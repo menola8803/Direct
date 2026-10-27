@@ -108,54 +108,97 @@
       "x": 0,
       "y": 2400
     },
+    "Tema.dc.html": {
+      "h": 844,
+      "title": "10b Tema",
+      "w": 390,
+      "x": 470,
+      "y": 2400
+    },
     "Sakerhet.dc.html": {
       "h": 844,
       "title": "11 Säkerhet",
       "w": 390,
-      "x": 470,
+      "x": 940,
       "y": 2400
     },
     "Sprak.dc.html": {
       "h": 844,
       "title": "12 Språk",
       "w": 390,
-      "x": 940,
+      "x": 1410,
       "y": 2400
     },
     "Uppdatering.dc.html": {
       "h": 844,
       "title": "13 Uppdateringar",
       "w": 390,
-      "x": 1410,
+      "x": 1880,
       "y": 2400
     },
     "UppdateringNy.dc.html": {
       "h": 844,
       "title": "13b Ny version finns",
       "w": 390,
-      "x": 1880,
+      "x": 2350,
       "y": 2400
     },
     "Lagring.dc.html": {
       "h": 844,
       "title": "14 Lagring",
       "w": 390,
-      "x": 2350,
+      "x": 2820,
       "y": 2400
     },
     "Rensa.dc.html": {
       "h": 844,
       "title": "15 Rensa allt",
       "w": 390,
-      "x": 2820,
+      "x": 3290,
       "y": 2400
     },
     "Om.dc.html": {
       "h": 844,
       "title": "16 Om Direct",
       "w": 390,
-      "x": 3290,
+      "x": 3760,
       "y": 2400
+    },
+    "Usb_Main.dc.html": {
+      "h": 844,
+      "title": "USB · 1 Välkomst",
+      "w": 390,
+      "x": 0,
+      "y": 3600
+    },
+    "Usb_Kontakter.dc.html": {
+      "h": 844,
+      "title": "USB · 2 Kontakter",
+      "w": 390,
+      "x": 470,
+      "y": 3600,
+      "is_interactive": true
+    },
+    "Usb_Chatt.dc.html": {
+      "h": 844,
+      "title": "USB · 3 Chatt",
+      "w": 390,
+      "x": 940,
+      "y": 3600
+    },
+    "Usb_Tema.dc.html": {
+      "h": 844,
+      "title": "USB · 10b Tema",
+      "w": 390,
+      "x": 1410,
+      "y": 3600
+    },
+    "Usb_Installningar.dc.html": {
+      "h": 844,
+      "title": "USB · 10 Inställningar",
+      "w": 390,
+      "x": 1880,
+      "y": 3600
     }
   },
   "createdOnFiles": {
@@ -183,10 +226,17 @@
     },
     "t3": {
       "kind": "title1",
-      "maxW": 3680,
-      "text": "Inställningar, uppdatering, filer och integritet",
+      "maxW": 4150,
+      "text": "Inställningar, tema, uppdatering, filer och integritet",
       "x": 0,
       "y": 2140
+    },
+    "t4": {
+      "kind": "title1",
+      "maxW": 2270,
+      "text": "USB-tema (förhandsvisning)",
+      "x": 0,
+      "y": 3340
     }
   },
   "order": [
@@ -205,13 +255,19 @@
     "Blockera.dc.html",
     "Blockerade.dc.html",
     "Installningar.dc.html",
+    "Tema.dc.html",
     "Sakerhet.dc.html",
     "Sprak.dc.html",
     "Uppdatering.dc.html",
     "UppdateringNy.dc.html",
     "Lagring.dc.html",
     "Rensa.dc.html",
-    "Om.dc.html"
+    "Om.dc.html",
+    "Usb_Main.dc.html",
+    "Usb_Kontakter.dc.html",
+    "Usb_Chatt.dc.html",
+    "Usb_Tema.dc.html",
+    "Usb_Installningar.dc.html"
   ],
   "pages": [],
   "title": "Direct – skärmdesign"

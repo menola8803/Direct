@@ -1,8 +1,12 @@
-import json
-BG,CARD,CHIP,BEI,LINE,INK,MUT,ACC,DK,GRN,RED="#EFEDE8","#FAF8F4","#E9E2D3","#DCCBA8","#DDD8CD","#26231F","#6A6358","#7A5C2B","#26231F","#2F6E4C","#A8403A"
-HF="font-family:'Fraunces',serif;font-weight:600"
-SH="box-shadow:0 1px 0 #fff inset,0 10px 28px rgba(70,55,25,.07)"
-CR="#F3E9D2"
+import json,sys,os,subprocess
+THEME=sys.argv[1] if len(sys.argv)>1 else "beige"
+OUT=sys.argv[2] if len(sys.argv)>2 else "."
+PREFIX=sys.argv[3] if len(sys.argv)>3 and not sys.argv[3].startswith("--") else ""
+CANVAS="--canvas" in sys.argv
+TH={"beige":dict(BG="#EFEDE8",CARD="#FAF8F4",CHIP="#E9E2D3",BEI="#DCCBA8",LINE="#DDD8CD",INK="#26231F",MUT="#6A6358",ACC="#7A5C2B",DK="#26231F",GRN="#2F6E4C",RED="#A8403A",CR="#F3E9D2",RT="#fff",PINK="#F1DAD6",WOFF="#A39A87",TOFF="#CFC8B8",VID="#3A342C",GLOW="rgba(38,35,31,.18)",SH="box-shadow:0 1px 0 #fff inset,0 10px 28px rgba(70,55,25,.07)",TABACT="#E9E2D3",BEIG="#DCCBA8",AMB="#7A5C2B",HF="font-family:Fraunces,serif;font-weight:600"),
+"usb":dict(BG="#0F1A1C",CARD="#172629",CHIP="#1E3236",BEI="#4A3A18",LINE="#25393D",INK="#EAF1EF",MUT="#B7C6C3",ACC="#5FC4B4",DK="#E8B04A",GRN="#5FC4B4",RED="#E8776D",CR="#0F1A1C",RT="#0F1A1C",PINK="#3A2224",WOFF="#35505A",TOFF="#2F4A4E",VID="#1B2D31",GLOW="rgba(232,176,74,.22)",SH="box-shadow:0 10px 28px rgba(0,0,0,.28)",TABACT="#383C2E",BEIG="#8A6A2E",AMB="#E8B04A",HF="font-family:Space Grotesk,sans-serif;font-weight:700")}
+globals().update(TH[THEME])
+LT="#F3E9D2"
 P={"block":'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',"call":'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
 "video":'<rect x="1" y="5" width="15" height="14" rx="3"/><path d="M23 7l-7 5 7 5z"/>',
 "group":'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -29,16 +33,17 @@ P={"block":'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',"call
 "flip":'<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15"/>',
 "broom":'<path d="M3 21l6-6M9 15l6-9 3 3-9 6zM15 6l3-3 3 3-3 3"/>'}
 def ic(k,s=22,c="currentColor"): return f'<svg width="{s}" height="{s}" viewBox="0 0 24 24" fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{P[k]}</svg>'
+FONTS="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&amp;family=Space+Grotesk:wght@500;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+def frame(body): return f'<div style="width:390px;height:844px;box-sizing:border-box;background:{BG};color:{INK};font-family:IBM Plex Sans,sans-serif;display:flex;flex-direction:column;padding:52px 16px 24px;gap:14px;overflow:hidden">\n{body}\n</div>'
 def page(title,body):
     return f'''<!doctype html>
 <html lang="sv"><head><meta charset="utf-8"><title>{title}</title><script src="./support.js"></script></head>
 <body><x-dc><helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="{FONTS}" rel="stylesheet">
 <style>body{{margin:0;background:{BG}}}button,input{{font-family:inherit}}</style></helmet>
-<div style="width:390px;height:844px;box-sizing:border-box;background:{BG};color:{INK};font-family:'IBM Plex Sans',sans-serif;display:flex;flex-direction:column;padding:52px 16px 24px;gap:14px;overflow:hidden">
-{body}
-</div></x-dc>
+{frame(body)}
+</x-dc>
 <script type="text/x-dc" data-dc-script data-props='{{"$preview":{{"width":390,"height":844}}}}'>
 class Component extends DCLogic {{ renderVals() {{ return {{}}; }} }}
 </script></body></html>'''
@@ -48,25 +53,29 @@ def ghost(k,label): return f'<button aria-label="{label}" style="width:40px;heig
 def card(i,x="",g=12): return f'<div style="background:{CARD};border:1px solid {LINE};border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:{g}px;{SH};{x}">{i}</div>'
 lab=lambda t,c=ACC: f'<div style="font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:{c}">{t}</div>'
 def btn(t,k=None,kind="p"):
-    st={"p":f"background:{DK};color:{CR};border:none;box-shadow:0 10px 24px rgba(38,35,31,.18)","s":f"background:{CARD};color:{INK};border:1px solid {LINE}","d":f"background:{RED};color:#fff;border:none","dg":f"background:{CARD};color:{RED};border:1px solid {RED}"}[kind]
+    st={"p":f"background:{DK};color:{CR};border:none;box-shadow:0 10px 24px {GLOW}","s":f"background:{CARD};color:{INK};border:1px solid {LINE}","d":f"background:{RED};color:{RT};border:none","dg":f"background:{CARD};color:{RED};border:1px solid {RED}"}[kind]
     return f'<button style="{st};width:100%;min-height:52px;border-radius:16px;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px">{ic(k) if k else ""}{t}</button>'
 def tabs(a):
-    o=''.join(f'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;font-size:12px;font-weight:600;color:{DK if t==a else MUT};{"background:"+CHIP+";border-radius:16px" if t==a else ""}">{ic(k,17)}{t}</div>' for t,k in [("Chattar","chat"),("Kontakter","group"),("Inställningar","gear")])
+    o=''.join(f'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;font-size:12px;font-weight:600;color:{DK if t==a else MUT};{"background:"+TABACT+";border-radius:16px" if t==a else ""}">{ic(k,17)}{t}</div>' for t,k in [("Chattar","chat"),("Kontakter","group"),("Inställningar","gear")])
     return f'<div style="display:flex;gap:4px;background:{CARD};border:1px solid {LINE};border-radius:22px;padding:6px;{SH}">{o}</div>'
 def wave(n=22,w=120,played=0.6,big=False):
     hs=[6,12,20,10,24,14,8,18,22,10,16,6,12,8,20,14,24,10,16,8,18,12,6,14,20,10,22,8,16,12][:n]
     H=56 if big else 28; sc=2 if big else 1
-    return f'<svg width="{w}" height="{H}" viewBox="0 0 {n*5} 28" preserveAspectRatio="none" aria-hidden="true">'+''.join(f'<rect x="{i*5}" y="{14-h/2}" width="3" height="{h}" rx="1.5" fill="{ACC if i<n*played else "#A39A87"}"/>' for i,h in enumerate(hs))+'</svg>'
+    return f'<svg width="{w}" height="{H}" viewBox="0 0 {n*5} 28" preserveAspectRatio="none" aria-hidden="true">'+''.join(f'<rect x="{i*5}" y="{14-h/2}" width="3" height="{h}" rx="1.5" fill="{ACC if i<n*played else WOFF}"/>' for i,h in enumerate(hs))+'</svg>'
 back=lambda: ib("back","Tillbaka",MUT)
 hdr=lambda t,s="": f'<div style="display:flex;align-items:center;gap:12px">{back()}<div><div style="{HF};font-size:22px;letter-spacing:-0.3px">{t}</div>'+(f'<div style="font-size:14px;color:{MUT}">{s}</div>' if s else '')+'</div></div>'
 sq=lambda k,bg=CHIP,c=ACC,s=40: f'<div style="width:{s}px;height:{s}px;border-radius:12px;background:{bg};color:{c};display:flex;align-items:center;justify-content:center;flex:none">{ic(k,20)}</div>'
+if THEME=="usb":
+    BRAND=f'<div style="display:flex;align-items:center;gap:14px;padding:6px 4px 0"><div style="width:56px;height:56px;border-radius:50%;border:2px solid {BEIG};display:flex;align-items:center;justify-content:center;flex:none"><div style="width:42px;height:42px;border-radius:50%;border:1px solid {DK};color:{DK};display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-weight:600;font-size:22px">D</div></div><div><div style="font-family:Fraunces,serif;font-weight:600;font-size:34px;letter-spacing:.22em;color:{DK};line-height:1">DIRECT</div><div style="font-size:11px;font-weight:600;letter-spacing:.35em;color:{ACC};margin-top:8px">— CHATT UTAN SERVER —</div></div></div>'
+else:
+    BRAND=f'<div style="display:flex;align-items:center;gap:10px;padding:0 4px"><div style="width:34px;height:34px;border-radius:11px;background:{DK};color:{CR};display:flex;align-items:center;justify-content:center;{HF};font-size:20px">D</div><div style="{HF};font-size:24px;letter-spacing:-0.4px">Direct</div></div>'
 F={}
 # 1 Välkomst
 hero=f'''<svg width="358" height="150" viewBox="0 0 358 150" aria-hidden="true"><line x1="76" y1="75" x2="282" y2="75" stroke="{ACC}" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/>
 <circle cx="52" cy="75" r="38" fill="{CARD}" stroke="{LINE}" stroke-width="2"/><circle cx="306" cy="75" r="38" fill="{CARD}" stroke="{LINE}" stroke-width="2"/>
 <text x="52" y="83" text-anchor="middle" font-family="Fraunces" font-weight="600" font-size="22" fill="{ACC}">Du</text><text x="306" y="83" text-anchor="middle" font-family="Fraunces" font-weight="600" font-size="22" fill="{ACC}">AL</text>
 <circle cx="179" cy="75" r="26" fill="{DK}"/><g transform="translate(167 63)" fill="none" stroke="{CR}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{P["lock"]}</g></svg>'''
-F["Main"]=("1 Välkomst",f'''<div style="display:flex;align-items:center;gap:10px;padding:0 4px"><div style="width:34px;height:34px;border-radius:11px;background:{DK};color:{CR};display:flex;align-items:center;justify-content:center;{HF};font-size:20px">D</div><div style="{HF};font-size:24px;letter-spacing:-0.4px">Direct</div></div>
+F["Main"]=("1 Välkomst",f'''{BRAND}
 <div style="padding-top:8px">{hero}</div>
 <div style="padding:4px 4px 0;display:flex;flex-direction:column;gap:12px"><h1 style="{HF};margin:0;font-size:36px;line-height:1.1;letter-spacing:-0.8px">Chatta direkt.<br><span style="color:{ACC}">Ingen server emellan.</span></h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:{MUT}">Din identitet är en nyckel som skapas på din telefon. Kontakterna matchas lokalt och laddas aldrig upp.</p></div>
@@ -78,7 +87,7 @@ def crow(n,i,sub,right,ring=LINE): return f'<div style="display:flex;align-items
 act=f'<div style="display:flex;gap:8px">{ghost("call","Ring")}{ghost("video","Video")}</div>'
 inv=f'<button style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid {ACC};background:{CHIP};color:{ACC};font-size:14px;font-weight:600">Bjud in</button>'
 off=f'<span style="font-size:13px;font-weight:600;color:{MUT}">Offline</span>'
-F["Kontakter"]=("2 Kontakter",f'''<div style="display:flex;align-items:flex-start;gap:12px"><div style="flex:1"><div style="{HF};font-size:28px;letter-spacing:-0.5px">Kontakter</div><div style="font-size:14px;color:{MUT};margin-top:2px">Matchas lokalt på din telefon</div></div><button style="min-height:44px;padding:0 14px;border-radius:14px;border:none;background:{DK};color:{CR};display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;box-shadow:0 8px 20px rgba(38,35,31,.18)">{ic("group",18)}Konferens</button></div>
+F["Kontakter"]=("2 Kontakter",f'''<div style="display:flex;align-items:flex-start;gap:12px"><div style="flex:1"><div style="{HF};font-size:28px;letter-spacing:-0.5px">Kontakter</div><div style="font-size:14px;color:{MUT};margin-top:2px">Matchas lokalt på din telefon</div></div><button style="min-height:44px;padding:0 14px;border-radius:14px;border:none;background:{DK};color:{CR};display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;box-shadow:0 8px 20px {GLOW}">{ic("group",18)}Konferens</button></div>
 <div style="display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:14px;background:{CARD};border:1px solid {LINE};color:{MUT};font-size:15px">{ic("search",18)}Sök bland kontakter</div>
 {card(lab("I appen · 4")+crow("Anna Lindqvist","AL","+46 70 *** ** 21",act,GRN)+crow("Erik Sundberg","ES","+46 73 *** ** 48",act,GRN)+crow("Lisa Ek","LE","+46 72 *** ** 63",act,GRN)+crow("Maja Holm","MH","+46 76 *** ** 05",off),"",14)}
 {card(lab("Bjud in · 2")+crow("Johan Berg","JB","Har inte appen",inv)+crow("Sara Nilsson","SN","Har inte appen",inv),"",14)}
@@ -92,7 +101,7 @@ def bub(t,me,meta,pend=False):
 meta_=lambda m,i="": f'<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:{MUT}">{i}{m}</div>'
 pill=lambda i,t: f'<div style="align-self:center;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:{CHIP};font-size:12px;color:{MUT}">{i}{t}</div>'
 voice=f'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div style="display:flex;align-items:center;gap:10px;padding:10px 14px 10px 10px;border-radius:18px 18px 6px 18px;background:{BEI}"><div style="width:36px;height:36px;border-radius:50%;background:{DK};color:{CR};display:flex;align-items:center;justify-content:center">{ic("play",16)}</div>{wave(22,120,.55)}<span style="font-size:13px;font-weight:600">0:24</span></div>{meta_("14:04 · Sparad krypterat",ic("check",13,ACC))}</div>'
-vid=f'<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px"><div style="position:relative;width:210px;height:140px;border-radius:18px 18px 18px 6px;background:#3A342C;display:flex;align-items:center;justify-content:center;color:{CR}"><div style="width:48px;height:48px;border-radius:50%;background:rgba(250,248,244,.18);border:1px solid rgba(250,248,244,.4);display:flex;align-items:center;justify-content:center">{ic("play",22)}</div><div style="position:absolute;left:10px;bottom:10px;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.45);font-size:12px;font-weight:600">Videomeddelande · 0:18</div></div>{meta_("14:05 · Sparad krypterat")}</div>'
+vid=f'<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px"><div style="position:relative;width:210px;height:140px;border-radius:18px 18px 18px 6px;background:{VID};display:flex;align-items:center;justify-content:center;color:{LT}"><div style="width:48px;height:48px;border-radius:50%;background:rgba(250,248,244,.18);border:1px solid rgba(250,248,244,.4);display:flex;align-items:center;justify-content:center">{ic("play",22)}</div><div style="position:absolute;left:10px;bottom:10px;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.45);font-size:12px;font-weight:600">Videomeddelande · 0:18</div></div>{meta_("14:05 · Sparad krypterat")}</div>'
 filec=f'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div style="display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border-radius:18px 18px 6px 18px;background:{CARD};border:1px solid {LINE}">{sq("file")}<div><div style="font-size:14px;font-weight:600">Offert_oktober.pdf</div><div style="font-size:12px;color:{MUT}">2,4 MB · PDF</div></div></div>{meta_("14:06 · Levererat",ic("check",13,ACC))}</div>'
 F["Chatt"]=("3 Chatt",f'''<div style="display:flex;align-items:center;gap:8px">{back()}{av("AL",36,GRN)}
 <div style="flex:1;min-width:0"><div style="{HF};font-size:18px">Anna Lindqvist</div><div style="font-size:12px;font-weight:600;color:{GRN}">Direkt · krypterad</div></div>{ib("call","Ring Anna")}{ib("video","Videosamtal med Anna")}</div>
@@ -100,7 +109,7 @@ F["Chatt"]=("3 Chatt",f'''<div style="display:flex;align-items:center;gap:8px">{
 {pill(ic("lock",12,ACC),"Krypterad direkt mellan era telefoner")}
 {bub("Hej! Hittade dig via kontaktlistan.",False,"14:02")}{voice}{vid}{filec}
 {bub("Skickar fler filer när du är online.",True,"Väntar i utkorgen",True)}</div>
-<div style="display:flex;gap:10px;align-items:center">{ib("clip","Dela fil",MUT,40)}<input aria-label="Meddelande" placeholder="Skriv ett meddelande" style="flex:1;min-width:0;box-sizing:border-box;height:44px;border:1px solid {LINE};border-radius:22px;padding:0 18px;font-size:15px;background:{CARD};color:{INK}"><button aria-label="Spela in röstmeddelande" style="width:44px;height:44px;flex:none;border-radius:50%;border:none;background:{DK};color:{CR};display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(38,35,31,.18)">{ic("mic",18)}</button></div>''')
+<div style="display:flex;gap:10px;align-items:center">{ib("clip","Dela fil",MUT,40)}<input aria-label="Meddelande" placeholder="Skriv ett meddelande" style="flex:1;min-width:0;box-sizing:border-box;height:44px;border:1px solid {LINE};border-radius:22px;padding:0 18px;font-size:15px;background:{CARD};color:{INK}"><button aria-label="Spela in röstmeddelande" style="width:44px;height:44px;flex:none;border-radius:50%;border:none;background:{DK};color:{CR};display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px {GLOW}">{ic("mic",18)}</button></div>''')
 # 4 Dela
 def opt(k,t,s): return f'<button style="display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px;border-radius:18px;border:1px solid {LINE};background:{BG};text-align:left;color:{INK}">{sq(k,CARD)}<div><div style="font-size:15px;font-weight:600">{t}</div><div style="font-size:12px;color:{MUT};margin-top:2px">{s}</div></div></button>'
 F["Dela"]=("4 Dela med kontakt",f'''<div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:{MUT}">{av("AL",56)}<div style="font-size:14px">Chatt med Anna Lindqvist</div></div>
@@ -115,17 +124,17 @@ F["Rost"]=("5 Röstmeddelande",f'''{hdr("Röstmeddelande","Till Anna Lindqvist")
 <div style="display:flex;align-items:center;justify-content:center;gap:28px">
 <button aria-label="Radera" style="width:48px;height:48px;border-radius:50%;border:1px solid {LINE};background:{CARD};color:{MUT};display:flex;align-items:center;justify-content:center">{ic("trash",21)}</button>
 <button aria-label="Stoppa inspelning" style="width:72px;height:72px;border-radius:50%;border:5px solid {BEI};background:{DK};color:{CR};display:flex;align-items:center;justify-content:center">{ic("stop",26)}</button>
-<button aria-label="Skicka" style="width:48px;height:48px;border-radius:50%;border:none;background:{ACC};color:#fff;display:flex;align-items:center;justify-content:center">{ic("send",21)}</button></div>
+<button aria-label="Skicka" style="width:48px;height:48px;border-radius:50%;border:none;background:{ACC};color:{RT};display:flex;align-items:center;justify-content:center">{ic("send",21)}</button></div>
 {card(f'<div style="display:flex;gap:10px;align-items:center;font-size:13px;line-height:1.5;color:{MUT}">{ic("folder",20,ACC)}<span>Sparas som <b style="color:{INK}">.m4a</b> krypterat i appen</span></div>',"padding:12px 16px")}''')
 # 6 Video
 F["Videomeddelande"]=("6 Videomeddelande",f'''{hdr("Videomeddelande","Till Anna Lindqvist")}
-<div style="position:relative;flex:1;border-radius:28px;background:#3A342C;overflow:hidden;display:flex;align-items:center;justify-content:center">
+<div style="position:relative;flex:1;border-radius:28px;background:{VID};overflow:hidden;display:flex;align-items:center;justify-content:center">
 <div style="position:absolute;inset:18px;border-radius:18px;border:1px solid rgba(243,233,210,.25)"></div>
-<div style="width:96px;height:96px;border-radius:50%;background:rgba(243,233,210,.1);color:{CR};display:flex;align-items:center;justify-content:center">{ic("video",40)}</div>
-<div style="position:absolute;top:30px;left:30px;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.45);color:{CR};font-size:13px;font-weight:600"><span style="width:8px;height:8px;border-radius:50%;background:#E8776D;display:inline-block"></span>00:12 / 01:00</div></div>
+<div style="width:96px;height:96px;border-radius:50%;background:rgba(243,233,210,.1);color:{LT};display:flex;align-items:center;justify-content:center">{ic("video",40)}</div>
+<div style="position:absolute;top:30px;left:30px;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.45);color:{LT};font-size:13px;font-weight:600"><span style="width:8px;height:8px;border-radius:50%;background:{RED};display:inline-block"></span>00:12 / 01:00</div></div>
 <div style="display:flex;align-items:center;justify-content:center;gap:28px">{ib("flip","Vänd kamera",MUT)}
-<button aria-label="Stoppa inspelning" style="width:72px;height:72px;border-radius:50%;border:5px solid {BEI};background:{RED};color:#fff;display:flex;align-items:center;justify-content:center">{ic("stop",26)}</button>
-<button aria-label="Skicka" style="width:48px;height:48px;border-radius:50%;border:none;background:{ACC};color:#fff;display:flex;align-items:center;justify-content:center">{ic("send",21)}</button></div>
+<button aria-label="Stoppa inspelning" style="width:72px;height:72px;border-radius:50%;border:5px solid {BEI};background:{RED};color:{RT};display:flex;align-items:center;justify-content:center">{ic("stop",26)}</button>
+<button aria-label="Skicka" style="width:48px;height:48px;border-radius:50%;border:none;background:{ACC};color:{RT};display:flex;align-items:center;justify-content:center">{ic("send",21)}</button></div>
 {card(f'<div style="display:flex;gap:10px;align-items:center;font-size:13px;line-height:1.5;color:{MUT}">{ic("folder",20,ACC)}<span>Sparas som <b style="color:{INK}">.mp4</b> krypterat i appen</span></div>',"padding:12px 16px")}''')
 # 7 Verifiera
 codes=["48213","90571","33846","71209","56482","19035"]
@@ -157,7 +166,7 @@ F["Samtal"]=("9 Pågående konferens",f'''<div style="display:flex;align-items:c
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">{tile("Anna","AL",True)}{tile("Erik","ES")}{tile("Maja","MH",False,True)}{tile("Du","Du")}</div>
 {card(f'<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:{MUT}">{ic("group",18,ACC)}Direktanslutning till 3 deltagare. Videon anpassas till 360p.</div>',"padding:12px 16px")}
 <div style="flex:1"></div>
-<div style="display:flex;justify-content:center;gap:18px">{cb("micoff","Stäng av mikrofon",CARD,INK)}{cb("video","Kamera",CARD,INK)}{cb("end","Lägg på",RED,"#fff")}</div>''')
+<div style="display:flex;justify-content:center;gap:18px">{cb("micoff","Stäng av mikrofon",CARD,INK)}{cb("video","Kamera",CARD,INK)}{cb("end","Lägg på",RED,RT)}</div>''')
 # 10 Inställningar
 def srow(k,t,s,r=None): return f'<div style="display:flex;align-items:center;gap:12px">{sq(k)}<div style="flex:1"><div style="font-size:16px;font-weight:600">{t}</div><div style="font-size:13px;color:{MUT}">{s}</div></div>{r or ic("next",18,MUT)}</div>'
 F["Installningar"]=("10 Inställningar",f'''<div><div style="{HF};font-size:28px;letter-spacing:-0.5px">Inställningar</div><div style="font-size:14px;color:{MUT};margin-top:2px">Direct är gjord för att stanna hos dig</div></div>
@@ -170,7 +179,7 @@ def seg2(w,c): return f'<div style="flex:{w};height:10px;background:{c}"></div>'
 def lg(c,t): return f'<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:{MUT}"><span style="width:8px;height:8px;border-radius:50%;background:{c};display:inline-block"></span>{t}</span>'
 def lrow(n,i,sub,sz,chk): return f'<div style="display:flex;align-items:center;gap:12px">{av(i,36)}<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">{n}</div><div style="font-size:12px;color:{MUT}">{sub}</div></div><div style="font-size:13px;font-weight:600">{sz}</div><input type="checkbox" aria-label="Välj {n}" {"checked" if chk else ""} style="width:24px;height:24px;accent-color:{DK}"></div>'
 F["Lagring"]=("14 Lagring",f'''{hdr("Lagring","Filer från dina kontakter")}
-{card(f'<div style="display:flex;justify-content:space-between;align-items:baseline">{lab("Totalt")}<div style="{HF};font-size:30px">1,8 GB</div></div><div style="display:flex;border-radius:5px;overflow:hidden;gap:2px">{seg2(18,DK)}{seg2(55,ACC)}{seg2(20,BEI)}{seg2(7,"#CFC8B8")}</div><div style="display:flex;gap:14px;flex-wrap:wrap">{lg(DK,"Ljud")}{lg(ACC,"Video")}{lg(BEI,"Filer")}{lg("#CFC8B8","Cache")}</div>',"",10)}
+{card(f'<div style="display:flex;justify-content:space-between;align-items:baseline">{lab("Totalt")}<div style="{HF};font-size:30px">1,8 GB</div></div><div style="display:flex;border-radius:5px;overflow:hidden;gap:2px">{seg2(18,DK)}{seg2(55,ACC)}{seg2(20,BEIG)}{seg2(7,TOFF)}</div><div style="display:flex;gap:14px;flex-wrap:wrap">{lg(DK,"Ljud")}{lg(ACC,"Video")}{lg(BEIG,"Filer")}{lg(TOFF,"Cache")}</div>',"",10)}
 {card(f'<div style="display:flex;align-items:center;gap:12px">{sq("broom")}<div style="flex:1"><div style="font-size:15px;font-weight:600">Cache · 124 MB</div><div style="font-size:12px;color:{MUT}">Tillfälliga filer. Inga meddelanden tas bort.</div></div><button style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid {LINE};background:{CHIP};color:{INK};font-size:14px;font-weight:600">Rensa</button></div>',"padding:12px 16px")}
 {card(lab("Rensa per kontakt")+lrow("Anna Lindqvist","AL","Ljud 120 MB · Video 640 MB · Filer 80 MB","840 MB",1)+lrow("Erik Sundberg","ES","Ljud 60 MB · Video 310 MB · Filer 20 MB","390 MB",1)+lrow("Lisa Ek","LE","Ljud 40 MB · Video 120 MB","160 MB",0)+lrow("Maja Holm","MH","Ljud 30 MB · Filer 260 MB","290 MB",0),"",12)}
 <div style="flex:1"></div>
@@ -178,7 +187,7 @@ F["Lagring"]=("14 Lagring",f'''{hdr("Lagring","Filer från dina kontakter")}
 <button style="min-height:40px;border:none;background:transparent;color:{RED};font-size:14px;font-weight:600;text-decoration:underline">Rensa allt…</button>''')
 # 12 Rensa allt
 F["Rensa"]=("15 Rensa allt",f'''{hdr("Rensa allt")}
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 8px"><div style="width:72px;height:72px;border-radius:50%;background:#F1DAD6;color:{RED};display:flex;align-items:center;justify-content:center">{ic("warn",34)}</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 8px"><div style="width:72px;height:72px;border-radius:50%;background:{PINK};color:{RED};display:flex;align-items:center;justify-content:center">{ic("warn",34)}</div>
 <h1 style="{HF};margin:0;font-size:30px;line-height:1.15">Rensa alla filer?</h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:{MUT}">1,8 GB tas bort från Download/Direct för alla kontakter. Det går inte att ångra. Meddelanden i chattarna ligger kvar.</p></div>
 {card(f'<label style="display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.5"><input type="checkbox" checked style="width:24px;height:24px;flex:none;accent-color:{DK}">Jag förstår att ljud, video och filer raderas från min telefon.</label><label for="ok" style="font-size:14px;font-weight:600">Skriv RENSA för att bekräfta</label><input id="ok" value="RENSA" style="box-sizing:border-box;height:52px;border:1px solid {LINE};border-radius:14px;padding:0 16px;font-size:17px;letter-spacing:2px;background:{BG};color:{INK}"><div style="font-size:13px;line-height:1.5;color:{MUT}">Tips: flytta filer du vill behålla ur mappen först.</div>')}
@@ -193,13 +202,13 @@ F["Om"]=("16 Om Direct",f'''{hdr("Om Direct")}
 <div style="flex:1"></div>{btn("Förstått",None,"p")}<div style="text-align:center;font-size:13px;color:{MUT}">Utvecklare: Claes Sundman SNC AB - 2026</div>''')
 
 # ---- Inställningar (ny), Språk, Uppdateringar ----
-def tog(on,l): return f'<button role="switch" aria-checked="{"true" if on else "false"}" aria-label="{l}" style="width:52px;height:32px;flex:none;border-radius:16px;border:none;background:{DK if on else "#CFC8B8"};display:flex;align-items:center;padding:3px;box-sizing:border-box;justify-content:{"flex-end" if on else "flex-start"}"><span style="width:26px;height:26px;border-radius:50%;background:{CR if on else "#fff"};display:block"></span></button>'
+def tog(on,l): return f'<button role="switch" aria-checked="{"true" if on else "false"}" aria-label="{l}" style="width:52px;height:32px;flex:none;border-radius:16px;border:none;background:{DK if on else TOFF};display:flex;align-items:center;padding:3px;box-sizing:border-box;justify-content:{"flex-end" if on else "flex-start"}"><span style="width:26px;height:26px;border-radius:50%;background:{CR if on else "#fff"};display:block"></span></button>'
 badge=lambda t: f'<span style="padding:3px 10px;border-radius:999px;background:{BEI};font-size:12px;font-weight:600">{t}</span>'
 val=lambda t: f'<span style="font-size:13px;font-weight:600;color:{MUT}">{t}</span>'
 cbtn=f'<button style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid {LINE};background:{CHIP};color:{INK};font-size:14px;font-weight:600">Rensa</button>'
 F["Installningar"]=("10 Inställningar",f'''<div><div style="{HF};font-size:28px;letter-spacing:-0.5px">Inställningar</div><div style="font-size:14px;color:{MUT};margin-top:2px">Direct är gjord för att stanna hos dig</div></div>
-{card(srow("lock","Säkerhet","Lås, IP-skydd och nyckelvarning")+srow("chat","Språk","Följer telefonen",val("Svenska"))+srow("broom","Uppdateringar","Version 0.4.0 · GitHub",badge("Aktuell"))+srow("folder","Lagring och filer","Privat lagring",val("1,8 GB"))+srow("key","Säkerhetskopiera nyckel","Behövs om du byter telefon")+srow("shield","Om Direct och integritet","Så fungerar appen"),"",16)}
-{card(lab("Rensa")+f'<div style="display:flex;align-items:center;gap:12px">{sq("broom")}<div style="flex:1"><div style="font-size:16px;font-weight:600">Rensa cache</div><div style="font-size:13px;color:{MUT}">124 MB tillfälliga filer</div></div>{cbtn}</div>'+srow("group","Rensa per kontakt","Välj vilka kontakters filer som tas bort")+f'<div style="display:flex;align-items:center;gap:12px">{sq("trash","#F1DAD6",RED)}<div style="flex:1"><div style="font-size:16px;font-weight:600;color:{RED}">Rensa allt…</div><div style="font-size:13px;color:{MUT}">Tar bort alla ljud, videor och filer</div></div>{ic("next",18,MUT)}</div>',"",14)}
+{card(srow("lock","Säkerhet","Lås, IP-skydd och nyckelvarning")+srow("image","Tema","Beige eller USB",val("USB" if THEME=="usb" else "Beige"))+srow("chat","Språk","Följer telefonen",val("Svenska"))+srow("broom","Uppdateringar","Version 0.4.0 · GitHub",badge("Aktuell"))+srow("folder","Lagring och filer","Privat lagring",val("1,8 GB"))+srow("key","Säkerhetskopiera nyckel","Behövs om du byter telefon")+srow("shield","Om Direct och integritet","Så fungerar appen"),"",12)}
+{card(f'<div style="display:flex;align-items:center;gap:12px">{sq("broom")}<div style="flex:1"><div style="font-size:16px;font-weight:600">Rensa cache</div><div style="font-size:13px;color:{MUT}">124 MB tillfälliga filer</div></div>{cbtn}</div>'+srow("group","Rensa per kontakt","Välj vilka kontakters filer som tas bort")+f'<div style="display:flex;align-items:center;gap:12px">{sq("trash",PINK,RED)}<div style="flex:1"><div style="font-size:16px;font-weight:600;color:{RED}">Rensa allt…</div><div style="font-size:13px;color:{MUT}">Tar bort alla ljud, videor och filer</div></div>{ic("next",18,MUT)}</div>',"",14)}
 <div style="flex:1"></div>{tabs("Inställningar")}''')
 def lopt(t,s,sel): return f'<label style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:{"2px solid "+DK if sel else "1px solid "+LINE};background:{CARD if sel else BG}"><div style="flex:1"><div style="font-size:16px;font-weight:600">{t}</div><div style="font-size:13px;color:{MUT}">{s}</div></div><input type="radio" name="sprak" aria-label="{t}" {"checked" if sel else ""} style="width:24px;height:24px;accent-color:{DK}"></label>'
 F["Sprak"]=("12 Språk",f'''{hdr("Språk","Välj appens språk")}
@@ -223,7 +232,7 @@ F["Sakerhet"]=("11 Säkerhet",f'''{hdr("Säkerhet","Skydda dig och dina kontakte
 kline=lambda t,d,c: f'<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">{t}</span><span style="color:{MUT}">{d}</span></div><div style="{HF};font-size:18px;letter-spacing:.06em;color:{c}">{c and ""}</div></div>'
 def kcode(t,d,code,col): return f'<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">{t}</span><span style="color:{MUT}">{d}</span></div><div style="{HF};font-size:19px;letter-spacing:.06em;color:{col}">{code}</div></div>'
 F["Nyckelbyte"]=("17 Nyckeln har ändrats",f'''{hdr("Nyckeln har ändrats")}
-<div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:8px 8px 0"><div style="width:72px;height:72px;border-radius:50%;background:{BEI};color:{ACC};display:flex;align-items:center;justify-content:center">{ic("warn",34)}</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:8px 8px 0"><div style="width:72px;height:72px;border-radius:50%;background:{BEI};color:{AMB};display:flex;align-items:center;justify-content:center">{ic("warn",34)}</div>
 <h1 style="{HF};margin:0;font-size:28px;line-height:1.15">Annas nyckel har ändrats</h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:{MUT}">Det kan betyda att hon bytt telefon, men också att någon utger sig för henne. Meddelanden är pausade tills du bestämt dig.</p></div>
 {card(kcode("Tidigare nyckel","Sedd 12 okt 2026","48213 90571 33846",MUT)+f'<div style="height:1px;background:{LINE}"></div>'+kcode("Ny nyckel","Idag 14:02","77120 45098 62351",ACC),"",12)}
@@ -248,17 +257,17 @@ ONL=[("Anna Lindqvist","AL","+46 70 *** ** 21",1),("Erik Sundberg","ES","+46 73 
 INV=[("Johan Berg","JB"),("Sara Nilsson","SN"),("Tomas Rydén","TR"),("Ulrika Vik","UV")]
 c1=lab("I appen · 8")+"".join(crow(n,i,p,act if o else off,GRN if o else LINE) for n,i,p,o in ONL)
 c2=lab("Bjud in · 4")+"".join(crow(n,i,"Har inte appen",inv) for n,i in INV)
-F["Kontakter"]=("2 Kontakter",f'''<div style="display:flex;align-items:flex-start;gap:12px"><div style="flex:1"><div style="{HF};font-size:28px;letter-spacing:-0.5px">Kontakter</div><div style="font-size:14px;color:{MUT};margin-top:2px">Matchas lokalt på din telefon</div></div><button style="min-height:44px;padding:0 14px;border-radius:14px;border:none;background:{DK};color:{CR};display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;box-shadow:0 8px 20px rgba(38,35,31,.18)">{ic("group",18)}Konferens</button></div>
+F["Kontakter"]=("2 Kontakter",f'''<div style="display:flex;align-items:flex-start;gap:12px"><div style="flex:1"><div style="{HF};font-size:28px;letter-spacing:-0.5px">Kontakter</div><div style="font-size:14px;color:{MUT};margin-top:2px">Matchas lokalt på din telefon</div></div><button style="min-height:44px;padding:0 14px;border-radius:14px;border:none;background:{DK};color:{CR};display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;box-shadow:0 8px 20px {GLOW}">{ic("group",18)}Konferens</button></div>
 <div style="display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:14px;background:{CARD};border:1px solid {LINE};color:{MUT};font-size:15px;flex:none">{ic("search",18)}Sök bland kontakter</div>
 <div style="font-size:12px;color:{MUT};padding:0 4px;flex:none">Håll in en kontakt för fler val, till exempel blockera.</div>
-<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#A39A87 transparent;display:flex;flex-direction:column;gap:14px;padding-bottom:4px">{card(c1,"flex:none",14)}{card(c2,"flex:none",14)}</div>
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:{WOFF} transparent;display:flex;flex-direction:column;gap:14px;padding-bottom:4px">{card(c1,"flex:none",14)}{card(c2,"flex:none",14)}</div>
 {tabs("Kontakter")}''')
-mrow=lambda k,t,red=False: f'<div style="display:flex;align-items:center;gap:12px;min-height:44px">{sq(k,"#F1DAD6" if red else CHIP,RED if red else ACC)}<div style="font-size:16px;font-weight:600;color:{RED if red else INK}">{t}</div></div>'
+mrow=lambda k,t,red=False: f'<div style="display:flex;align-items:center;gap:12px;min-height:44px">{sq(k,PINK if red else CHIP,RED if red else ACC)}<div style="font-size:16px;font-weight:600;color:{RED if red else INK}">{t}</div></div>'
 F["Kontaktmeny"]=("19 Kontaktmeny",f'''<div style="flex:1;display:flex;flex-direction:column;gap:14px;opacity:.55"><div style="{HF};font-size:28px">Kontakter</div>{card(crow("Anna Lindqvist","AL","+46 70 *** ** 21",act,GRN),"",14)}</div>
 {card(f'<div style="width:40px;height:4px;border-radius:2px;background:{LINE};align-self:center"></div><div style="display:flex;align-items:center;gap:12px">{av("AL",44,GRN)}<div><div style="{HF};font-size:20px">Anna Lindqvist</div><div style="font-size:13px;color:{GRN};font-weight:600">Online</div></div></div>'+mrow("call","Ring")+mrow("video","Videosamtal")+mrow("key","Verifiera säkerhetskod")+mrow("trash","Rensa filer · 840 MB")+f'<div style="height:1px;background:{LINE}"></div>'+mrow("block","Blockera Anna",True),"border-radius:28px 28px 22px 22px",6)}''')
 bl=lambda t: f'<div style="display:flex;gap:10px;font-size:14px;line-height:1.5;color:{MUT}">{ic("check",18,ACC)}<span>{t}</span></div>'
 F["Blockera"]=("20 Blockera kontakt",f'''{hdr("Blockera kontakt")}
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 8px"><div style="width:72px;height:72px;border-radius:50%;background:#F1DAD6;color:{RED};display:flex;align-items:center;justify-content:center">{ic("block",34)}</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 8px"><div style="width:72px;height:72px;border-radius:50%;background:{PINK};color:{RED};display:flex;align-items:center;justify-content:center">{ic("block",34)}</div>
 <h1 style="{HF};margin:0;font-size:30px;line-height:1.15">Blockera Anna?</h1><p style="margin:0;font-size:15px;line-height:1.55;color:{MUT}">Du kan avblockera henne när som helst under Säkerhet.</p></div>
 {card(bl("Hon kan inte skriva, ringa eller se när du är online.")+bl("Hon får ingen notis om att hon är blockerad.")+bl("Chatten ligger kvar hos dig.")+f'<label style="display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.5;padding-top:4px"><input type="checkbox" style="width:24px;height:24px;flex:none;accent-color:{DK}">Radera även hennes filer (840 MB)</label>',"",12)}
 {btn("Blockera Anna","block","d")}{btn("Avbryt",None,"s")}''')
@@ -267,12 +276,36 @@ F["Blockerade"]=("21 Blockerade kontakter",f'''{hdr("Blockerade kontakter","2 ko
 {card(crow("Okänt nummer","?","+46 70 *** ** 99 · blockerad 20 okt",unb)+crow("Viktor Lund","VL","+46 73 *** ** 12 · blockerad 3 okt",unb),"",16)}
 {card(f'<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;color:{MUT}">{ic("shield",18,ACC)}<span>Blockerade kontakter kan inte skriva, ringa eller se när du är online. De får ingen notis.</span></div>',"padding:12px 16px")}
 <div style="flex:1"></div>''')
-for k,(t,b) in F.items(): open(k+".dc.html","w").write(page(t[t.index(" ")+1:] if t[0].isdigit() else t,b))
-rows=[["Main","Kontakter","Chatt","Dela","Rost","Videomeddelande"],["Sakerhetskod","Videokonferens","Samtal","Nyckelbyte","Applas","Kontaktmeny","Blockera","Blockerade"],["Installningar","Sakerhet","Sprak","Uppdatering","UppdateringNy","Lagring","Rensa","Om"]]
-c=json.load(open("canvas.json")); c["boards"]={}; c["order"]=[]
-for r,names in enumerate(rows):
-    for i,n in enumerate(names):
-        f=n+".dc.html"; c["boards"][f]={"h":844,"title":F[n][0],"w":390,"x":i*470,"y":r*1200,**({"is_interactive":True} if n=="Kontakter" else {})}; c["order"].append(f)
-c["notes"]={"t1":{"kind":"title1","maxW":2740,"text":"Direct: skärmflöde","x":0,"y":-260},"t2":{"kind":"title1","maxW":3680,"text":"Samtal, verifiering, lås och blockering","x":0,"y":940},"t3":{"kind":"title1","maxW":3680,"text":"Inställningar, uppdatering, filer och integritet","x":0,"y":2140}}
-c["title"]="Direct – skärmdesign"
-json.dump(c,open("canvas.json","w"),ensure_ascii=False,indent=2)
+# ---- Tema ----
+def prev(inner): return f'<div style="width:144px;height:313px;border-radius:18px;overflow:hidden;border:1px solid {LINE};flex:none;position:relative"><div style="width:390px;height:844px;transform:scale(.37);transform-origin:top left;pointer-events:none">{inner}</div></div>'
+def theme_inner(path):
+    s=open(path).read(); return s[s.index("</helmet>")+9:s.index("</x-dc>")].strip()
+OTHER="usb" if THEME=="beige" else "beige"
+own=frame(F["Chatt"][1]); oth='<div style="width:390px;height:844px"></div>'
+if not os.environ.get("NOPREV"):
+    d="/tmp/prev_"+OTHER; os.makedirs(d,exist_ok=True)
+    subprocess.run([sys.executable,os.path.abspath(__file__),OTHER,d],env=dict(os.environ,NOPREV="1"),check=True)
+    oth=theme_inner(d+"/Chatt.dc.html")
+bp=own if THEME=="beige" else oth; up=own if THEME=="usb" else oth
+def topt(name,sub,pv,sel):
+    b=f"2px solid {DK}" if sel else f"1px solid {LINE}"
+    return f'<label style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;border-radius:22px;border:{b};background:{CARD};{SH}">{prev(pv)}<div style="display:flex;align-items:center;gap:8px;align-self:stretch"><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">{name}</div><div style="font-size:12px;color:{MUT}">{sub}</div></div><input type="radio" name="tema" aria-label="{name}" {"checked" if sel else ""} style="width:24px;height:24px;accent-color:{DK}"></div></label>'
+F["Tema"]=("10b Tema",f'''{hdr("Tema","Välj utseende")}
+<div style="display:flex;gap:12px">{topt("Beige","Ljust och varmt",bp,THEME=="beige")}{topt("USB","Mörkt, guld och mint",up,THEME=="usb")}</div>
+{card(f'<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;color:{MUT}">{ic("shield",18,ACC)}<span>Temat byts direkt och sparas bara på din telefon.</span></div>',"padding:12px 16px")}
+<div style="flex:1"></div>{btn("Använd tema",None,"p")}''')
+SUB=["Main","Kontakter","Chatt","Tema","Installningar"]
+os.makedirs(OUT,exist_ok=True)
+for k,(t,b) in F.items():
+    if PREFIX and k not in SUB: continue
+    open(os.path.join(OUT,PREFIX+k+".dc.html"),"w").write(page(t[t.index(" ")+1:] if t[0].isdigit() else t,b))
+if CANVAS:
+    rows=[["Main","Kontakter","Chatt","Dela","Rost","Videomeddelande"],["Sakerhetskod","Videokonferens","Samtal","Nyckelbyte","Applas","Kontaktmeny","Blockera","Blockerade"],["Installningar","Tema","Sakerhet","Sprak","Uppdatering","UppdateringNy","Lagring","Rensa","Om"],["Usb_"+n for n in SUB]]
+    cp=os.path.join(OUT,"canvas.json"); c=json.load(open(cp)); c["boards"]={}; c["order"]=[]
+    for r,names in enumerate(rows):
+        for i,n in enumerate(names):
+            u=n.startswith("Usb_"); base=n[4:] if u else n
+            f=n+".dc.html"; c["boards"][f]={"h":844,"title":("USB · " if u else "")+F[base][0],"w":390,"x":i*470,"y":r*1200,**({"is_interactive":True} if base=="Kontakter" else {})}; c["order"].append(f)
+    c["notes"]={"t1":{"kind":"title1","maxW":2740,"text":"Direct: skärmflöde","x":0,"y":-260},"t2":{"kind":"title1","maxW":3680,"text":"Samtal, verifiering, lås och blockering","x":0,"y":940},"t3":{"kind":"title1","maxW":4150,"text":"Inställningar, tema, uppdatering, filer och integritet","x":0,"y":2140},"t4":{"kind":"title1","maxW":2270,"text":"USB-tema (förhandsvisning)","x":0,"y":3340}}
+    c["title"]="Direct – skärmdesign"
+    json.dump(c,open(cp,"w"),ensure_ascii=False,indent=2)

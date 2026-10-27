@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Direct",
+    "slug": "direct",
+    "version": "0.6.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "se.sncab.direct",
+      "infoPlist": {
+        "NSContactsUsageDescription": "Direct matchar dina kontakter lokalt på telefonen. Inget laddas upp."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#EFEDE8",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "se.sncab.direct",
+      "permissions": [
+        "READ_CONTACTS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Direct matchar dina kontakter lokalt på telefonen. Inget laddas upp."
+        }
+      ]
+    ]
+  }
+}

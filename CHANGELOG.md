@@ -1,5 +1,10 @@
 # Ändringslogg
 
+## 0.6.0
+- Ny körbar app (`app/`, Expo/React Native) med temaval Beige/USB, språkval, kontakter från telefonboken, blockering och lokal chattdemo.
+- Design: temaval Beige eller USB med ny skärm Tema (10b) och USB-tema för fem skärmar.
+- Generatorn stöder tema via argument.
+
 ## 0.5.0
 - Kontakter: scrollbar lista (8 kontakter i appen, 4 att bjuda in), fast rubrik, sök och flikrad.
 - Blockering: kontaktmeny (håll in en kontakt), bekräftelseskärm och lista över blockerade kontakter med Avblockera.

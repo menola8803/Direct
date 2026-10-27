@@ -58,7 +58,15 @@
           "microphonePermission": "Direct uses the microphone for voice messages and calls."
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "# WebRTC is called from native code and by reflection: keep it and ignore optional codecs that are not bundled\n-keep class org.webrtc.** { *; }\n-dontwarn org.webrtc.**\n-dontwarn org.chromium.build.**\n"
+          }
+        }
+      ]
     ]
   }
 }

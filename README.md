@@ -1,5 +1,7 @@
 # Direct
 
+**Version 0.2.0** (se `CHANGELOG.md`)
+
 Chattapp utan server emellan. Meddelanden, samtal, röst- och videomeddelanden samt filer går direkt mellan telefonerna, krypterade. Gjord för människors integritet.
 
 Det här repot innehåller **skärmdesignen** (mockups). Ingen app-kod ännu.
@@ -17,10 +19,12 @@ Det här repot innehåller **skärmdesignen** (mockups). Ingen app-kod ännu.
 7. Verifiera kontakt (säkerhetskod)
 8. Ny videokonferens (max 4 med video)
 9. Pågående konferens
-10. Inställningar
-11. Lagring (rensa cache, per kontakt, allt)
-12. Rensa allt (bekräftelse)
-13. Om Direct (integritet)
+10. Inställningar (språk, uppdateringar, rensa cache/per kontakt/allt)
+11. Språk (telefonens språk, svenska, English)
+12. Uppdateringar (GitHub Releases)
+13. Lagring
+14. Rensa allt (bekräftelse)
+15. Om Direct (integritet)
 
 Källfilerna ligger i `design/screens/*.dc.html`. `design/gen.py` genererar dem (kör `python3 ../gen.py` i `design/screens`, med `canvas.json` i den mappen).
 

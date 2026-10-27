@@ -169,7 +169,7 @@ F["Installningar"]=("10 Inställningar",f'''<div><div style="{HF};font-size:28px
 def seg2(w,c): return f'<div style="flex:{w};height:10px;background:{c}"></div>'
 def lg(c,t): return f'<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:{MUT}"><span style="width:8px;height:8px;border-radius:50%;background:{c};display:inline-block"></span>{t}</span>'
 def lrow(n,i,sub,sz,chk): return f'<div style="display:flex;align-items:center;gap:12px">{av(i,36)}<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">{n}</div><div style="font-size:12px;color:{MUT}">{sub}</div></div><div style="font-size:13px;font-weight:600">{sz}</div><input type="checkbox" aria-label="Välj {n}" {"checked" if chk else ""} style="width:24px;height:24px;accent-color:{DK}"></div>'
-F["Lagring"]=("11 Lagring",f'''{hdr("Lagring","Filer från dina kontakter")}
+F["Lagring"]=("13 Lagring",f'''{hdr("Lagring","Filer från dina kontakter")}
 {card(f'<div style="display:flex;justify-content:space-between;align-items:baseline">{lab("Totalt")}<div style="{HF};font-size:30px">1,8 GB</div></div><div style="display:flex;border-radius:5px;overflow:hidden;gap:2px">{seg2(18,DK)}{seg2(55,ACC)}{seg2(20,BEI)}{seg2(7,"#CFC8B8")}</div><div style="display:flex;gap:14px;flex-wrap:wrap">{lg(DK,"Ljud")}{lg(ACC,"Video")}{lg(BEI,"Filer")}{lg("#CFC8B8","Cache")}</div>',"",10)}
 {card(f'<div style="display:flex;align-items:center;gap:12px">{sq("broom")}<div style="flex:1"><div style="font-size:15px;font-weight:600">Cache · 124 MB</div><div style="font-size:12px;color:{MUT}">Tillfälliga filer. Inga meddelanden tas bort.</div></div><button style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid {LINE};background:{CHIP};color:{INK};font-size:14px;font-weight:600">Rensa</button></div>',"padding:12px 16px")}
 {card(lab("Rensa per kontakt")+lrow("Anna Lindqvist","AL","Ljud 120 MB · Video 640 MB · Filer 80 MB","840 MB",1)+lrow("Erik Sundberg","ES","Ljud 60 MB · Video 310 MB · Filer 20 MB","390 MB",1)+lrow("Lisa Ek","LE","Ljud 40 MB · Video 120 MB","160 MB",0)+lrow("Maja Holm","MH","Ljud 30 MB · Filer 260 MB","290 MB",0),"",12)}
@@ -177,7 +177,7 @@ F["Lagring"]=("11 Lagring",f'''{hdr("Lagring","Filer från dina kontakter")}
 {btn("Rensa valda (2) · 1,2 GB","trash","dg")}
 <button style="min-height:40px;border:none;background:transparent;color:{RED};font-size:14px;font-weight:600;text-decoration:underline">Rensa allt…</button>''')
 # 12 Rensa allt
-F["Rensa"]=("12 Rensa allt",f'''{hdr("Rensa allt")}
+F["Rensa"]=("14 Rensa allt",f'''{hdr("Rensa allt")}
 <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 8px"><div style="width:72px;height:72px;border-radius:50%;background:#F1DAD6;color:{RED};display:flex;align-items:center;justify-content:center">{ic("warn",34)}</div>
 <h1 style="{HF};margin:0;font-size:30px;line-height:1.15">Rensa alla filer?</h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:{MUT}">1,8 GB tas bort från Download/Direct för alla kontakter. Det går inte att ångra. Meddelanden i chattarna ligger kvar.</p></div>
@@ -186,17 +186,38 @@ F["Rensa"]=("12 Rensa allt",f'''{hdr("Rensa allt")}
 # 13 Om
 def prin(k,t,s): return f'<div style="display:flex;gap:12px;align-items:flex-start">{sq(k)}<div><div style="font-size:15px;font-weight:600">{t}</div><div style="font-size:13px;line-height:1.5;color:{MUT};margin-top:2px">{s}</div></div></div>'
 chip=lambda t: f'<span style="padding:6px 12px;border-radius:999px;background:{CHIP};font-size:13px;font-weight:600">{t}</span>'
-F["Om"]=("13 Om Direct",f'''{hdr("Om Direct")}
+F["Om"]=("15 Om Direct",f'''{hdr("Om Direct")}
 <div style="padding:4px 4px 0"><h1 style="{HF};margin:0;font-size:30px;line-height:1.12;letter-spacing:-0.6px">Gjord för människor, <span style="color:{ACC}">inte för data.</span></h1></div>
 {card(prin("lock","Direkt mellan telefoner","Meddelanden, samtal och filer går rakt till mottagaren, krypterade. Ingen läser med.")+prin("folder","Filerna är dina","Ljud, video och filer sparas i Download/Direct per kontakt. Ingen molnkopia. Du rensar själv.")+prin("key","Din nyckel är ditt konto","Ingen e-post, inget lösenord. Identiteten skapas och stannar på din telefon.")+prin("group","Kontakterna stannar hos dig","Telefonboken matchas lokalt. Inget laddas upp."),"",16)}
 {card(lab("Vi gör aldrig")+f'<div style="display:flex;gap:8px;flex-wrap:wrap">{chip("Reklam")}{chip("Spårning")}{chip("Datainsamling")}{chip("Försäljning av data")}</div><div style="font-size:12px;line-height:1.5;color:{MUT}">För att koppla upp och ringa används en notistjänst (Google/Apple) och vid behov en relay. De ser aldrig innehållet.</div>',"",10)}
 <div style="flex:1"></div>{btn("Förstått",None,"p")}''')
+
+# ---- Inställningar (ny), Språk, Uppdateringar ----
+def tog(on,l): return f'<button role="switch" aria-checked="{"true" if on else "false"}" aria-label="{l}" style="width:52px;height:32px;flex:none;border-radius:16px;border:none;background:{DK if on else "#CFC8B8"};display:flex;align-items:center;padding:3px;box-sizing:border-box;justify-content:{"flex-end" if on else "flex-start"}"><span style="width:26px;height:26px;border-radius:50%;background:{CR if on else "#fff"};display:block"></span></button>'
+badge=lambda t: f'<span style="padding:3px 10px;border-radius:999px;background:{BEI};font-size:12px;font-weight:600">{t}</span>'
+val=lambda t: f'<span style="font-size:13px;font-weight:600;color:{MUT}">{t}</span>'
+cbtn=f'<button style="min-height:44px;padding:0 16px;border-radius:12px;border:1px solid {LINE};background:{CHIP};color:{INK};font-size:14px;font-weight:600">Rensa</button>'
+F["Installningar"]=("10 Inställningar",f'''<div><div style="{HF};font-size:28px;letter-spacing:-0.5px">Inställningar</div><div style="font-size:14px;color:{MUT};margin-top:2px">Direct är gjord för att stanna hos dig</div></div>
+{card(srow("chat","Språk","Följer telefonen",val("Svenska"))+srow("broom","Uppdateringar","Version 1.1.0 · GitHub",badge("Ny"))+srow("folder","Lagring och filer","Download/Direct",val("1,8 GB"))+srow("key","Säkerhetskopiera nyckel","Behövs om du byter telefon")+srow("shield","Om Direct och integritet","Så fungerar appen"),"",16)}
+{card(lab("Rensa")+f'<div style="display:flex;align-items:center;gap:12px">{sq("broom")}<div style="flex:1"><div style="font-size:16px;font-weight:600">Rensa cache</div><div style="font-size:13px;color:{MUT}">124 MB tillfälliga filer</div></div>{cbtn}</div>'+srow("group","Rensa per kontakt","Välj vilka kontakters filer som tas bort")+f'<div style="display:flex;align-items:center;gap:12px">{sq("trash","#F1DAD6",RED)}<div style="flex:1"><div style="font-size:16px;font-weight:600;color:{RED}">Rensa allt…</div><div style="font-size:13px;color:{MUT}">Tar bort alla ljud, videor och filer</div></div>{ic("next",18,MUT)}</div>',"",14)}
+<div style="flex:1"></div>{tabs("Inställningar")}''')
+def lopt(t,s,sel): return f'<label style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:{"2px solid "+DK if sel else "1px solid "+LINE};background:{CARD if sel else BG}"><div style="flex:1"><div style="font-size:16px;font-weight:600">{t}</div><div style="font-size:13px;color:{MUT}">{s}</div></div><input type="radio" name="sprak" aria-label="{t}" {"checked" if sel else ""} style="width:24px;height:24px;accent-color:{DK}"></label>'
+F["Sprak"]=("11 Språk",f'''{hdr("Språk","Välj appens språk")}
+{card(lopt("Telefonens språk","Just nu: Svenska",True)+lopt("Svenska","Appen visas på svenska",False)+lopt("English","The app is shown in English",False),"",10)}
+{card(f'<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;color:{MUT}">{ic("shield",18,ACC)}<span>Ändringen gäller direkt och sparas bara på din telefon. Om telefonens språk varken är svenska eller engelska används engelska.</span></div>',"padding:12px 16px")}
+<div style="flex:1"></div>{btn("Klar",None,"p")}''')
+nt=lambda t: f'<div style="display:flex;gap:8px;font-size:13px;line-height:1.45;color:{MUT}"><span style="color:{ACC}">•</span><span>{t}</span></div>'
+F["Uppdatering"]=("12 Uppdateringar",f'''{hdr("Uppdateringar","Hämtas från GitHub Releases")}
+{card(f'<div style="display:flex;justify-content:space-between;align-items:center">{lab("Ny version")}{badge("Stabil")}</div><div style="{HF};font-size:30px;letter-spacing:-0.5px">Direct 1.2.0</div><div style="font-size:13px;color:{MUT}">Du har 1.1.0 · 18,4 MB · släppt 24 okt 2026</div><div style="height:8px;border-radius:4px;background:{ACC}"></div><div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:{GRN}">{ic("check",16)}Nedladdad och verifierad (SHA-256)</div>'+nt("Snabbare uppkoppling av samtal")+nt("Nytt: Rensa per kontakt")+nt("Felrättningar"),"",10)}
+{card(f'<div style="display:flex;align-items:center;gap:12px"><div style="flex:1;font-size:15px;font-weight:600">Sök automatiskt</div>{tog(True,"Sök automatiskt")}</div><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><div style="font-size:15px;font-weight:600">Källa</div><div style="font-size:12px;color:{MUT}">GitHub · menola8803/direct</div></div>{ic("next",18,MUT)}</div><div style="display:flex;align-items:center;gap:12px"><div style="flex:1;font-size:15px;font-weight:600">Förhandsversioner</div>{tog(False,"Förhandsversioner")}</div>',"",14)}
+{card(f'<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;color:{MUT}">{ic("shield",18,ACC)}<span>Uppdateringen installeras ovanpå din app. Chattar, nyckel och filer behålls. Android frågar om du vill installera.</span></div>',"padding:12px 16px")}
+<div style="flex:1"></div>{btn("Installera 1.2.0","check","p")}{btn("Sök efter uppdatering",None,"s")}''')
 for k,(t,b) in F.items(): open(k+".dc.html","w").write(page(t[t.index(" ")+1:] if t[0].isdigit() else t,b))
-rows=[["Main","Kontakter","Chatt","Dela","Rost","Videomeddelande"],["Sakerhetskod","Videokonferens","Samtal"],["Installningar","Lagring","Rensa","Om"]]
+rows=[["Main","Kontakter","Chatt","Dela","Rost","Videomeddelande"],["Sakerhetskod","Videokonferens","Samtal"],["Installningar","Sprak","Uppdatering","Lagring","Rensa","Om"]]
 c=json.load(open("canvas.json")); c["boards"]={}; c["order"]=[]
 for r,names in enumerate(rows):
     for i,n in enumerate(names):
         f=n+".dc.html"; c["boards"][f]={"h":844,"title":F[n][0],"w":390,"x":i*470,"y":r*1200}; c["order"].append(f)
-c["notes"]={"t1":{"kind":"title1","maxW":2740,"text":"Direct: skärmflöde","x":0,"y":-260},"t2":{"kind":"title1","maxW":1330,"text":"Samtal och verifiering","x":0,"y":940},"t3":{"kind":"title1","maxW":1800,"text":"Filer, lagring och integritet","x":0,"y":2140}}
+c["notes"]={"t1":{"kind":"title1","maxW":2740,"text":"Direct: skärmflöde","x":0,"y":-260},"t2":{"kind":"title1","maxW":1330,"text":"Samtal och verifiering","x":0,"y":940},"t3":{"kind":"title1","maxW":2740,"text":"Inställningar, uppdatering, filer och integritet","x":0,"y":2140}}
 c["title"]="Direct – skärmdesign"
 json.dump(c,open("canvas.json","w"),ensure_ascii=False,indent=2)

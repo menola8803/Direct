@@ -72,25 +72,39 @@
       "x": 0,
       "y": 2400
     },
-    "Lagring.dc.html": {
+    "Sprak.dc.html": {
       "h": 844,
-      "title": "11 Lagring",
+      "title": "11 Språk",
       "w": 390,
       "x": 470,
       "y": 2400
     },
-    "Rensa.dc.html": {
+    "Uppdatering.dc.html": {
       "h": 844,
-      "title": "12 Rensa allt",
+      "title": "12 Uppdateringar",
       "w": 390,
       "x": 940,
       "y": 2400
     },
-    "Om.dc.html": {
+    "Lagring.dc.html": {
       "h": 844,
-      "title": "13 Om Direct",
+      "title": "13 Lagring",
       "w": 390,
       "x": 1410,
+      "y": 2400
+    },
+    "Rensa.dc.html": {
+      "h": 844,
+      "title": "14 Rensa allt",
+      "w": 390,
+      "x": 1880,
+      "y": 2400
+    },
+    "Om.dc.html": {
+      "h": 844,
+      "title": "15 Om Direct",
+      "w": 390,
+      "x": 2350,
       "y": 2400
     }
   },
@@ -119,8 +133,8 @@
     },
     "t3": {
       "kind": "title1",
-      "maxW": 1800,
-      "text": "Filer, lagring och integritet",
+      "maxW": 2740,
+      "text": "Inställningar, uppdatering, filer och integritet",
       "x": 0,
       "y": 2140
     }
@@ -136,6 +150,8 @@
     "Videokonferens.dc.html",
     "Samtal.dc.html",
     "Installningar.dc.html",
+    "Sprak.dc.html",
+    "Uppdatering.dc.html",
     "Lagring.dc.html",
     "Rensa.dc.html",
     "Om.dc.html"

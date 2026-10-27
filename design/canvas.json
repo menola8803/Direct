@@ -14,7 +14,8 @@
       "title": "2 Kontakter",
       "w": 390,
       "x": 470,
-      "y": 0
+      "y": 0,
+      "is_interactive": true
     },
     "Chatt.dc.html": {
       "h": 844,
@@ -77,6 +78,27 @@
       "title": "18 Applås",
       "w": 390,
       "x": 1880,
+      "y": 1200
+    },
+    "Kontaktmeny.dc.html": {
+      "h": 844,
+      "title": "19 Kontaktmeny",
+      "w": 390,
+      "x": 2350,
+      "y": 1200
+    },
+    "Blockera.dc.html": {
+      "h": 844,
+      "title": "20 Blockera kontakt",
+      "w": 390,
+      "x": 2820,
+      "y": 1200
+    },
+    "Blockerade.dc.html": {
+      "h": 844,
+      "title": "21 Blockerade kontakter",
+      "w": 390,
+      "x": 3290,
       "y": 1200
     },
     "Installningar.dc.html": {
@@ -154,8 +176,8 @@
     },
     "t2": {
       "kind": "title1",
-      "maxW": 2270,
-      "text": "Samtal, verifiering och lås",
+      "maxW": 3680,
+      "text": "Samtal, verifiering, lås och blockering",
       "x": 0,
       "y": 940
     },
@@ -179,6 +201,9 @@
     "Samtal.dc.html",
     "Nyckelbyte.dc.html",
     "Applas.dc.html",
+    "Kontaktmeny.dc.html",
+    "Blockera.dc.html",
+    "Blockerade.dc.html",
     "Installningar.dc.html",
     "Sakerhet.dc.html",
     "Sprak.dc.html",

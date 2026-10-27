@@ -1,5 +1,10 @@
 # Ändringslogg
 
+## 0.5.0
+- Kontakter: scrollbar lista (8 kontakter i appen, 4 att bjuda in), fast rubrik, sök och flikrad.
+- Blockering: kontaktmeny (håll in en kontakt), bekräftelseskärm och lista över blockerade kontakter med Avblockera.
+- Säkerhet: ny rad "Blockerade kontakter".
+
 ## 0.4.3
 - Mindre ikoner längst ner: flikrad, chattens inmatningsrad, inspelningsknappar och samtalsknappar.
 - Kontakter: tydlig mörk knapp "Konferens" för att skapa videokonferens (upp till 4 med video).

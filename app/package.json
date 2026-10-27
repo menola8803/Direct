@@ -43,7 +43,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "tsx test/core.test.ts && tsx test/session.test.ts && tsx test/calls.test.ts && tsx test/peers.test.ts && tsx test/manual.test.ts && node ../server/test.js",
+    "test": "tsx test/core.test.ts && tsx test/session.test.ts && tsx test/calls.test.ts && tsx test/peers.test.ts && tsx test/manual.test.ts && tsx test/stun.test.ts && node ../server/test.js",
     "typecheck": "tsc --noEmit"
   },
   "private": true

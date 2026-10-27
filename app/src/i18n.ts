@@ -56,6 +56,8 @@ const sv = {
   makeRequest: 'Jag börjar: skapa förfrågan', haveRequest: 'Jag fick en förfrågan', yourRequest: 'Din förfrågan – skicka till kontakten', yourAnswer: 'Ditt svar – skicka tillbaka', pasteRequest: 'Klistra in förfrågan', pasteAnswerHere: 'Klistra in svaret du fick', makeAnswer: 'Skapa svar', finish: 'Anslut', shareCode: 'Dela kod', pairFailed: 'Koden passade inte. Börja om.', pairWaiting: 'Väntar på anslutning…', pairDone: 'Ansluten!',
   storage: 'Lagring', storageSub: 'Rensa chattar, filer och cache', clearAllFiles: 'Radera alla sparade filer', clearContactFiles: 'Radera filer för en kontakt', clearCache: 'Rensa cache', cacheCleared: 'Cache rensad', used: 'Används', pickContact: 'Välj kontakt', clearChatFor: 'Rensa chatt',
   installUpdate: 'Ladda ner och installera', downloading: 'Laddar ner…', installAllow: 'Android frågar om du vill tillåta installation från Direct. Tillåt och försök igen.', installFail: 'Kunde inte installera. Öppna nedladdningssidan i stället.', fsTitle: 'Forward secrecy', fsBody: 'Varje uppkoppling använder nya engångsnycklar. Stjäls dina nycklar senare går gamla samtal inte att läsa.',
+
+  stunList: 'STUN-servrar (en per rad)', stunHelp: 'Hjälper telefonen att hitta sin publika adress. Tomt = standardlistan. Servern ser aldrig dina meddelanden.', testStun: 'Testa STUN-servrar',
 };
 const en: typeof sv = {
   appName: 'Direct',
@@ -112,6 +114,7 @@ const en: typeof sv = {
   makeRequest: 'I start: create request', haveRequest: 'I received a request', yourRequest: 'Your request – send it to the contact', yourAnswer: 'Your answer – send it back', pasteRequest: 'Paste the request', pasteAnswerHere: 'Paste the answer you received', makeAnswer: 'Create answer', finish: 'Connect', shareCode: 'Share code', pairFailed: 'The code did not match. Start over.', pairWaiting: 'Waiting for connection…', pairDone: 'Connected!',
   storage: 'Storage', storageSub: 'Clear chats, files and cache', clearAllFiles: 'Delete all saved files', clearContactFiles: 'Delete files for one contact', clearCache: 'Clear cache', cacheCleared: 'Cache cleared', used: 'Used', pickContact: 'Choose contact', clearChatFor: 'Clear chat',
   installUpdate: 'Download and install', downloading: 'Downloading…', installAllow: 'Android asks whether to allow installs from Direct. Allow it and try again.', installFail: 'Could not install. Open the download page instead.', fsTitle: 'Forward secrecy', fsBody: 'Every connection uses fresh one-time keys. If your keys are stolen later, past conversations stay unreadable.',
+  stunList: 'STUN servers (one per line)', stunHelp: 'Helps the phone find its public address. Empty = default list. The server never sees your messages.', testStun: 'Test STUN servers',
 };
 export const dict = { sv, en };
 export type Strings = typeof sv;

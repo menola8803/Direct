@@ -7,6 +7,7 @@ import { fileSource, makeSink } from '../files';
 import { IceServer, LinkState, PeerManager, SignalState } from './peers';
 import { CallController, CallView } from './calls';
 import { mediaDevices, rtc } from './rtc';
+import { stunOrDefault } from './stun';
 
 const idleCall: CallView = { status: 'idle', cid: '', video: false, peers: {}, muted: false, camOff: false, local: null };
 export type SendFileArgs = { uri: string; name: string; mime: string; kind: FileKind; dur?: number };
@@ -36,7 +37,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
   const [remote, setRemote] = useState<Record<string, any>>({});
   const [calls, setCalls] = useState<CallController | null>(null);
 
-  const { identity, signalUrl, turnUrl, turnUser, turnCred, hideIp } = app;
+  const { identity, signalUrl, stunList, turnUrl, turnUser, turnCred, hideIp } = app;
 
   const pushFile = useCallback(async (c: Contact, msgId: string) => {
     const a = appRef.current, m = mgr.current;
@@ -71,7 +72,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!rtc || !identity) return;
-    const ice: IceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
+    const ice: IceServer[] = [{ urls: stunOrDefault(stunList) }];
     if (turnUrl) ice.push({ urls: turnUrl, username: turnUser || undefined, credential: turnCred || undefined });
     const byId = (id: string) => appRef.current.contacts[id];
     const receiverFor = (c: Contact) => {
@@ -139,7 +140,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
       });
     }, 10000);
     return () => { clearInterval(iv); cc.end(); m.stop(); mgr.current = null; setCalls(null); receivers.current.clear(); setLink({}); setSignal('offline'); };
-  }, [identity, signalUrl, turnUrl, turnUser, turnCred, hideIp, flush]);
+  }, [identity, signalUrl, stunList, turnUrl, turnUser, turnCred, hideIp, flush]);
 
   const connect = useCallback((c: Contact) => { mgr.current?.connect(c); }, []);
   const sendText = useCallback((c: Contact, text: string) => {

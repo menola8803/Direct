@@ -10,6 +10,9 @@
 `cd server && npm i && PORT=8080 node server.js` behind TLS, then enter `wss://your.domain` under Settings → Connection.
 The server only relays encrypted connection messages, never chat, files or calls.
 
+## STUN servers
+A STUN server only tells a phone its public address; it never sees messages. Settings → Connection lets you enter your own list (one per line) and test each one on the phone. The empty default uses Cloudflare, Nextcloud and stunprotocol.org (not Google).
+
 ## Limitations (honest list)
 - Direct connections do not always work over mobile networks / strict firewalls without a TURN server (optional, under Connection).
 - No push notifications without a server: messages and calls are received while the app is open and connected.

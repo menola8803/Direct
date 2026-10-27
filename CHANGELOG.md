@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.8.0 – No server, calls, files, forward secrecy
+- **Configurable STUN servers** with a per-server test; defaults are no longer Google.
 - **Connect without a server:** manual pairing with encrypted codes (QR/text). The signaling server is optional.
 - **Forward secrecy:** fresh one-time keys per connection plus a hash chain per message (`core/session.ts`).
 - **Calls and conference:** voice/video 1:1 and up to 4 people with video (8 audio only), mesh over WebRTC, negotiated over the encrypted data channel.

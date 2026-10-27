@@ -15,13 +15,13 @@ export type Person = { id: string; name: string; phone?: string };
 type Saved = {
   themeName: ThemeName; langChoice: LangChoice; name: string;
   contacts: Record<string, Contact>; blocked: Record<string, string>; messages: Record<string, Msg[]>;
-  signalUrl: string; turnUrl: string; turnUser: string; turnCred: string; hideIp: boolean;
+  signalUrl: string; stunList: string; turnUrl: string; turnUser: string; turnCred: string; hideIp: boolean;
 };
 const KEY = 'direct.state.v2';
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
   themeName: 'beige', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
-  signalUrl: '', turnUrl: '', turnUser: '', turnCred: '', hideIp: false,
+  signalUrl: '', stunList: '', turnUrl: '', turnUser: '', turnCred: '', hideIp: false,
 };
 
 type Ctx = Saved & {
@@ -31,7 +31,7 @@ type Ctx = Saved & {
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
-  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'turnUrl' | 'turnUser' | 'turnCred' | 'hideIp'>>) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnUrl' | 'turnUser' | 'turnCred' | 'hideIp'>>) => void;
   clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);

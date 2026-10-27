@@ -18,5 +18,12 @@ The server only relays encrypted connection messages, never chat, files or calls
 - Forward secrecy per connection; no post-compromise security (Double Ratchet) yet.
 - Tests run in Node (`npm test`). Phone-specific code (camera, microphone, WebRTC in React Native, installing) has not been run on a device.
 
+## Build the APK in the cloud (no tools needed)
+Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
+```
+git tag -a v0.8.0 -m "Direct 0.8.0" && git push origin v0.8.0
+```
+The APK is signed with the Expo template's debug key, which is public. Fine for testing; before a real launch create your own keystore and keep it safe, since updates only install over an app signed with the same key.
+
 ## In-app update
 Attach the APK to a public GitHub release tagged `vX.Y.Z` (workflow in `.github/workflows/release.yml`). The app checks `menola8803/Direct`.

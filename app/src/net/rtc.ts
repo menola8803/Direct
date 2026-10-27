@@ -1,4 +1,4 @@
-// WebRTC finns bara i den installerade appen (APK), inte i Expo Go. Laddas därför försiktigt.
+// WebRTC only exists in the installed app (APK), not in Expo Go. Therefore it is loaded defensively.
 import type { RtcApi } from './peers';
 
 let api: RtcApi | null = null;

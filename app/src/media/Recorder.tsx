@@ -7,7 +7,7 @@ import { Btn } from '../ui';
 
 export type Recorded = { uri: string; name: string; mime: string; dur: number };
 
-// Röstmeddelande: spela in, stoppa och skicka.
+// Voice message: record, stop and send.
 export function VoiceRecorder({ onDone, onCancel }: { onDone: (r: Recorded) => void; onCancel: () => void }) {
   const { theme, t } = useApp();
   const rec = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -31,7 +31,7 @@ export function VoiceRecorder({ onDone, onCancel }: { onDone: (r: Recorded) => v
     const dur = Math.max(1, Math.round((Date.now() - started.current) / 1000));
     try { await rec.stop(); } catch {}
     await setAudioModeAsync({ allowsRecording: false }).catch(() => {});
-    if (rec.uri) onDone({ uri: rec.uri, name: `röst-${Date.now()}.m4a`, mime: 'audio/mp4', dur });
+    if (rec.uri) onDone({ uri: rec.uri, name: `voice-${Date.now()}.m4a`, mime: 'audio/mp4', dur });
     else onCancel();
   };
   return (
@@ -45,7 +45,7 @@ export function VoiceRecorder({ onDone, onCancel }: { onDone: (r: Recorded) => v
   );
 }
 
-// Videomeddelande: helskärm med kamera, max 60 sekunder.
+// Video message: full-screen camera, max 60 seconds.
 export function VideoRecorder({ onDone, onCancel }: { onDone: (r: Recorded) => void; onCancel: () => void }) {
   const { theme, t } = useApp();
   const cam = useRef<CameraView>(null);

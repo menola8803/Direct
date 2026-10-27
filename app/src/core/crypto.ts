@@ -1,4 +1,4 @@
-// Ren TypeScript (ingen React Native) så att den kan testas i Node.
+// Plain TypeScript (no React Native) so it can be tested in Node.
 import nacl from 'tweetnacl';
 import { decodeBase64, encodeBase64, decodeUTF8, encodeUTF8 } from 'tweetnacl-util';
 
@@ -47,7 +47,7 @@ export function cardToContact(c: Card, now = Date.now()): Contact {
   return { id: contactId(c.s, c.b), name: c.n, boxPub: c.b, signPub: c.s, addedAt: now };
 }
 
-// Säkerhetskod: samma för båda parter, 6 grupper om 5 siffror.
+// Safety code: the same for both parties, 6 groups of 5 digits.
 export function safetyCode(mySignPub: string, myBoxPub: string, theirSignPub: string, theirBoxPub: string): string {
   const a = mySignPub + myBoxPub, b = theirSignPub + theirBoxPub;
   const [x, y] = a < b ? [a, b] : [b, a];

@@ -38,7 +38,7 @@ export default function MediaTest({ onBack }: { onBack: () => void }) {
   };
   useEffect(() => { if (uri) { try { player.seekTo(0); player.play(); } catch {} } }, [uri]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Provar själva WebRTC-mediastacken (samma som används i samtal).
+  // Tests the WebRTC media stack itself (the same one used in calls).
   const webrtc = async () => {
     if (!mediaDevices || !rtc) { setRtcMsg(t.noCalls); return; }
     try {

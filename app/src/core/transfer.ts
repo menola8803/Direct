@@ -1,4 +1,4 @@
-// Filöverföring i bitar över den krypterade datakanalen (används för filer, röst- och videomeddelanden).
+// Chunked file transfer over the encrypted data channel (used for files, voice and video messages).
 import { decodeBase64, encodeBase64 } from 'tweetnacl-util';
 import { FileKind, Plain } from './protocol';
 
@@ -46,7 +46,7 @@ export class Receiver {
     } else if (p.t === 'chunk') {
       const inc = this.cur.get(p.id);
       if (!inc) return;
-      // Serialisera: bitarna kommer i ordning men skrivningarna är asynkrona.
+      // Serialize: chunks arrive in order but writes are asynchronous.
       inc.busy = inc.busy.then(async () => {
         if (!this.cur.has(p.id)) return;
         if (p.i !== inc.next) { await this.fail(p.id); return; }
@@ -73,6 +73,6 @@ export class Receiver {
     if (!quiet) this.o.onFail?.(id);
   }
 
-  // Länken föll: kasta halvfärdiga överföringar (avsändaren skickar om hela filen).
+  // Link dropped: discard unfinished transfers (the sender resends the whole file).
   async dropAll() { for (const id of [...this.cur.keys()]) await this.fail(id, true); }
 }

@@ -9,7 +9,7 @@ import { FileKind, MsgStatus } from './core/protocol';
 
 export type Attach = { name: string; mime: string; size: number; kind: FileKind; uri: string; dur?: number };
 export type Msg = { id: string; mine: boolean; text: string; at: number; status?: MsgStatus; file?: Attach };
-// Kontakt från telefonboken (för inbjudan via SMS). Har inga nycklar.
+// Contact from the phone book (for SMS invites). Has no keys.
 export type Person = { id: string; name: string; phone?: string };
 
 type Saved = {
@@ -20,7 +20,7 @@ type Saved = {
 const KEY = 'direct.state.v2';
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
-  themeName: 'beige', langChoice: 'system', name: '', contacts: {}, blocked: {}, messages: {},
+  themeName: 'beige', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
   signalUrl: '', turnUrl: '', turnUser: '', turnCred: '', hideIp: false,
 };
 

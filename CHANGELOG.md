@@ -1,60 +1,54 @@
-# Ändringslogg
+# Changelog
+
+## 0.8.0 – No server, calls, files, forward secrecy
+- **Connect without a server:** manual pairing with encrypted codes (QR/text). The signaling server is optional.
+- **Forward secrecy:** fresh one-time keys per connection plus a hash chain per message (`core/session.ts`).
+- **Calls and conference:** voice/video 1:1 and up to 4 people with video (8 audio only), mesh over WebRTC, negotiated over the encrypted data channel.
+- **Voice messages, video messages, files:** recording in the app, chunked transfer (max 50 MB), stored privately per contact, clear per contact / all / cache.
+- **Voice and video test** under Settings (microphone level, camera, WebRTC media stack).
+- **In-app update:** downloads the APK from the latest GitHub release and starts the Android installer.
+- Tested in Node: session/ratchet, serverless pairing, media tracks, file transfer (300 kB), call logic (1:1, conference, busy, timeout). **Not tested on a real phone.**
+- Repository documentation translated to English; app defaults to English.
+
+## 0.7.0 – Real P2P chat (first step)
+- Real identity (NaCl keys in secure storage), contacts via QR/code, safety code for verification.
+- Encrypted messages directly between phones over WebRTC; small signaling relay in `server/` (stores nothing).
+- Outbox with status (queued/sent/delivered), blocking, connection settings (signaling server, TURN, hide IP), update check via GitHub Releases.
 
 ## 0.6.0
-- Ny körbar app (`app/`, Expo/React Native) med temaval Beige/USB, språkval, kontakter från telefonboken, blockering och lokal chattdemo.
-- Design: temaval Beige eller USB med ny skärm Tema (10b) och USB-tema för fem skärmar.
-- Generatorn stöder tema via argument.
+- Runnable app (`app/`, Expo/React Native) with Beige/USB themes, language choice, phone-book contacts, blocking and a local chat demo.
+- Design: Beige or USB theme with a new Theme screen (10b) and a USB theme for five screens.
+- The generator supports themes through an argument.
 
 ## 0.5.0
-- Kontakter: scrollbar lista (8 kontakter i appen, 4 att bjuda in), fast rubrik, sök och flikrad.
-- Blockering: kontaktmeny (håll in en kontakt), bekräftelseskärm och lista över blockerade kontakter med Avblockera.
-- Säkerhet: ny rad "Blockerade kontakter".
+- Contacts: scrollable list, sticky header, search and tab bar.
+- Blocking: contact menu (long-press), confirmation screen and a list of blocked contacts with Unblock.
+- Security: new row "Blocked contacts".
 
 ## 0.4.3
-- Mindre ikoner längst ner: flikrad, chattens inmatningsrad, inspelningsknappar och samtalsknappar.
-- Kontakter: tydlig mörk knapp "Konferens" för att skapa videokonferens (upp till 4 med video).
+- Smaller icons at the bottom: tab bar, chat input, record buttons and call buttons.
+- Contacts: clear dark "Conference" button to start a video conference (up to 4 with video).
 
 ## 0.4.2
-- Utvecklarraden visas bara på Om Direct (borttagen från Välkomst för att spara utrymme).
+- The developer line is only shown on About Direct.
 
 ## 0.4.1
-- Utvecklarrad ("Utvecklare: Claes Sundman SNC AB - 2026") på Välkomst och Om Direct.
-- README visar utvecklare.
+- Developer line on Welcome and About Direct; README shows the developer.
 
 ## 0.4.0
-- Uppdateringar visar nu läget "Du har senaste versionen" (0.4.0, ingen uppdatering finns).
-- Läget "Ny version finns" ligger kvar som egen skärm (13b).
-- Inställningar visar "Aktuell" i stället för "Ny".
-- Galleriet byggs med `design/build_gallery.py`.
+- Updates shows "You have the latest version"; "New version available" kept as its own screen (13b).
+- Settings shows "Current" instead of "New".
+- The gallery is built with `design/build_gallery.py`.
 
 ## 0.3.0
-- Ny skärm: Säkerhet (appslås, dölj IP, privat lagring, nyckelvarning).
-- Ny skärm: Nyckeln har ändrats (varning).
-- Ny skärm: Applås (PIN).
-- Privat lagring är standard. Texter om Download/Direct justerade.
-- Release-automatik (GitHub Actions) och skript för äldre taggar.
+- New screens: Security, Key changed (warning), App lock (PIN).
+- Private storage is the default.
+- Release automation (GitHub Actions) and a script for older tags.
 
 ## 0.2.0
-- Inställningar byggd om: språk, uppdateringar, rensa cache, rensa per kontakt, rensa allt.
-- Ny skärm: Språk (telefonens språk, svenska, English).
-- Ny skärm: Uppdateringar via GitHub Releases.
-- Skärmarna omnumrerade (nu 15).
-- Arkitektur: avsnitt om uppdatering i appen.
+- Settings rebuilt: language, updates, clear cache, clear per contact, clear everything.
+- New screens: Language, Updates via GitHub Releases.
+- Architecture: section on in-app updates.
 
 ## 0.1.0
-- Första version: 13 skärmar (chatt, röst, video, filer, lagring, integritet), README och arkitekturförslag.
-
-## 0.7.0 – Riktig P2P-chatt (första steget)
-- Riktig identitet (NaCl-nycklar i säker lagring), kontakter via QR/kod, säkerhetskod för verifiering.
-- Krypterade meddelanden direkt mellan telefoner över WebRTC; litet signalrelä i `server/` (lagrar inget).
-- Utkorg med status (väntar/skickat/levererat), blockering, anslutningsinställningar (signalserver, TURN, dölj IP), uppdateringssök via GitHub Releases.
-- Testat: krypto, relä och riktig WebRTC i Node, samt Android-bundle. EJ testat på riktig telefon ännu. Samtal, röst/video, filer och APK-installation kommer i nästa steg.
-
-## 0.8.0 – Utan server, samtal, filer, forward secrecy
-- **Anslut utan server:** manuell parkoppling med krypterade koder (QR/text). Signalservern är valfri.
-- **Forward secrecy:** nya engångsnycklar för varje uppkoppling + hash-kedja per meddelande (`core/session.ts`).
-- **Samtal och konferens:** röst/video 1:1 och upp till 4 personer med video (8 med enbart röst), mesh över WebRTC. Förhandlas över den krypterade datakanalen.
-- **Röst- och videomeddelanden, filer:** inspelning i appen, uppdelning i bitar (max 50 MB), sparas privat per kontakt, rensning per kontakt/alla/cache.
-- **Röst- och videotest** under Inställningar (mikrofonnivå, kamera, WebRTC-mediastack).
-- **Uppdatering i appen:** laddar ner APK från senaste GitHub-release och startar Androids installerare.
-- Testat i Node: session/ratchet, serverlös koppling, mediaspår, filöverföring (300 kB), samtalslogik (1:1, konferens, upptagen, tidsgräns). **Ej testat på riktig telefon.**
+- First version: 13 screens (chat, voice, video, files, storage, privacy), README and architecture proposal.

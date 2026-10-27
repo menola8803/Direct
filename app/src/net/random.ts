@@ -1,4 +1,4 @@
-// tweetnacl behöver en säker slumpkälla. I React Native saknas den som standard.
+// tweetnacl needs a secure random source. React Native has none by default.
 import nacl from 'tweetnacl';
 import { getRandomBytes } from 'expo-crypto';
 

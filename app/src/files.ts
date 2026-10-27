@@ -1,4 +1,4 @@
-// Filer på telefonen: privat lagring per kontakt (appens egen mapp), källa/mål för överföringar.
+// Files on the phone: private storage per contact (the app's own folder), source/sink for transfers.
 import { Directory, File, FileMode, Paths } from 'expo-file-system';
 import { Meta, Sink, Source, safeName } from './core/transfer';
 
@@ -27,7 +27,7 @@ export const makeSink = (contactId: string) => async (m: Meta): Promise<Sink> =>
   };
 };
 
-// Radera sparade filer: för en kontakt, eller allt.
+// Delete saved files: for one contact, or everything.
 export function deleteFiles(contactId?: string) {
   try { const d = contactId ? dirFor(contactId) : root(); if (d.exists) d.delete(); } catch {}
 }

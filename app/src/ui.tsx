@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from './store';
 import { headingFont, Theme } from './theme';
 
-// Skärmram som aldrig hamnar under Androids statusfält eller gestfält.
+// Screen frame that never ends up under the Android status bar or gesture bar.
 export function Screen({ children, bottom = true }: { children: React.ReactNode; bottom?: boolean }) {
   const { theme } = useApp();
   const i = useSafeAreaInsets();
@@ -111,7 +111,7 @@ export function TabBar({ tab, setTab }: { tab: 'chats' | 'contacts' | 'settings'
   );
 }
 
-// Liten förhandsbild av ett tema (används i temaväljaren).
+// Small preview of a theme (used in the theme picker).
 export function ThemePreview({ th }: { th: Theme }) {
   return (
     <View style={{ width: 120, height: 200, borderRadius: 16, backgroundColor: th.bg, borderWidth: 1, borderColor: th.line, padding: 10, gap: 8 }}>

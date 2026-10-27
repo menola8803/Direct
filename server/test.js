@@ -29,22 +29,22 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
   a.ws.send(JSON.stringify({ type: 'relay', to: b.pub, payload: { n: 'x', c: 'y' } }));
   await wait(100);
-  assert.deepEqual(b.inbox[0], { type: 'relay', from: a.pub, payload: { n: 'x', c: 'y' } }, 'B ska få paketet från A');
+  assert.deepEqual(b.inbox[0], { type: 'relay', from: a.pub, payload: { n: 'x', c: 'y' } }, 'B should receive the packet from A');
 
   a.ws.send(JSON.stringify({ type: 'relay', to: encodeBase64(E.publicKey), payload: { n: '1', c: '2' } }));
   await wait(100);
-  assert.equal(a.inbox[0].type, 'offline', 'okänd mottagare ger offline');
+  assert.equal(a.inbox[0].type, 'offline', 'unknown recipient returns offline');
 
   await assert.rejects(client(url, E, { cheat: true }), /closed 4003/, 'falsk signatur nekas');
 
-  b.ws.send(JSON.stringify({ type: 'relay', to: a.pub, payload: 'sträng' }));
+  b.ws.send(JSON.stringify({ type: 'relay', to: a.pub, payload: 'string' }));
   await wait(100);
-  assert.equal(a.inbox.length, 1, 'payload som inte är objekt ignoreras');
+  assert.equal(a.inbox.length, 1, 'non-object payloads are ignored');
 
   const b2 = await client(url, B); // samma nyckel ansluter igen
   await wait(100);
   assert.equal(srv.online.get(b.pub), srv.online.get(b2.pub));
   await srv.close();
-  console.log('server: alla tester OK');
+  console.log('server: all tests OK');
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

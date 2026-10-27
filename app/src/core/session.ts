@@ -1,7 +1,7 @@
 // Sessionskryptering med forward secrecy.
-// Varje uppkoppling gör en ny X25519-nyckelväxling med tillfälliga nycklar (autentiserad av de långlivade nycklarna).
-// Därefter används en hash-kedja (ratchet): varje meddelande får en egen nyckel som raderas direkt.
-// Stulna långtidsnycklar avslöjar alltså inte tidigare sessioner. (Ingen "post-compromise security" – det kräver Double Ratchet.)
+// Every connection performs a new X25519 key exchange with ephemeral keys (authenticated by the long-term keys).
+// A hash chain (ratchet) is then used: every message gets its own key, which is erased immediately.
+// Stolen long-term keys therefore do not reveal earlier sessions. (No "post-compromise security" – that needs a Double Ratchet.)
 import nacl from 'tweetnacl';
 import { decodeBase64, decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util';
 
@@ -50,7 +50,7 @@ export class Session {
 
   decrypt<T>(f: Frame): T | null {
     if (this.dead || f.s !== 1 || typeof f.i !== 'number' || f.i < this.recvI || f.i - this.recvI > MAX_SKIP) return null;
-    // Spola fram kedjan vid hopp, men bara i en kopia: en falsk ram får inte förstöra läget.
+    // Fast-forward the chain on gaps, but only in a copy: a forged frame must not corrupt the state.
     let chain: Uint8Array = this.recvChain.slice();
     for (let k = this.recvI; k < f.i; k++) { const [key, next] = this.step(chain); key.fill(0); chain = next; }
     const [key, next] = this.step(chain);

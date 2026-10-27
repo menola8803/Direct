@@ -58,7 +58,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Skicka allt som inte är levererat till en kontakt när kanalen är öppen.
+  // Send everything not yet delivered to a contact when the channel is open.
   const flush = useCallback((cid: string) => {
     const a = appRef.current, m = mgr.current, c = a.contacts[cid];
     if (!m || !c) return;
@@ -111,7 +111,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
       onPlain: (c, p: Plain) => {
         if (p.t === 'msg') {
           appRef.current.addMessage(c.id, { id: p.id, mine: false, text: p.text, at: p.at });
-          m.send(c, { t: 'ack', id: p.id }); // kvittera även dubbletter
+          m.send(c, { t: 'ack', id: p.id }); // acknowledge duplicates too
         } else if (p.t === 'ack') appRef.current.setStatus(c.id, p.id, 'delivered');
         else if (p.t === 'file' || p.t === 'chunk' || p.t === 'abort') {
           if (p.t === 'file' && appRef.current.messages[c.id]?.some(x => x.id === p.id)) { m.send(c, { t: 'ack', id: p.id }); return; } // redan mottagen
@@ -130,7 +130,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
       onTrack: (c, stream) => { if (stream) setRemote(o => ({ ...o, [c.id]: stream })); },
     });
     mgr.current = m; m.start();
-    // Försök igen för kontakter med meddelanden som väntar.
+    // Retry for contacts with pending messages.
     const iv = setInterval(() => {
       const a = appRef.current;
       Object.values(a.contacts).forEach(c => {

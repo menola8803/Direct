@@ -1,7 +1,7 @@
 import { cmpVersion } from './core/semver';
 
-// Repo där releaser publiceras. Måste vara publikt för att appen ska kunna läsa det utan inloggning.
-export const UPDATE_REPO = 'menola8803/direct-design';
+// Repository where releases are published. Must be public so the app can read it without signing in.
+export const UPDATE_REPO = 'menola8803/Direct';
 
 export type Release = { tag: string; page: string; apk?: string; notes: string };
 

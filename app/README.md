@@ -1,27 +1,28 @@
 # Direct (app)
 
-Expo/React Native-app. Se rotens README för status och vad som återstår.
+Expo / React Native app. See the root README for status and what remains.
 
 ```
 npm install
-npx expo start      # öppna med Expo Go
-npx tsc --noEmit    # typkontroll
+npm test            # unit + integration tests (Node)
+npm run typecheck
+npx expo start      # note: calls and direct connections need the installed APK, not Expo Go
 ```
 
-Teman definieras i `src/theme.ts` (Beige och USB), texter i `src/i18n.ts`, tillstånd i `src/store.tsx`.
+Themes are defined in `src/theme.ts` (Beige and USB), texts in `src/i18n.ts` (English and Swedish), state in `src/store.tsx`, networking in `src/net/`, crypto and protocol in `src/core/`.
 
-## Bygga en riktig APK (Android)
-Moln-bygge med EAS (gratis Expo-konto, ingen Android Studio behövs):
+## Build a real APK (Android)
+Cloud build with EAS (free Expo account, no Android Studio needed):
 ```
 npm install -g eas-cli
 eas login
 eas build -p android --profile preview
 ```
-När bygget är klart får du en länk till en `.apk`. Öppna länken på telefonen och installera (tillåt "Installera okända appar").
+When the build finishes you get a link to an `.apk`. Open it on the phone and install (allow "Install unknown apps").
 
-Lokalt bygge (kräver Android Studio/SDK och Java 17):
+Local build (needs Android Studio/SDK and Java 17):
 ```
 npx expo prebuild --platform android
 cd android && ./gradlew assembleRelease
 ```
-APK-filen hamnar i `android/app/build/outputs/apk/release/`.
+The APK ends up in `android/app/build/outputs/apk/release/`.

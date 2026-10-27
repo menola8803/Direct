@@ -1,5 +1,5 @@
 // Samtalslogik (1:1 och konferens, mesh) utan beroenden till React Native – kan testas i Node.
-// Signaleringen går som krypterade meddelanden över den redan öppna datakanalen.
+// Signaling goes as encrypted messages over the already open data channel.
 import { Plain } from '../core/protocol';
 
 export type CallStatus = 'idle' | 'outgoing' | 'incoming' | 'active';
@@ -8,7 +8,7 @@ export type CallView = {
   status: CallStatus; cid: string; video: boolean; from?: string;
   peers: Record<string, PeerState>; muted: boolean; camOff: boolean; local: any | null; startedAt?: number;
 };
-export const MAX_VIDEO = 4, MAX_AUDIO = 8; // inklusive dig själv (mesh: varje deltagare skickar till alla andra)
+export const MAX_VIDEO = 4, MAX_AUDIO = 8; // including yourself (mesh: every participant sends to all others)
 
 export type CallDeps = {
   mySign: string;
@@ -29,8 +29,8 @@ const idle = (): CallView => ({ status: 'idle', cid: '', video: false, peers: {}
 
 export class CallController {
   v: CallView = idle();
-  private members: string[] = [];           // signPub för alla i samtalet (inkl. mig)
-  private pendingSend = new Map<string, Plain>(); // meddelanden som väntar på öppen länk
+  private members: string[] = [];           // signPub of everyone in the call (incl. me)
+  private pendingSend = new Map<string, Plain>(); // messages waiting for an open link
   private early = new Set<string>();        // som tackat ja innan jag svarat
   private ring: any;
   constructor(private d: CallDeps) {}
@@ -76,7 +76,7 @@ export class CallController {
     const peers: Record<string, PeerState> = {};
     for (const sign of this.members) {
       if (sign === this.d.mySign) continue;
-      const c = this.d.contactBySign(sign); if (!c) continue; // okänd för mig: kan inte ansluta
+      const c = this.d.contactBySign(sign); if (!c) continue; // unknown to me: cannot connect
       peers[c.id] = this.early.has(c.id) || c.id === from ? 'in' : 'connecting';
     }
     this.set({ status: 'active', peers, local, startedAt: Date.now() });
@@ -118,14 +118,14 @@ export class CallController {
     this.ring = setTimeout(() => {
       if (this.v.status === 'incoming') return this.decline();
       if (this.v.status === 'outgoing' || this.v.status === 'active') {
-        // Den som inte svarat (ringer) eller aldrig kopplades (ansluter) släpps.
+        // Anyone who has not answered (ringing) or never connected (connecting) is dropped.
         for (const [id, st] of Object.entries(this.v.peers)) if (st === 'ringing' || st === 'connecting') { this.deliver(id, { t: 'call', k: 'end', cid: this.v.cid, video: this.v.video }); this.drop(id); }
         this.check();
       }
     }, this.d.ringMs ?? 45000);
   }
 
-  // Avsluta om ingen längre är kvar att prata med.
+  // End the call if there is nobody left to talk to.
   private check() {
     if (this.v.status === 'idle' || this.v.status === 'incoming') return;
     const live = Object.values(this.v.peers).some(s => s === 'in' || s === 'ringing' || s === 'connecting');

@@ -21,7 +21,7 @@ export type Theme = {
   onBubbleMine: string;
 };
 
-// Färgerna motsvarar skärmdesignen i design/ (Beige och USB).
+// The colors match the screen design in design/ (Beige and USB).
 export const themes: Record<ThemeName, Theme> = {
   beige: {
     name: 'beige', label: 'Beige', dark: false,

@@ -1,8 +1,8 @@
 // Direct signaleringsserver.
 // - Klienter bevisar sin identitet med en signatur (challenge/response).
-// - Servern vidarebefordrar krypterade paket mellan två anslutna nycklar.
-// - Servern lagrar inga meddelanden och kan inte läsa innehållet (det är end-to-end-krypterat).
-// - Meddelanden, samtal och filer går direkt mellan telefonerna (WebRTC), inte via servern.
+// - The server forwards encrypted packets between two connected keys.
+// - The server stores no messages and cannot read the content (it is end-to-end encrypted).
+// - Messages, calls and files go directly between the phones (WebRTC), not through the server.
 const { WebSocketServer } = require('ws');
 const nacl = require('tweetnacl');
 const { decodeBase64, encodeBase64 } = require('tweetnacl-util');
@@ -56,5 +56,5 @@ module.exports = { createServer };
 if (require.main === module) {
   const port = Number(process.env.PORT || 8080);
   createServer({ port });
-  console.log(`Direct signalering lyssnar på port ${port}`);
+  console.log(`Direct signaling listening on port ${port}`);
 }

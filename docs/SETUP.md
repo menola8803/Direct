@@ -1,21 +1,22 @@
-# Komma igång (0.8.0)
-## Utan server (inget att hosta)
-1. Bygg APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC fungerar inte i Expo Go).
-2. Installera på två telefoner, skapa nyckel, lägg till varandra: Kontakter → Lägg till (QR eller kod).
-3. Öppna chatten → *Anslut utan server*: en skapar förfrågan, den andra klistrar in/skannar och svarar, första klistrar in svaret.
-   Både måste vara online samtidigt. Kopplingen måste göras om när anslutningen brutits.
+# Getting started (0.8.0)
 
-## Med signalserver (automatisk återanslutning)
-`cd server && npm i && PORT=8080 node server.js` bakom TLS, ange `wss://din.domän` under Inställningar → Anslutning.
-Servern förmedlar bara krypterade anslutningsmeddelanden, aldrig chatt, filer eller samtal.
+## Without a server (nothing to host)
+1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
+2. Install it on two phones, create your key, add each other: Contacts → Add (QR or code).
+3. Open the chat → *Connect without a server*: one creates a request, the other pastes/scans it and replies, the first pastes the reply.
+   Both must be online at the same time. Pairing has to be repeated after the connection has dropped.
 
-## Begränsningar (ärligt)
-- Direktanslutning går inte alltid över mobilnät/strikta brandväggar utan TURN-server (valfritt under Anslutning).
-- Inga pushnotiser utan server: samtal och meddelanden tas emot när appen är öppen och ansluten.
-- Konferens är mesh: varje deltagare skickar till alla. Max 4 med video, 8 med röst.
-- Uppdatering i appen kräver en publik GitHub-release med en `.apk` bifogad och att användaren tillåter installation.
-- Forward secrecy per uppkoppling; ingen post-compromise-säkerhet (Double Ratchet) än.
-- Tester körs i Node (`npm test`). Telefonspecifik kod (kamera, mikrofon, WebRTC i RN, installation) är inte provkörd på enhet.
+## With a signaling server (automatic reconnect)
+`cd server && npm i && PORT=8080 node server.js` behind TLS, then enter `wss://your.domain` under Settings → Connection.
+The server only relays encrypted connection messages, never chat, files or calls.
 
-## Uppdatering i appen
-Bifoga APK:n på en publik GitHub Release med tagg `vX.Y.Z` (workflow i `.github/workflows/release.yml`).
+## Limitations (honest list)
+- Direct connections do not always work over mobile networks / strict firewalls without a TURN server (optional, under Connection).
+- No push notifications without a server: messages and calls are received while the app is open and connected.
+- Conference is a mesh: every participant sends to all others. Max 4 with video, 8 audio only.
+- In-app update needs a public GitHub release with an `.apk` attached, and the user must allow the install.
+- Forward secrecy per connection; no post-compromise security (Double Ratchet) yet.
+- Tests run in Node (`npm test`). Phone-specific code (camera, microphone, WebRTC in React Native, installing) has not been run on a device.
+
+## In-app update
+Attach the APK to a public GitHub release tagged `vX.Y.Z` (workflow in `.github/workflows/release.yml`). The app checks `menola8803/Direct`.

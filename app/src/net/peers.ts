@@ -1,4 +1,4 @@
-// Plattformsoberoende anslutningshanterare: signalering via WebSocket-relä, meddelanden via WebRTC data channel.
+// Platform-independent connection manager: signaling via WebSocket relay, messages via WebRTC data channel.
 // WebRTC-implementationen injiceras (react-native-webrtc i appen, wrtc i testerna).
 import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
 import { decodeBase64, encodeBase64, decodeUTF8, encodeUTF8 } from 'tweetnacl-util';
@@ -62,7 +62,7 @@ export class PeerManager {
   isOpen(contactId: string) { return this.peers.get(contactId)?.state === 'open'; }
   isSignalOnline() { return this.signal === 'online'; }
 
-  // Försök koppla upp mot en kontakt (om inte redan igång).
+  // Try to connect to a contact (unless already in progress).
   connect(c: Contact) {
     const p = this.peers.get(c.id);
     if (p && p.state !== 'closed') return;
@@ -84,7 +84,7 @@ export class PeerManager {
   bufferedAmount(id: string): number { return this.peers.get(id)?.dc?.bufferedAmount ?? 0; }
 
   // ---- media (samtal) ----
-  // Lägger till/ersätter lokala spår; omförhandlas automatiskt över den krypterade datakanalen (fungerar även utan server).
+  // Adds/replaces local tracks; renegotiated automatically over the encrypted data channel (works without a server too).
   setLocalStream(id: string, stream: any | null) {
     const p = this.peers.get(id);
     if (!p) return;
@@ -123,13 +123,13 @@ export class PeerManager {
     p.remoteSet = true;
   }
 
-  // SDP komprimeras före kryptering så att koden blir kort nog för QR/SMS.
+  // SDP is compressed before encryption so the code is short enough for QR/SMS.
   private encodeManual(s: Signal, c: Contact) {
     const z = s.k === 'offer' || s.k === 'answer' ? { k: s.k, z: encodeBase64(deflateSync(strToU8(s.sdp), { level: 9 })) } : s;
     const body = JSON.stringify({ f: this.o.identity.signPublic, p: seal(z, this.o.identity.boxSecret, c.boxPub) });
     return MANUAL_PREFIX + b64url(encodeBase64(decodeUTF8(body)));
   }
-  // Returnerar avsändarens signeringsnyckel utan att kräva en känd kontakt (för att välja rätt kontakt).
+  // Returns the sender's signing key without requiring a known contact (to pick the right contact).
   static manualSender(code: string): string | null {
     try { const i = code.indexOf(MANUAL_PREFIX); if (i < 0) return null; return JSON.parse(encodeUTF8(decodeBase64(unb64url(code.slice(i + MANUAL_PREFIX.length).split(/\s/)[0])))).f ?? null; } catch { return null; }
   }
@@ -190,12 +190,12 @@ export class PeerManager {
 
   private async onRelay(from: string, payload: any) {
     const c = this.o.getContactBySign(from);
-    if (!c) return; // okända avsändare ignoreras
+    if (!c) return; // unknown senders are ignored
     const s = open<Signal>(payload, c.boxPub, this.o.identity.boxSecret);
     if (!s || typeof s !== 'object') return;
     if (s.k === 'hello') {
       const ex = this.peers.get(c.id);
-      if (ex && ex.state !== 'closed') return; // pågående försök, starta inte ett till
+      if (ex && ex.state !== 'closed') return; // attempt in progress, do not start another
       if (isInitiator(this.o.identity.signPublic, c.signPub)) await this.startOffer(c);
       return;
     }
@@ -257,12 +257,12 @@ export class PeerManager {
         this.o.onPlain(c, m);
         return;
       }
-      // Handskakning: den enda meddelandetypen som får vara statiskt krypterad.
+      // Handshake: the only message type allowed to be statically encrypted.
       if (p.sess) return;
       const hs = open<{ t: string; pub: string }>(env, c.boxPub, this.o.identity.boxSecret);
       if (!hs || hs.t !== 'eph' || typeof hs.pub !== 'string') return;
       try { p.sess = new Session(p.eph.secret, hs.pub, isInitiator(this.o.identity.signPublic, c.signPub)); } catch { return; }
-      p.eph.secret.fill(0); // den tillfälliga hemliga nyckeln behövs inte längre
+      p.eph.secret.fill(0); // the ephemeral secret key is no longer needed
       this.maybeOpen(c, p);
     });
   }

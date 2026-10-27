@@ -1,4 +1,4 @@
-// Integrationstest: riktig reläserver + riktig WebRTC (wrtc) mellan två PeerManager.
+// Integration test: real relay server + real WebRTC (wrtc) between two PeerManagers.
 import assert from 'node:assert/strict';
 import wrtc from '@roamhq/wrtc';
 import { newIdentity, cardToContact, decodeCard, encodeCard, Contact } from '../src/core/crypto';
@@ -13,7 +13,7 @@ async function until(f: () => boolean, ms = 8000) { const t = Date.now(); while 
 (async () => {
   const srv = createServer({ port: 18081, host: '127.0.0.1' });
   const ia = newIdentity(), ib = newIdentity();
-  // Kontakter läggs till via kort (som QR-koden)
+  // Contacts are added via a card (like the QR code)
   const aSeesB: Contact = cardToContact(decodeCard(encodeCard(ib, 'Bo'))!);
   const bSeesA: Contact = cardToContact(decodeCard(encodeCard(ia, 'Anna'))!);
   const gotA: Plain[] = [], gotB: Plain[] = [];
@@ -27,11 +27,11 @@ async function until(f: () => boolean, ms = 8000) { const t = Date.now(); while 
   A.start(); B.start();
   await until(() => A.isSignalOnline() && B.isSignalOnline());
 
-  // Båda försöker koppla samtidigt: bara en initierar, ingen deadlock
+  // Both try to connect at the same time: only one initiates, no deadlock
   A.connect(aSeesB); B.connect(bSeesA);
   await until(() => A.isOpen(aSeesB.id) && B.isOpen(bSeesA.id));
 
-  const m: Plain = { t: 'msg', id: newId(), text: 'Hej från A åäö', at: Date.now() };
+  const m: Plain = { t: 'msg', id: newId(), text: 'Hello from A åäö', at: Date.now() };
   assert.equal(A.send(aSeesB, m), true);
   await until(() => gotB.length === 1);
   assert.deepEqual(gotB[0], m);
@@ -39,18 +39,18 @@ async function until(f: () => boolean, ms = 8000) { const t = Date.now(); while 
   await until(() => gotA.length === 1);
   assert.deepEqual(gotA[0], { t: 'ack', id: (m as any).id });
 
-  // Okänd avsändare ignoreras
+  // Unknown sender is ignored
   const eve = newIdentity(); const gotE: Plain[] = [];
   const E = new PeerManager({ identity: eve, signalUrl: 'ws://127.0.0.1:18081', iceServers: [], rtc: wrtc as any,
     getContactBySign: s => (s === ia.signPublic ? cardToContact(decodeCard(encodeCard(ia, 'Anna'))!) : undefined), onPlain: (_c, p) => gotE.push(p), onLink: () => {} });
   E.start(); await until(() => E.isSignalOnline());
   const annaForEve = cardToContact(decodeCard(encodeCard(ia, 'Anna'))!);
   E.connect(annaForEve); await wait(1500);
-  assert.equal(E.isOpen(annaForEve.id), false, 'okänd kontakt får ingen anslutning');
+  assert.equal(E.isOpen(annaForEve.id), false, 'unknown contact gets no connection');
 
-  // Stäng ner B: A märker det, och kan koppla upp igen när B kommer tillbaka
+  // Shut down B: A notices, and can reconnect when B comes back
   B.stop(); await until(() => !A.isOpen(aSeesB.id), 8000);
-  assert.equal(A.send(aSeesB, m), false, 'skicka misslyckas när kanalen är nere (hamnar i utkorgen)');
+  assert.equal(A.send(aSeesB, m), false, 'sending fails when the channel is down (goes to the outbox)');
   const B2 = mk(ib, bSeesA, gotB, linkB); B2.start();
   await until(() => B2.isSignalOnline());
   A.connect(aSeesB); B2.connect(bSeesA);
@@ -58,6 +58,6 @@ async function until(f: () => boolean, ms = 8000) { const t = Date.now(); while 
   assert.equal(A.send(aSeesB, m), true);
 
   A.stop(); B2.stop(); E.stop(); await srv.close();
-  console.log('peers: alla tester OK (riktig WebRTC + relä)');
+  console.log('peers: all tests OK (real WebRTC + relay)');
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

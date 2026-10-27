@@ -2,7 +2,7 @@
   "name": "direct-signal",
   "version": "0.7.0",
   "private": true,
-  "description": "Liten reläserver för Direct. Vidarebefordrar krypterade signaleringsmeddelanden. Sparar ingenting.",
+  "description": "Small relay server for Direct. Forwards encrypted signaling messages. Stores nothing.",
   "main": "server.js",
   "scripts": { "start": "node server.js", "test": "node test.js" },
   "dependencies": { "tweetnacl": "1.0.3", "tweetnacl-util": "0.15.1", "ws": "8.18.0" }

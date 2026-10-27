@@ -1,4 +1,4 @@
-// Utan någon server: manuell parkoppling med koder, sessionskryptering och omförhandling av mediaspår.
+// Without any server: manual pairing with codes, session encryption and renegotiation of media tracks.
 import assert from 'node:assert/strict';
 import wrtc from '@roamhq/wrtc';
 import { newIdentity, cardToContact, decodeCard, encodeCard, Contact } from '../src/core/crypto';
@@ -23,41 +23,41 @@ async function until(f: () => boolean, ms = 10000) { const t = Date.now(); while
   const A = mk(ia, aSeesB, gotA, tracksA), B = mk(ib, bSeesA, gotB, tracksB);
   A.start(); B.start();
 
-  // utan server och utan kod händer inget
+  // nothing happens without a server and without a code
   A.connect(aSeesB); assert.equal(A.isOpen(aSeesB.id), false);
 
-  // A skapar förfråga, B svarar, A slutför
+  // A creates a request, B answers, A finishes
   const offer = await A.manualOffer(aSeesB);
   assert.ok(offer.startsWith('directm1:'));
   assert.equal(PeerManager.manualSender(offer), ia.signPublic);
-  assert.ok(!offer.includes('v=0'), 'koden är inte klartext-SDP');
+  assert.ok(!offer.includes('v=0'), 'the code is not plaintext SDP');
   const answer = await B.manualAnswer(bSeesA, offer);
-  // fel person kan inte slutföra
+  // the wrong person cannot finish
   const eve = newIdentity();
   const E = new PeerManager({ identity: eve, signalUrl: '', iceServers: [], rtc: wrtc as any, getContactBySign: () => undefined, onPlain: () => {}, onLink: () => {} });
   await assert.rejects(E.manualAnswer(cardToContact(decodeCard(encodeCard(ia, 'Anna'))!), offer));
   await A.manualFinish(aSeesB, answer);
   await until(() => A.isOpen(aSeesB.id) && B.isOpen(bSeesA.id));
 
-  const m: Plain = { t: 'msg', id: 'x1', text: 'Helt utan server', at: 1 };
+  const m: Plain = { t: 'msg', id: 'x1', text: 'Completely serverless', at: 1 };
   assert.equal(A.send(aSeesB, m), true);
   await until(() => gotB.length === 1);
   assert.deepEqual(gotB[0], m);
 
-  // Mediaspår läggs till i efterhand och förhandlas över den krypterade kanalen
+  // Media tracks are added afterwards and negotiated over the encrypted channel
   const src = new (wrtc as any).nonstandard.RTCAudioSource();
   const stream = new (wrtc as any).MediaStream([src.createTrack()]);
   A.setLocalStream(aSeesB.id, stream);
   await until(() => tracksB.includes('audio'));
-  // och åt andra hållet samtidigt
+  // and the other way at the same time
   const src2 = new (wrtc as any).nonstandard.RTCAudioSource();
   B.setLocalStream(bSeesA.id, new (wrtc as any).MediaStream([src2.createTrack()]));
   await until(() => tracksA.includes('audio'));
-  // chatten fungerar fortfarande efter omförhandling
+  // chat still works after renegotiation
   assert.equal(B.send(bSeesA, { t: 'ack', id: 'x1' }), true);
   await until(() => gotA.length === 1);
 
-  // Filöverföring (300 000 byte) i bitar, med mottagare som skriver till minnet
+  // File transfer (300,000 bytes) in chunks, with a receiver that writes to memory
   const data = new Uint8Array(300000).map((_, i) => (i * 7 + 3) & 255);
   const doneFiles: { id: string; bytes: Uint8Array }[] = [];
   const rx = new Receiver({
@@ -72,8 +72,8 @@ async function until(f: () => boolean, ms = 10000) { const t = Date.now(); while
   await until(() => gotB.filter(x => x.t === 'chunk' || x.t === 'file').length === 38);
   for (const x of gotB) if (x.t === 'file' || x.t === 'chunk') await rx.handle(x);
   assert.equal(doneFiles.length, 1);
-  assert.deepEqual(doneFiles[0].bytes, data, 'filen kom fram oförändrad');
-  // för stor fil / trasig ordning avvisas
+  assert.deepEqual(doneFiles[0].bytes, data, 'the file arrived unchanged');
+  // oversized file / broken order is rejected
   const fails: string[] = [];
   const rx2 = new Receiver({ makeSink: async () => ({ write: async () => {}, finish: async () => '', abort: async () => {} }), onDone: () => assert.fail('ska ej bli klar'), onFail: id => fails.push(id) });
   await rx2.handle({ t: 'file', id: 'z', name: 'x', mime: 'x', size: 99999999999, kind: 'file', chunks: 1, at: 1 });
@@ -82,6 +82,6 @@ async function until(f: () => boolean, ms = 10000) { const t = Date.now(); while
   assert.deepEqual(fails, ['z', 'y']);
 
   A.stop(); B.stop(); E.stop();
-  console.log('manual: alla tester OK (serverlös koppling, session, media)');
+  console.log('manual: all tests OK (serverless pairing, session, media)');
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

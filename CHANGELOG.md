@@ -1,5 +1,8 @@
 # Ändringslogg
 
+## 0.4.2
+- Utvecklarraden visas bara på Om Direct (borttagen från Välkomst för att spara utrymme).
+
 ## 0.4.1
 - Utvecklarrad ("Utvecklare: Claes Sundman SNC AB - 2026") på Välkomst och Om Direct.
 - README visar utvecklare.

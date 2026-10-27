@@ -72,7 +72,7 @@ F["Main"]=("1 Välkomst",f'''<div style="display:flex;align-items:center;gap:10p
 <p style="margin:0;font-size:15px;line-height:1.55;color:{MUT}">Din identitet är en nyckel som skapas på din telefon. Kontakterna matchas lokalt och laddas aldrig upp.</p></div>
 <div style="flex:1"></div>
 {card(f'<label for="nr" style="font-size:14px;font-weight:600">Ditt telefonnummer</label><input id="nr" value="+46 70 123 45 67" style="box-sizing:border-box;height:52px;border:1px solid {LINE};border-radius:14px;padding:0 16px;font-size:17px;background:{BG};color:{INK};letter-spacing:.3px"><div style="font-size:13px;line-height:1.5;color:{MUT}">Numret används bara för att andra ska hitta dig. Det verifieras inte via SMS.</div>')}
-{btn("Skapa min nyckel","key")}<div style="text-align:center;font-size:13px;color:{MUT}">Utvecklare: Claes Sundman SNC AB - 2026</div>''')
+{btn("Skapa min nyckel","key")}''')
 # 2 Kontakter
 def crow(n,i,sub,right,ring=LINE): return f'<div style="display:flex;align-items:center;gap:12px">{av(i,44,ring)}<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">{n}</div><div style="font-size:13px;color:{MUT}">{sub}</div></div>{right}</div>'
 act=f'<div style="display:flex;gap:8px">{ghost("call","Ring")}{ghost("video","Video")}</div>'

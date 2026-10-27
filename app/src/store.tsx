@@ -5,9 +5,10 @@ import { getLocales } from 'expo-localization';
 import { Theme, ThemeName, themes } from './theme';
 import { dict, Lang, LangChoice, Strings } from './i18n';
 import { Contact, Identity, newIdentity } from './core/crypto';
-import { MsgStatus } from './core/protocol';
+import { FileKind, MsgStatus } from './core/protocol';
 
-export type Msg = { id: string; mine: boolean; text: string; at: number; status?: MsgStatus };
+export type Attach = { name: string; mime: string; size: number; kind: FileKind; uri: string; dur?: number };
+export type Msg = { id: string; mine: boolean; text: string; at: number; status?: MsgStatus; file?: Attach };
 // Kontakt från telefonboken (för inbjudan via SMS). Har inga nycklar.
 export type Person = { id: string; name: string; phone?: string };
 
@@ -31,7 +32,7 @@ type Ctx = Saved & {
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
   setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'turnUrl' | 'turnUser' | 'turnCred' | 'hideIp'>>) => void;
-  block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
+  clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
 export const useApp = () => useContext(C);
@@ -83,6 +84,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSettings: p => setS(o => ({ ...o, ...p })),
     block: (id, name) => setS(o => ({ ...o, blocked: { ...o.blocked, [id]: name } })),
     unblock: id => setS(o => { const b = { ...o.blocked }; delete b[id]; return { ...o, blocked: b }; }),
+    clearChat: id => setS(o => { const m = { ...o.messages }; delete m[id]; return { ...o, messages: m }; }),
     clearChats: () => setS(o => ({ ...o, messages: {} })),
   }), [s, ready, identity, lang, addMessage]);
 

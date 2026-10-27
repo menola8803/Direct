@@ -44,6 +44,18 @@ const sv = {
   sigOnline: 'Ansluten till signalserver', sigConnecting: 'Ansluter till signalserver…', sigOffline: 'Ej ansluten till signalserver',
   noServer: 'Ingen signalserver inställd. Gå till Inställningar, Anslutning.', rtcMissing: 'Direktanslutning kräver den installerade appen (APK), inte Expo Go.',
   update: 'Uppdateringar', updateSub: 'Söker efter ny version på GitHub', checkUpdate: 'Sök efter uppdatering', upToDate: 'Du har senaste versionen', newVersion: 'Ny version', download: 'Ladda ner', noRelease: 'Ingen release hittades.', checking: 'Söker…', updateFail: 'Kunde inte kontrollera uppdatering.',
+
+  attach: 'Bifoga fil', pickFile: 'Välj fil', recVoice: 'Spela in röstmeddelande', recVideo: 'Spela in videomeddelande', stopSend: 'Stoppa och skicka', cancelRec: 'Avbryt', recording: 'Spelar in…',
+  tooBig: 'Filen är för stor (max 50 MB).', micDenied: 'Mikrofonen är inte tillåten.', play: 'Spela upp', pause: 'Pausa', openFile: 'Öppna / spara', sendingPct: 'Skickar',
+  voiceMsg: 'Röstmeddelande', videoMsg: 'Videomeddelande', fileMsg: 'Fil',
+  call: 'Ring', videoCall: 'Videosamtal', groupCall: 'Konferens', incomingCall: 'Inkommande samtal', incomingVideo: 'Inkommande videosamtal', accept: 'Svara', decline: 'Avvisa', endCall: 'Lägg på',
+  mute: 'Ljud av', unmute: 'Ljud på', camOff: 'Kamera av', camOn: 'Kamera på', calling: 'Ringer…', inCall: 'I samtal', callFail: 'Kunde inte starta samtalet. Kontrollera mikrofon/kamera och att kontakten är ansluten.',
+  pickMembers: 'Välj upp till 3 personer (video) – du är den fjärde', needLink: 'Kontakten måste vara ansluten', noCalls: 'Samtal kräver den installerade appen (APK).',
+  mediaTest: 'Röst- och videotest', mediaTestSub: 'Kontrollera mikrofon och kamera', micLevel: 'Mikrofonnivå – prata nu', startTest: 'Starta test', stopTest: 'Stoppa test', testCam: 'Testa kamera', testOk: 'Fungerar', testNoMedia: 'Hittade ingen mikrofon/kamera eller saknar tillstånd.', testHint: 'Spela in 3 sekunder och lyssna på dig själv',
+  manualTitle: 'Anslut utan server', manualSub: 'Byt koder i stället för att använda en signalserver', manualHelp: 'Båda behöver vara online samtidigt. En av er skapar en förfrågan och skickar den (SMS, e-post eller QR). Den andra svarar med en kod som skickas tillbaka.',
+  makeRequest: 'Jag börjar: skapa förfrågan', haveRequest: 'Jag fick en förfrågan', yourRequest: 'Din förfrågan – skicka till kontakten', yourAnswer: 'Ditt svar – skicka tillbaka', pasteRequest: 'Klistra in förfrågan', pasteAnswerHere: 'Klistra in svaret du fick', makeAnswer: 'Skapa svar', finish: 'Anslut', shareCode: 'Dela kod', pairFailed: 'Koden passade inte. Börja om.', pairWaiting: 'Väntar på anslutning…', pairDone: 'Ansluten!',
+  storage: 'Lagring', storageSub: 'Rensa chattar, filer och cache', clearAllFiles: 'Radera alla sparade filer', clearContactFiles: 'Radera filer för en kontakt', clearCache: 'Rensa cache', cacheCleared: 'Cache rensad', used: 'Används', pickContact: 'Välj kontakt', clearChatFor: 'Rensa chatt',
+  installUpdate: 'Ladda ner och installera', downloading: 'Laddar ner…', installAllow: 'Android frågar om du vill tillåta installation från Direct. Tillåt och försök igen.', installFail: 'Kunde inte installera. Öppna nedladdningssidan i stället.', fsTitle: 'Forward secrecy', fsBody: 'Varje uppkoppling använder nya engångsnycklar. Stjäls dina nycklar senare går gamla samtal inte att läsa.',
 };
 const en: typeof sv = {
   appName: 'Direct',
@@ -88,6 +100,18 @@ const en: typeof sv = {
   sigOnline: 'Connected to signal server', sigConnecting: 'Connecting to signal server…', sigOffline: 'Not connected to signal server',
   noServer: 'No signal server set. Go to Settings, Connection.', rtcMissing: 'Direct connection needs the installed app (APK), not Expo Go.',
   update: 'Updates', updateSub: 'Checks GitHub for a new version', checkUpdate: 'Check for updates', upToDate: 'You have the latest version', newVersion: 'New version', download: 'Download', noRelease: 'No release found.', checking: 'Checking…', updateFail: 'Could not check for updates.',
+
+  attach: 'Attach file', pickFile: 'Choose file', recVoice: 'Record voice message', recVideo: 'Record video message', stopSend: 'Stop and send', cancelRec: 'Cancel', recording: 'Recording…',
+  tooBig: 'The file is too large (max 50 MB).', micDenied: 'Microphone is not allowed.', play: 'Play', pause: 'Pause', openFile: 'Open / save', sendingPct: 'Sending',
+  voiceMsg: 'Voice message', videoMsg: 'Video message', fileMsg: 'File',
+  call: 'Call', videoCall: 'Video call', groupCall: 'Conference', incomingCall: 'Incoming call', incomingVideo: 'Incoming video call', accept: 'Answer', decline: 'Decline', endCall: 'Hang up',
+  mute: 'Mute', unmute: 'Unmute', camOff: 'Camera off', camOn: 'Camera on', calling: 'Calling…', inCall: 'In call', callFail: 'Could not start the call. Check microphone/camera and that the contact is connected.',
+  pickMembers: 'Pick up to 3 people (video) – you are the fourth', needLink: 'The contact must be connected', noCalls: 'Calls need the installed app (APK).',
+  mediaTest: 'Voice and video test', mediaTestSub: 'Check microphone and camera', micLevel: 'Microphone level – speak now', startTest: 'Start test', stopTest: 'Stop test', testCam: 'Test camera', testOk: 'Works', testNoMedia: 'No microphone/camera found, or permission is missing.', testHint: 'Record 3 seconds and listen to yourself',
+  manualTitle: 'Connect without a server', manualSub: 'Swap codes instead of using a signaling server', manualHelp: 'Both must be online at the same time. One of you creates a request and sends it (SMS, e-mail or QR). The other replies with a code that is sent back.',
+  makeRequest: 'I start: create request', haveRequest: 'I received a request', yourRequest: 'Your request – send it to the contact', yourAnswer: 'Your answer – send it back', pasteRequest: 'Paste the request', pasteAnswerHere: 'Paste the answer you received', makeAnswer: 'Create answer', finish: 'Connect', shareCode: 'Share code', pairFailed: 'The code did not match. Start over.', pairWaiting: 'Waiting for connection…', pairDone: 'Connected!',
+  storage: 'Storage', storageSub: 'Clear chats, files and cache', clearAllFiles: 'Delete all saved files', clearContactFiles: 'Delete files for one contact', clearCache: 'Clear cache', cacheCleared: 'Cache cleared', used: 'Used', pickContact: 'Choose contact', clearChatFor: 'Clear chat',
+  installUpdate: 'Download and install', downloading: 'Downloading…', installAllow: 'Android asks whether to allow installs from Direct. Allow it and try again.', installFail: 'Could not install. Open the download page instead.', fsTitle: 'Forward secrecy', fsBody: 'Every connection uses fresh one-time keys. If your keys are stolen later, past conversations stay unreadable.',
 };
 export const dict = { sv, en };
 export type Strings = typeof sv;

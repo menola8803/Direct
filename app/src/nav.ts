@@ -3,6 +3,10 @@ export type Route =
   | { name: 'chat'; id: string }
   | { name: 'verify'; id: string }
   | { name: 'mycode' }
+  | { name: 'pair'; id: string }
+  | { name: 'conference' }
+  | { name: 'mediatest' }
+  | { name: 'storage' }
   | { name: 'add' }
   | { name: 'connection' }
   | { name: 'update' }

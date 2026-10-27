@@ -21,9 +21,16 @@ import AddContact from './src/screens/AddContact';
 import Verify from './src/screens/Verify';
 import Connection from './src/screens/Connection';
 import Update from './src/screens/Update';
+import ManualPair from './src/screens/ManualPair';
+import Conference from './src/screens/Conference';
+import MediaTest from './src/screens/MediaTest';
+import Storage from './src/screens/Storage';
+import CallScreen from './src/screens/CallScreen';
+import { useNet } from './src/net/net';
 
 function Root() {
   const { ready, identity, theme } = useApp();
+  const { call } = useNet();
   const [stack, setStack] = useState<Route[]>([{ name: 'tabs' }]);
   const [tab, setTab] = useState<'chats' | 'contacts' | 'settings'>('chats');
   const push = useCallback((r: Route) => setStack(s => [...s, r]), []);
@@ -39,11 +46,16 @@ function Root() {
 
   if (!ready) return <View style={{ flex: 1, backgroundColor: theme.bg }} />;
   if (!identity) return <Welcome />;
+  if (call.status !== 'idle') return <CallScreen />;
 
   const r = stack[stack.length - 1];
   switch (r.name) {
-    case 'chat': return <Screen><Chat id={r.id} onBack={pop} onVerify={() => push({ name: 'verify', id: r.id })} /></Screen>;
+    case 'chat': return <Screen><Chat id={r.id} onBack={pop} onVerify={() => push({ name: 'verify', id: r.id })} onPair={() => push({ name: 'pair', id: r.id })} /></Screen>;
     case 'verify': return <Verify id={r.id} onBack={pop} onRemoved={() => setStack([{ name: 'tabs' }])} />;
+    case 'pair': return <ManualPair id={r.id} onBack={pop} />;
+    case 'conference': return <Conference onBack={pop} />;
+    case 'mediatest': return <MediaTest onBack={pop} />;
+    case 'storage': return <Storage onBack={pop} />;
     case 'mycode': return <MyCode onBack={pop} />;
     case 'add': return <AddContact onBack={pop} onAdded={id => setStack(s => [...s.slice(0, -1), { name: 'chat', id }])} />;
     case 'connection': return <Connection onBack={pop} />;

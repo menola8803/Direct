@@ -49,3 +49,12 @@
 - Krypterade meddelanden direkt mellan telefoner över WebRTC; litet signalrelä i `server/` (lagrar inget).
 - Utkorg med status (väntar/skickat/levererat), blockering, anslutningsinställningar (signalserver, TURN, dölj IP), uppdateringssök via GitHub Releases.
 - Testat: krypto, relä och riktig WebRTC i Node, samt Android-bundle. EJ testat på riktig telefon ännu. Samtal, röst/video, filer och APK-installation kommer i nästa steg.
+
+## 0.8.0 – Utan server, samtal, filer, forward secrecy
+- **Anslut utan server:** manuell parkoppling med krypterade koder (QR/text). Signalservern är valfri.
+- **Forward secrecy:** nya engångsnycklar för varje uppkoppling + hash-kedja per meddelande (`core/session.ts`).
+- **Samtal och konferens:** röst/video 1:1 och upp till 4 personer med video (8 med enbart röst), mesh över WebRTC. Förhandlas över den krypterade datakanalen.
+- **Röst- och videomeddelanden, filer:** inspelning i appen, uppdelning i bitar (max 50 MB), sparas privat per kontakt, rensning per kontakt/alla/cache.
+- **Röst- och videotest** under Inställningar (mikrofonnivå, kamera, WebRTC-mediastack).
+- **Uppdatering i appen:** laddar ner APK från senaste GitHub-release och startar Androids installerare.
+- Testat i Node: session/ratchet, serverlös koppling, mediaspår, filöverföring (300 kB), samtalslogik (1:1, konferens, upptagen, tidsgräns). **Ej testat på riktig telefon.**

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Direct",
     "slug": "direct",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -29,7 +29,9 @@
         "CAMERA",
         "RECORD_AUDIO",
         "MODIFY_AUDIO_SETTINGS",
-        "INTERNET"
+        "INTERNET",
+        "REQUEST_INSTALL_PACKAGES",
+        "VIBRATE"
       ]
     },
     "web": {
@@ -49,7 +51,14 @@
         }
       ],
       "expo-secure-store",
-      "@config-plugins/react-native-webrtc"
+      "@config-plugins/react-native-webrtc",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Direct använder mikrofonen för röstmeddelanden och samtal."
+        }
+      ],
+      "expo-video"
     ]
   }
 }

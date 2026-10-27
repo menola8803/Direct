@@ -1,13 +1,13 @@
 # Direct
 
-**Version 0.6.0** (se `CHANGELOG.md`)
+**Version 0.7.0** (se `CHANGELOG.md`)
 
 Chattapp utan server emellan. Meddelanden, samtal, röst- och videomeddelanden samt filer går direkt mellan telefonerna, krypterade. Gjord för människors integritet.
 
 Det här repot innehåller **skärmdesignen** (`design/`) och en **körbar app** (`app/`, Expo/React Native) med både teman.
 
 ## Appen (`app/`)
-Expo SDK 58, React Native 0.88, TypeScript. Funktioner i v0.6.0:
+Expo SDK 58, React Native 0.88, TypeScript. Funktioner i v0.7.0:
 - Välkomst, Chattar, Kontakter (läser telefonboken lokalt med tillstånd, sök, håll in för att blockera, bjud in via SMS), Chatt, Inställningar.
 - **Temaval Beige eller USB** med förhandsbild, sparas på telefonen.
 - Språk: telefonens språk, svenska eller engelska.

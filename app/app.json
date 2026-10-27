@@ -2,7 +2,7 @@
   "expo": {
     "name": "Direct",
     "slug": "direct",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -10,7 +10,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "se.sncab.direct",
       "infoPlist": {
-        "NSContactsUsageDescription": "Direct matchar dina kontakter lokalt på telefonen. Inget laddas upp."
+        "NSContactsUsageDescription": "Direct matchar dina kontakter lokalt på telefonen. Inget laddas upp.",
+        "NSCameraUsageDescription": "Direct använder kameran för att skanna en väns kod och för videosamtal.",
+        "NSMicrophoneUsageDescription": "Direct använder mikrofonen för samtal och röstmeddelanden."
       }
     },
     "android": {
@@ -23,7 +25,11 @@
       "predictiveBackGestureEnabled": false,
       "package": "se.sncab.direct",
       "permissions": [
-        "READ_CONTACTS"
+        "READ_CONTACTS",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "INTERNET"
       ]
     },
     "web": {
@@ -35,7 +41,15 @@
         {
           "contactsPermission": "Direct matchar dina kontakter lokalt på telefonen. Inget laddas upp."
         }
-      ]
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Direct använder kameran för att skanna en väns kod."
+        }
+      ],
+      "expo-secure-store",
+      "@config-plugins/react-native-webrtc"
     ]
   }
 }

@@ -43,3 +43,9 @@
 
 ## 0.1.0
 - Första version: 13 skärmar (chatt, röst, video, filer, lagring, integritet), README och arkitekturförslag.
+
+## 0.7.0 – Riktig P2P-chatt (första steget)
+- Riktig identitet (NaCl-nycklar i säker lagring), kontakter via QR/kod, säkerhetskod för verifiering.
+- Krypterade meddelanden direkt mellan telefoner över WebRTC; litet signalrelä i `server/` (lagrar inget).
+- Utkorg med status (väntar/skickat/levererat), blockering, anslutningsinställningar (signalserver, TURN, dölj IP), uppdateringssök via GitHub Releases.
+- Testat: krypto, relä och riktig WebRTC i Node, samt Android-bundle. EJ testat på riktig telefon ännu. Samtal, röst/video, filer och APK-installation kommer i nästa steg.

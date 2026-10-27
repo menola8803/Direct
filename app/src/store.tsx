@@ -1,68 +1,90 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { getLocales } from 'expo-localization';
 import { Theme, ThemeName, themes } from './theme';
 import { dict, Lang, LangChoice, Strings } from './i18n';
+import { Contact, Identity, newIdentity } from './core/crypto';
+import { MsgStatus } from './core/protocol';
 
-export type Msg = { id: string; mine: boolean; text: string; at: number };
-export type Profile = { phone: string; createdAt: number };
-export type Person = { id: string; name: string; phone?: string; demo?: boolean };
+export type Msg = { id: string; mine: boolean; text: string; at: number; status?: MsgStatus };
+// Kontakt från telefonboken (för inbjudan via SMS). Har inga nycklar.
+export type Person = { id: string; name: string; phone?: string };
 
 type Saved = {
-  themeName: ThemeName; langChoice: LangChoice; profile: Profile | null;
-  blocked: Record<string, string>; messages: Record<string, Msg[]>;
+  themeName: ThemeName; langChoice: LangChoice; name: string;
+  contacts: Record<string, Contact>; blocked: Record<string, string>; messages: Record<string, Msg[]>;
+  signalUrl: string; turnUrl: string; turnUser: string; turnCred: string; hideIp: boolean;
 };
-const KEY = 'direct.state.v1';
-const empty: Saved = { themeName: 'beige', langChoice: 'system', profile: null, blocked: {}, messages: {} };
+const KEY = 'direct.state.v2';
+const ID_KEY = 'direct.identity.v1';
+const empty: Saved = {
+  themeName: 'beige', langChoice: 'system', name: '', contacts: {}, blocked: {}, messages: {},
+  signalUrl: '', turnUrl: '', turnUser: '', turnCred: '', hideIp: false,
+};
 
 type Ctx = Saved & {
-  ready: boolean; theme: Theme; t: Strings; lang: Lang;
+  ready: boolean; identity: Identity | null; theme: Theme; t: Strings; lang: Lang;
   setTheme: (n: ThemeName) => void; setLang: (l: LangChoice) => void;
-  createProfile: (phone: string) => void;
-  send: (p: Person, text: string) => void;
-  block: (p: Person) => void; unblock: (id: string) => void; clearChats: () => void;
+  createIdentity: (name: string) => Promise<void>;
+  addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
+  addMessage: (cid: string, m: Msg) => boolean;
+  setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'turnUrl' | 'turnUser' | 'turnCred' | 'hideIp'>>) => void;
+  block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
 export const useApp = () => useContext(C);
 
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [s, setS] = useState<Saved>(empty);
+  const [identity, setIdentity] = useState<Identity | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(KEY)
-      .then(v => { if (v) setS({ ...empty, ...JSON.parse(v) }); })
-      .catch(() => {})
-      .finally(() => setReady(true));
+    (async () => {
+      try { const v = await AsyncStorage.getItem(KEY); if (v) setS({ ...empty, ...JSON.parse(v) }); } catch {}
+      try { const v = await SecureStore.getItemAsync(ID_KEY); if (v) setIdentity(JSON.parse(v)); } catch {}
+      setReady(true);
+    })();
   }, []);
   useEffect(() => { if (ready) AsyncStorage.setItem(KEY, JSON.stringify(s)).catch(() => {}); }, [s, ready]);
 
   const sys: Lang = getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en';
   const lang: Lang = s.langChoice === 'system' ? sys : s.langChoice;
 
-  const send = useCallback((p: Person, text: string) => {
-    const mine: Msg = { id: uid(), mine: true, text, at: Date.now() };
-    setS(o => ({ ...o, messages: { ...o.messages, [p.id]: [...(o.messages[p.id] ?? []), mine] } }));
-    if (p.demo) {
-      setTimeout(() => {
-        const reply: Msg = { id: uid(), mine: false, text: dict[lang].demoReply, at: Date.now() };
-        setS(o => ({ ...o, messages: { ...o.messages, [p.id]: [...(o.messages[p.id] ?? []), reply] } }));
-      }, 700);
-    }
-  }, [lang]);
+  const addMessage = useCallback((cid: string, m: Msg) => {
+    let added = true;
+    setS(o => {
+      const list = o.messages[cid] ?? [];
+      if (list.some(x => x.id === m.id)) { added = false; return o; }
+      return { ...o, messages: { ...o.messages, [cid]: [...list, m] } };
+    });
+    return added;
+  }, []);
 
   const value = useMemo<Ctx>(() => ({
-    ...s, ready, lang, theme: themes[s.themeName], t: dict[lang],
+    ...s, ready, identity, lang, theme: themes[s.themeName], t: dict[lang],
     setTheme: themeName => setS(o => ({ ...o, themeName })),
     setLang: langChoice => setS(o => ({ ...o, langChoice })),
-    createProfile: phone => setS(o => ({ ...o, profile: { phone, createdAt: Date.now() } })),
-    send,
-    block: p => setS(o => ({ ...o, blocked: { ...o.blocked, [p.id]: p.name } })),
+    createIdentity: async name => {
+      const id = newIdentity();
+      await SecureStore.setItemAsync(ID_KEY, JSON.stringify(id));
+      setIdentity(id); setS(o => ({ ...o, name: name.trim() }));
+    },
+    addContact: c => setS(o => ({ ...o, contacts: { ...o.contacts, [c.id]: o.contacts[c.id] ?? c } })),
+    removeContact: id => setS(o => { const c = { ...o.contacts }; delete c[id]; const m = { ...o.messages }; delete m[id]; return { ...o, contacts: c, messages: m }; }),
+    setVerified: (id, v) => setS(o => (o.contacts[id] ? { ...o, contacts: { ...o.contacts, [id]: { ...o.contacts[id], verified: v } } } : o)),
+    addMessage,
+    setStatus: (cid, msgId, st) => setS(o => {
+      const list = o.messages[cid]; if (!list) return o;
+      return { ...o, messages: { ...o.messages, [cid]: list.map(m => (m.id === msgId && m.status !== 'delivered' ? { ...m, status: st } : m)) } };
+    }),
+    setSettings: p => setS(o => ({ ...o, ...p })),
+    block: (id, name) => setS(o => ({ ...o, blocked: { ...o.blocked, [id]: name } })),
     unblock: id => setS(o => { const b = { ...o.blocked }; delete b[id]; return { ...o, blocked: b }; }),
     clearChats: () => setS(o => ({ ...o, messages: {} })),
-  }), [s, ready, lang, send]);
+  }), [s, ready, identity, lang, addMessage]);
 
   return <C.Provider value={value}>{children}</C.Provider>;
 }

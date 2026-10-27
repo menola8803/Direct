@@ -5,8 +5,8 @@ import { Btn, Card, H1, Screen } from '../ui';
 import { headingFont } from '../theme';
 
 export default function Welcome() {
-  const { theme, t, createProfile } = useApp();
-  const [phone, setPhone] = useState('');
+  const { theme, t, createIdentity } = useApp();
+  const [name, setName] = useState('');
   return (
     <Screen>
       <KeyboardAvoidingView style={{ flex: 1, gap: 14 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -23,12 +23,12 @@ export default function Welcome() {
           <Text style={{ fontSize: 15, lineHeight: 23, color: theme.muted }}>{t.welcomeBody}</Text>
         </View>
         <Card>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: theme.ink }}>{t.yourNumber}</Text>
-          <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="+46 70 123 45 67" placeholderTextColor={theme.muted}
+          <Text style={{ fontSize: 14, fontWeight: '600', color: theme.ink }}>{t.yourName}</Text>
+          <TextInput value={name} onChangeText={setName} placeholder={t.namePh} placeholderTextColor={theme.muted}
             style={{ height: 52, borderWidth: 1, borderColor: theme.line, borderRadius: 14, paddingHorizontal: 16, fontSize: 17, color: theme.ink, backgroundColor: theme.bg }} />
-          <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{t.numberHint}</Text>
+          <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{t.nameHint}</Text>
         </Card>
-        <Btn title={t.create} onPress={() => createProfile(phone.trim())} />
+        <Btn title={t.create} onPress={() => name.trim() && createIdentity(name)} />
       </KeyboardAvoidingView>
     </Screen>
   );

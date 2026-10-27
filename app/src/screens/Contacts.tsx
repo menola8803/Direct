@@ -2,13 +2,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Linking, Pressable, Text, TextInput, View } from 'react-native';
 import * as Contacts from 'expo-contacts';
 import { Person, useApp } from '../store';
+import { useNet } from '../net/net';
+import { encodeCard } from '../core/crypto';
+import { Route } from '../nav';
 import { Avatar, Btn, H1, Sub, SmallBtn } from '../ui';
 
-export const DEMO: Person = { id: 'demo-anna', name: 'Anna Lindqvist', demo: true };
-
-export default function ContactsScreen({ onOpen }: { onOpen: (p: Person) => void }) {
-  const { theme, t, blocked, block } = useApp();
-  const [list, setList] = useState<Person[]>([]);
+export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) => void; go: (r: Route) => void }) {
+  const { theme, t, contacts, blocked, block, identity, name } = useApp();
+  const { link } = useNet();
+  const [book, setBook] = useState<Person[]>([]);
   const [denied, setDenied] = useState(false);
   const [q, setQ] = useState('');
 
@@ -17,42 +19,70 @@ export default function ContactsScreen({ onOpen }: { onOpen: (p: Person) => void
     if (r.status !== 'granted') { setDenied(true); return; }
     setDenied(false);
     const { data } = await Contacts.getContactsAsync({ fields: [Contacts.Fields.PhoneNumbers], sort: Contacts.SortTypes.FirstName });
-    setList(data.filter(c => c.name && c.phoneNumbers?.length).map(c => ({ id: c.id ?? c.name!, name: c.name!, phone: c.phoneNumbers![0].number })));
+    setBook(data.filter(c => c.name && c.phoneNumbers?.length).map(c => ({ id: c.id ?? c.name!, name: c.name!, phone: c.phoneNumbers![0].number })));
   }, []);
   useEffect(() => { load().catch(() => setDenied(true)); }, [load]);
 
-  const shown = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    return [DEMO, ...list].filter(p => !blocked[p.id] && (!s || p.name.toLowerCase().includes(s)));
-  }, [list, q, blocked]);
+  const s = q.trim().toLowerCase();
+  const mine = useMemo(() => Object.values(contacts).filter(c => !blocked[c.id] && (!s || c.name.toLowerCase().includes(s))).sort((a, b) => a.name.localeCompare(b.name)), [contacts, blocked, s]);
+  const others = useMemo(() => book.filter(p => !s || p.name.toLowerCase().includes(s)), [book, s]);
+  const data: ({ kind: 'h'; title: string } | { kind: 'c'; id: string } | { kind: 'p'; p: Person })[] = [
+    { kind: 'h', title: t.inApp },
+    ...mine.map(c => ({ kind: 'c' as const, id: c.id })),
+    ...(mine.length === 0 ? [] : []),
+    { kind: 'h', title: t.fromPhonebook },
+    ...others.map(p => ({ kind: 'p' as const, p })),
+  ];
 
-  const menu = (p: Person) => Alert.alert(p.name, undefined, [
-    { text: t.block, style: 'destructive', onPress: () => Alert.alert(t.blockTitle, t.blockBody, [{ text: t.cancel, style: 'cancel' }, { text: t.block, style: 'destructive', onPress: () => block(p) }]) },
+  const menu = (id: string) => Alert.alert(contacts[id].name, undefined, [
+    { text: t.block, style: 'destructive', onPress: () => Alert.alert(t.blockTitle, t.blockBody, [{ text: t.cancel, style: 'cancel' }, { text: t.block, style: 'destructive', onPress: () => block(id, contacts[id].name) }]) },
     { text: t.cancel, style: 'cancel' },
   ]);
-  const invite = (p: Person) => Linking.openURL(`sms:${p.phone ?? ''}?body=${encodeURIComponent(t.inviteText)}`).catch(() => {});
+  const invite = (p: Person) => {
+    const body = identity ? `${t.inviteText}\n\n${encodeCard(identity, name)}` : t.inviteText;
+    Linking.openURL(`sms:${p.phone ?? ''}?body=${encodeURIComponent(body)}`).catch(() => {});
+  };
 
   return (
     <View style={{ flex: 1, gap: 12 }}>
-      <View><H1>{t.contacts}</H1><Sub>{t.contactsSub}</Sub></View>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flex: 1 }}><H1>{t.contacts}</H1><Sub>{t.contactsSub}</Sub></View>
+        <SmallBtn title={t.myCode} onPress={() => go({ name: 'mycode' })} />
+        <View style={{ width: 8 }} />
+        <SmallBtn title={`+ ${t.add}`} tone="accent" onPress={() => go({ name: 'add' })} />
+      </View>
       <TextInput value={q} onChangeText={setQ} placeholder={t.search} placeholderTextColor={theme.muted}
         style={{ height: 48, borderRadius: 14, borderWidth: 1, borderColor: theme.line, backgroundColor: theme.card, paddingHorizontal: 16, fontSize: 15, color: theme.ink }} />
-      <Text style={{ fontSize: 12, color: theme.muted, paddingHorizontal: 4 }}>{t.hold}</Text>
       {denied ? (
         <View style={{ gap: 10 }}><Text style={{ color: theme.muted }}>{t.contactsDenied}</Text><Btn title={t.allowContacts} kind="secondary" onPress={() => load().catch(() => {})} /></View>
       ) : null}
-      <FlatList data={shown} keyExtractor={p => p.id} contentContainerStyle={{ gap: 4, paddingBottom: 8 }}
-        renderItem={({ item }) => (
-          <Pressable onPress={() => (item.demo ? onOpen(item) : invite(item))} onLongPress={() => menu(item)}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60 }}>
-            <Avatar name={item.name} ring={item.demo ? theme.good : theme.line} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16, fontWeight: '600', color: theme.ink }}>{item.name}</Text>
-              <Text style={{ fontSize: 13, color: theme.muted }}>{item.demo ? t.demoContact : item.phone}</Text>
+      <FlatList data={data} keyExtractor={(d, i) => (d.kind === 'h' ? 'h' + i : d.kind === 'c' ? d.id : 'p' + d.p.id)} contentContainerStyle={{ gap: 4, paddingBottom: 8 }}
+        renderItem={({ item }) => {
+          if (item.kind === 'h') return <Text style={{ fontSize: 12, fontWeight: '700', letterSpacing: 1, color: theme.muted, marginTop: 10, textTransform: 'uppercase' }}>{item.title}</Text>;
+          if (item.kind === 'c') {
+            const c = contacts[item.id];
+            return (
+              <Pressable onPress={() => onOpen(c.id)} onLongPress={() => menu(c.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60 }}>
+                <Avatar name={c.name} ring={link[c.id] === 'open' ? theme.good : theme.line} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: theme.ink }}>{c.name}</Text>
+                  <Text style={{ fontSize: 13, color: theme.muted }}>{link[c.id] === 'open' ? t.online : link[c.id] === 'connecting' ? t.connecting : t.offline}{c.verified ? ` · ${t.verified}` : ''}</Text>
+                </View>
+              </Pressable>
+            );
+          }
+          return (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60 }}>
+              <Avatar name={item.p.name} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: theme.ink }}>{item.p.name}</Text>
+                <Text style={{ fontSize: 13, color: theme.muted }}>{item.p.phone}</Text>
+              </View>
+              <SmallBtn title={t.invite} tone="accent" onPress={() => invite(item.p)} />
             </View>
-            {item.demo ? null : <SmallBtn title={t.invite} tone="accent" onPress={() => invite(item)} />}
-          </Pressable>
-        )} />
+          );
+        }} />
+      {mine.length === 0 ? <Text style={{ color: theme.muted, fontSize: 13 }}>{t.noContactsYet}</Text> : null}
     </View>
   );
 }

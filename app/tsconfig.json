@@ -1,1 +1,1 @@
-{"extends":"expo/tsconfig.base","compilerOptions":{"strict":true,"resolveJsonModule":true}}
+{"extends":"expo/tsconfig.base","compilerOptions":{"strict":true,"resolveJsonModule":true},"exclude":["test","node_modules"]}

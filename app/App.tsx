@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { BackHandler, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import './src/net/random';
 import { AppProvider, useApp } from './src/store';
+import { NetProvider } from './src/net/net';
 import { Route } from './src/nav';
 import { Screen, TabBar } from './src/ui';
 import Welcome from './src/screens/Welcome';
@@ -14,9 +16,14 @@ import ThemePicker from './src/screens/ThemePicker';
 import LanguagePicker from './src/screens/LanguagePicker';
 import Blocked from './src/screens/Blocked';
 import About from './src/screens/About';
+import MyCode from './src/screens/MyCode';
+import AddContact from './src/screens/AddContact';
+import Verify from './src/screens/Verify';
+import Connection from './src/screens/Connection';
+import Update from './src/screens/Update';
 
 function Root() {
-  const { ready, profile, theme } = useApp();
+  const { ready, identity, theme } = useApp();
   const [stack, setStack] = useState<Route[]>([{ name: 'tabs' }]);
   const [tab, setTab] = useState<'chats' | 'contacts' | 'settings'>('chats');
   const push = useCallback((r: Route) => setStack(s => [...s, r]), []);
@@ -31,11 +38,16 @@ function Root() {
   }, [stack.length, pop]);
 
   if (!ready) return <View style={{ flex: 1, backgroundColor: theme.bg }} />;
-  if (!profile) return <Welcome />;
+  if (!identity) return <Welcome />;
 
   const r = stack[stack.length - 1];
   switch (r.name) {
-    case 'chat': return <Screen><Chat person={r.person} onBack={pop} /></Screen>;
+    case 'chat': return <Screen><Chat id={r.id} onBack={pop} onVerify={() => push({ name: 'verify', id: r.id })} /></Screen>;
+    case 'verify': return <Verify id={r.id} onBack={pop} onRemoved={() => setStack([{ name: 'tabs' }])} />;
+    case 'mycode': return <MyCode onBack={pop} />;
+    case 'add': return <AddContact onBack={pop} onAdded={id => setStack(s => [...s.slice(0, -1), { name: 'chat', id }])} />;
+    case 'connection': return <Connection onBack={pop} />;
+    case 'update': return <Update onBack={pop} />;
     case 'theme': return <ThemePicker onBack={pop} />;
     case 'language': return <LanguagePicker onBack={pop} />;
     case 'blocked': return <Blocked onBack={pop} />;
@@ -44,8 +56,8 @@ function Root() {
       return (
         <Screen>
           <View style={{ flex: 1 }}>
-            {tab === 'chats' && <Chats onOpen={p => push({ name: 'chat', person: p })} />}
-            {tab === 'contacts' && <ContactsScreen onOpen={p => push({ name: 'chat', person: p })} />}
+            {tab === 'chats' && <Chats onOpen={id => push({ name: 'chat', id })} />}
+            {tab === 'contacts' && <ContactsScreen onOpen={id => push({ name: 'chat', id })} go={push} />}
             {tab === 'settings' && <Settings go={push} />}
           </View>
           <TabBar tab={tab} setTab={setTab} />
@@ -62,7 +74,7 @@ function Themed() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppProvider><Themed /></AppProvider>
+      <AppProvider><NetProvider><Themed /></NetProvider></AppProvider>
     </SafeAreaProvider>
   );
 }

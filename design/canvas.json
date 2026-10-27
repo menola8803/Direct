@@ -1,0 +1,145 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "h": 844,
+      "title": "1 Välkomst",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Kontakter.dc.html": {
+      "h": 844,
+      "title": "2 Kontakter",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Chatt.dc.html": {
+      "h": 844,
+      "title": "3 Chatt",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Dela.dc.html": {
+      "h": 844,
+      "title": "4 Dela med kontakt",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Rost.dc.html": {
+      "h": 844,
+      "title": "5 Röstmeddelande",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "Videomeddelande.dc.html": {
+      "h": 844,
+      "title": "6 Videomeddelande",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "Sakerhetskod.dc.html": {
+      "h": 844,
+      "title": "7 Verifiera kontakt",
+      "w": 390,
+      "x": 0,
+      "y": 1200
+    },
+    "Videokonferens.dc.html": {
+      "h": 844,
+      "title": "8 Videokonferens",
+      "w": 390,
+      "x": 470,
+      "y": 1200
+    },
+    "Samtal.dc.html": {
+      "h": 844,
+      "title": "9 Pågående konferens",
+      "w": 390,
+      "x": 940,
+      "y": 1200
+    },
+    "Installningar.dc.html": {
+      "h": 844,
+      "title": "10 Inställningar",
+      "w": 390,
+      "x": 0,
+      "y": 2400
+    },
+    "Lagring.dc.html": {
+      "h": 844,
+      "title": "11 Lagring",
+      "w": 390,
+      "x": 470,
+      "y": 2400
+    },
+    "Rensa.dc.html": {
+      "h": 844,
+      "title": "12 Rensa allt",
+      "w": 390,
+      "x": 940,
+      "y": 2400
+    },
+    "Om.dc.html": {
+      "h": 844,
+      "title": "13 Om Direct",
+      "w": 390,
+      "x": 1410,
+      "y": 2400
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-27T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t1": {
+      "kind": "title1",
+      "maxW": 2740,
+      "text": "Direct: skärmflöde",
+      "x": 0,
+      "y": -260
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 1330,
+      "text": "Samtal och verifiering",
+      "x": 0,
+      "y": 940
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 1800,
+      "text": "Filer, lagring och integritet",
+      "x": 0,
+      "y": 2140
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Kontakter.dc.html",
+    "Chatt.dc.html",
+    "Dela.dc.html",
+    "Rost.dc.html",
+    "Videomeddelande.dc.html",
+    "Sakerhetskod.dc.html",
+    "Videokonferens.dc.html",
+    "Samtal.dc.html",
+    "Installningar.dc.html",
+    "Lagring.dc.html",
+    "Rensa.dc.html",
+    "Om.dc.html"
+  ],
+  "pages": [],
+  "title": "Direct – skärmdesign"
+}

@@ -72,7 +72,7 @@ F["Main"]=("1 Välkomst",f'''<div style="display:flex;align-items:center;gap:10p
 <p style="margin:0;font-size:15px;line-height:1.55;color:{MUT}">Din identitet är en nyckel som skapas på din telefon. Kontakterna matchas lokalt och laddas aldrig upp.</p></div>
 <div style="flex:1"></div>
 {card(f'<label for="nr" style="font-size:14px;font-weight:600">Ditt telefonnummer</label><input id="nr" value="+46 70 123 45 67" style="box-sizing:border-box;height:52px;border:1px solid {LINE};border-radius:14px;padding:0 16px;font-size:17px;background:{BG};color:{INK};letter-spacing:.3px"><div style="font-size:13px;line-height:1.5;color:{MUT}">Numret används bara för att andra ska hitta dig. Det verifieras inte via SMS.</div>')}
-{btn("Skapa min nyckel","key")}''')
+{btn("Skapa min nyckel","key")}<div style="text-align:center;font-size:13px;color:{MUT}">Utvecklare: Claes Sundman SNC AB - 2026</div>''')
 # 2 Kontakter
 def crow(n,i,sub,right,ring=LINE): return f'<div style="display:flex;align-items:center;gap:12px">{av(i,44,ring)}<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">{n}</div><div style="font-size:13px;color:{MUT}">{sub}</div></div>{right}</div>'
 act=f'<div style="display:flex;gap:8px">{ghost("call","Ring")}{ghost("video","Video")}</div>'
@@ -190,7 +190,7 @@ F["Om"]=("16 Om Direct",f'''{hdr("Om Direct")}
 <div style="padding:4px 4px 0"><h1 style="{HF};margin:0;font-size:30px;line-height:1.12;letter-spacing:-0.6px">Gjord för människor, <span style="color:{ACC}">inte för data.</span></h1></div>
 {card(prin("lock","Direkt mellan telefoner","Meddelanden, samtal och filer går rakt till mottagaren, krypterade. Ingen läser med.")+prin("folder","Filerna är dina","Ljud, video och filer sparas krypterat i appen per kontakt. Ingen molnkopia. Du rensar själv.")+prin("key","Din nyckel är ditt konto","Ingen e-post, inget lösenord. Identiteten skapas och stannar på din telefon.")+prin("group","Kontakterna stannar hos dig","Telefonboken matchas lokalt. Inget laddas upp."),"",16)}
 {card(lab("Vi gör aldrig")+f'<div style="display:flex;gap:8px;flex-wrap:wrap">{chip("Reklam")}{chip("Spårning")}{chip("Datainsamling")}{chip("Försäljning av data")}</div><div style="font-size:12px;line-height:1.5;color:{MUT}">För att koppla upp och ringa används en notistjänst (Google/Apple) och vid behov en relay. De ser aldrig innehållet.</div>',"",10)}
-<div style="flex:1"></div>{btn("Förstått",None,"p")}''')
+<div style="flex:1"></div>{btn("Förstått",None,"p")}<div style="text-align:center;font-size:13px;color:{MUT}">Utvecklare: Claes Sundman SNC AB - 2026</div>''')
 
 # ---- Inställningar (ny), Språk, Uppdateringar ----
 def tog(on,l): return f'<button role="switch" aria-checked="{"true" if on else "false"}" aria-label="{l}" style="width:52px;height:32px;flex:none;border-radius:16px;border:none;background:{DK if on else "#CFC8B8"};display:flex;align-items:center;padding:3px;box-sizing:border-box;justify-content:{"flex-end" if on else "flex-start"}"><span style="width:26px;height:26px;border-radius:50%;background:{CR if on else "#fff"};display:block"></span></button>'

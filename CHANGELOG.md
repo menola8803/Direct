@@ -1,5 +1,9 @@
 # Ändringslogg
 
+## 0.4.1
+- Utvecklarrad ("Utvecklare: Claes Sundman SNC AB - 2026") på Välkomst och Om Direct.
+- README visar utvecklare.
+
 ## 0.4.0
 - Uppdateringar visar nu läget "Du har senaste versionen" (0.4.0, ingen uppdatering finns).
 - Läget "Ny version finns" ligger kvar som egen skärm (13b).

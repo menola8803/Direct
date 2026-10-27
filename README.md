@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.4.0** (se `CHANGELOG.md`)
+**Version 0.4.1** (se `CHANGELOG.md`)
 
 Chattapp utan server emellan. Meddelanden, samtal, röst- och videomeddelanden samt filer går direkt mellan telefonerna, krypterade. Gjord för människors integritet.
 
@@ -43,3 +43,6 @@ Se `docs/ARCHITECTURE.md`.
 
 ## Releaser
 Taggar `vX.Y.Z` skapar automatiskt en release med zip (se `.github/workflows/release.yml`). Äldre taggar kan läggas upp med `scripts/release-all.sh`.
+
+## Utvecklare
+Claes Sundman SNC AB - 2026

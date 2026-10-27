@@ -20,11 +20,12 @@ export function parseStun(text: string): string[] {
 
 export const stunOrDefault = (text: string) => { const l = parseStun(text); return l.length ? l : DEFAULT_STUN; };
 
-// True if the server returned a server-reflexive candidate (i.e. it answered).
-export function testStun(rtc: RtcApi, url: string, ms = 4000): Promise<boolean> {
+// Milliseconds until the server returned a server-reflexive candidate, or null if it did not answer.
+export function pingStun(rtc: RtcApi, url: string, ms = 4000): Promise<number | null> {
   return new Promise(resolve => {
     let pc: any;
-    const done = (ok: boolean) => { clearTimeout(t); try { pc?.close(); } catch {} resolve(ok); };
+    const t0 = Date.now();
+    const done = (ok: boolean) => { clearTimeout(t); try { pc?.close(); } catch {} resolve(ok ? Date.now() - t0 : null); };
     const t = setTimeout(() => done(false), ms);
     try {
       pc = new rtc.RTCPeerConnection({ iceServers: [{ urls: url }] });
@@ -34,3 +35,5 @@ export function testStun(rtc: RtcApi, url: string, ms = 4000): Promise<boolean> 
     } catch { done(false); }
   });
 }
+
+export const testStun = async (rtc: RtcApi, url: string, ms = 4000) => (await pingStun(rtc, url, ms)) !== null;

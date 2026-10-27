@@ -11,7 +11,7 @@
 The server only relays encrypted connection messages, never chat, files or calls.
 
 ## STUN servers
-A STUN server only tells a phone its public address; it never sees messages. Settings → Connection lets you enter your own list (one per line) and test each one on the phone. The empty default uses Cloudflare, Nextcloud and stunprotocol.org (not Google).
+A STUN server only tells a phone its public address; it never sees messages. Settings → STUN servers lets you paste addresses, test all of them on the phone (✓/✗ with response time), remove single servers or all that do not answer, and restore the defaults. The empty default uses Cloudflare, Nextcloud and stunprotocol.org (not Google).
 
 ## Limitations (honest list)
 - Direct connections do not always work over mobile networks / strict firewalls without a TURN server (optional, under Connection).

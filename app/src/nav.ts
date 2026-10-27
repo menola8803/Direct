@@ -9,6 +9,7 @@ export type Route =
   | { name: 'storage' }
   | { name: 'add' }
   | { name: 'connection' }
+  | { name: 'stun' }
   | { name: 'update' }
   | { name: 'theme' }
   | { name: 'language' }

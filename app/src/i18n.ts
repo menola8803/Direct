@@ -58,6 +58,8 @@ const sv = {
   installUpdate: 'Ladda ner och installera', downloading: 'Laddar ner…', installAllow: 'Android frågar om du vill tillåta installation från Direct. Tillåt och försök igen.', installFail: 'Kunde inte installera. Öppna nedladdningssidan i stället.', fsTitle: 'Forward secrecy', fsBody: 'Varje uppkoppling använder nya engångsnycklar. Stjäls dina nycklar senare går gamla samtal inte att läsa.',
 
   stunList: 'STUN-servrar (en per rad)', stunHelp: 'Hjälper telefonen att hitta sin publika adress. Tomt = standardlistan. Servern ser aldrig dina meddelanden.', testStun: 'Testa STUN-servrar',
+
+  stunTitle: 'STUN-servrar', stunSub: 'Lägg till, testa och ta bort', stunAddPh: 'Klistra in en eller flera adresser, till exempel stun.example.org:3478', stunDefaultsNote: 'Standardlistan används. Lägg till egna så ersätter de den.', stunNoAnswer: 'Svarar inte', stunEmpty: 'Listan är tom. Standardservrar används.', stunRemoveFailed: 'Ta bort de som inte svarar', stunReset: 'Återställ standardlistan',
 };
 const en: typeof sv = {
   appName: 'Direct',
@@ -115,6 +117,7 @@ const en: typeof sv = {
   storage: 'Storage', storageSub: 'Clear chats, files and cache', clearAllFiles: 'Delete all saved files', clearContactFiles: 'Delete files for one contact', clearCache: 'Clear cache', cacheCleared: 'Cache cleared', used: 'Used', pickContact: 'Choose contact', clearChatFor: 'Clear chat',
   installUpdate: 'Download and install', downloading: 'Downloading…', installAllow: 'Android asks whether to allow installs from Direct. Allow it and try again.', installFail: 'Could not install. Open the download page instead.', fsTitle: 'Forward secrecy', fsBody: 'Every connection uses fresh one-time keys. If your keys are stolen later, past conversations stay unreadable.',
   stunList: 'STUN servers (one per line)', stunHelp: 'Helps the phone find its public address. Empty = default list. The server never sees your messages.', testStun: 'Test STUN servers',
+  stunTitle: 'STUN servers', stunSub: 'Add, test and remove', stunAddPh: 'Paste one or more addresses, for example stun.example.org:3478', stunDefaultsNote: 'The default list is in use. Add your own and they replace it.', stunNoAnswer: 'No answer', stunEmpty: 'The list is empty. Default servers are used.', stunRemoveFailed: 'Remove the ones that do not answer', stunReset: 'Restore default list',
 };
 export const dict = { sv, en };
 export type Strings = typeof sv;

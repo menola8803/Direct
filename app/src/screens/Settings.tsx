@@ -14,6 +14,7 @@ export default function Settings({ go }: { go: (r: Route) => void }) {
         <Row title={t.theme} sub={t.themeSub} right={theme.label} onPress={() => go({ name: 'theme' })} />
         <Row title={t.language} sub={t.languageSub} right={langLabel} onPress={() => go({ name: 'language' })} />
         <Row title={t.connection} sub={t.connectionSub} onPress={() => go({ name: 'connection' })} />
+        <Row title={t.stunTitle} sub={t.stunSub} onPress={() => go({ name: 'stun' })} />
         <Row title={t.mediaTest} sub={t.mediaTestSub} onPress={() => go({ name: 'mediatest' })} />
         <Row title={t.groupCall} sub={t.pickMembers} onPress={() => go({ name: 'conference' })} />
         <Row title={t.storage} sub={t.storageSub} onPress={() => go({ name: 'storage' })} />

@@ -1,5 +1,9 @@
 # Ändringslogg
 
+## 0.4.3
+- Mindre ikoner längst ner: flikrad, chattens inmatningsrad, inspelningsknappar och samtalsknappar.
+- Kontakter: tydlig mörk knapp "Konferens" för att skapa videokonferens (upp till 4 med video).
+
 ## 0.4.2
 - Utvecklarraden visas bara på Om Direct (borttagen från Välkomst för att spara utrymme).
 

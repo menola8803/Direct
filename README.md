@@ -1,13 +1,13 @@
 # Direct
 
-**Version 0.3.0** (se `CHANGELOG.md`)
+**Version 0.4.0** (se `CHANGELOG.md`)
 
 Chattapp utan server emellan. Meddelanden, samtal, röst- och videomeddelanden samt filer går direkt mellan telefonerna, krypterade. Gjord för människors integritet.
 
 Det här repot innehåller **skärmdesignen** (mockups). Ingen app-kod ännu.
 
 ## Förhandsvisa designen
-Öppna `design/index.html` i en webbläsare. Med GitHub Pages (Settings → Pages → branch `main`, mapp `/design`) får du en publik länk.
+Öppna `design/index.html` (byggs med `python3 design/build_gallery.py <version>`) i en webbläsare. Med GitHub Pages (Settings → Pages → branch `main`, mapp `/design`) får du en publik länk.
 
 ## Skärmar
 1. Välkomst
@@ -22,7 +22,8 @@ Det här repot innehåller **skärmdesignen** (mockups). Ingen app-kod ännu.
 10. Inställningar
 11. Säkerhet (appslås, dölj IP, privat lagring, nyckelvarning)
 12. Språk (telefonens språk, svenska, English)
-13. Uppdateringar (GitHub Releases)
+13. Uppdateringar (aktuell version, ingen uppdatering finns)
+13b. Ny version finns (nedladdning och installation)
 14. Lagring
 15. Rensa allt (bekräftelse)
 16. Om Direct (integritet)

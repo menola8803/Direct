@@ -1,5 +1,11 @@
 # Ändringslogg
 
+## 0.4.0
+- Uppdateringar visar nu läget "Du har senaste versionen" (0.4.0, ingen uppdatering finns).
+- Läget "Ny version finns" ligger kvar som egen skärm (13b).
+- Inställningar visar "Aktuell" i stället för "Ny".
+- Galleriet byggs med `design/build_gallery.py`.
+
 ## 0.3.0
 - Ny skärm: Säkerhet (appslås, dölj IP, privat lagring, nyckelvarning).
 - Ny skärm: Nyckeln har ändrats (varning).

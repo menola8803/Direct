@@ -107,25 +107,32 @@
       "x": 1410,
       "y": 2400
     },
+    "UppdateringNy.dc.html": {
+      "h": 844,
+      "title": "13b Ny version finns",
+      "w": 390,
+      "x": 1880,
+      "y": 2400
+    },
     "Lagring.dc.html": {
       "h": 844,
       "title": "14 Lagring",
       "w": 390,
-      "x": 1880,
+      "x": 2350,
       "y": 2400
     },
     "Rensa.dc.html": {
       "h": 844,
       "title": "15 Rensa allt",
       "w": 390,
-      "x": 2350,
+      "x": 2820,
       "y": 2400
     },
     "Om.dc.html": {
       "h": 844,
       "title": "16 Om Direct",
       "w": 390,
-      "x": 2820,
+      "x": 3290,
       "y": 2400
     }
   },
@@ -154,7 +161,7 @@
     },
     "t3": {
       "kind": "title1",
-      "maxW": 3210,
+      "maxW": 3680,
       "text": "Inställningar, uppdatering, filer och integritet",
       "x": 0,
       "y": 2140
@@ -176,6 +183,7 @@
     "Sakerhet.dc.html",
     "Sprak.dc.html",
     "Uppdatering.dc.html",
+    "UppdateringNy.dc.html",
     "Lagring.dc.html",
     "Rensa.dc.html",
     "Om.dc.html"

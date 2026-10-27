@@ -16,3 +16,10 @@
 - Sökningen är valbar (automatisk sökning kan stängas av) eftersom GitHub ser användarens IP-adress.
 - iOS: uppdatering via App Store/TestFlight. Google Play: använd Plays egen in-app-uppdatering.
 - Förlorad signeringsnyckel betyder att befintliga installationer inte kan uppdateras. Säkerhetskopiera den.
+
+## Säkerhet (standardval)
+- Appslås (PIN/biometri), dolt innehåll i notiser och blockerade skärmdumpar är på.
+- "Dölj min IP-adress" tvingar trafik via TURN-relay (av som standard, något längre fördröjning).
+- Filer lagras krypterat i appens privata lagring. Kopia i Download/Direct är ett val.
+- Varning och paus av meddelanden när en kontakts nyckel byts.
+- Använd beprövade bibliotek (libsignal, libp2p, WebRTC). Låt en oberoende part granska innan lansering.

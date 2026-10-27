@@ -1,5 +1,12 @@
 # Ändringslogg
 
+## 0.3.0
+- Ny skärm: Säkerhet (appslås, dölj IP, privat lagring, nyckelvarning).
+- Ny skärm: Nyckeln har ändrats (varning).
+- Ny skärm: Applås (PIN).
+- Privat lagring är standard. Texter om Download/Direct justerade.
+- Release-automatik (GitHub Actions) och skript för äldre taggar.
+
 ## 0.2.0
 - Inställningar byggd om: språk, uppdateringar, rensa cache, rensa per kontakt, rensa allt.
 - Ny skärm: Språk (telefonens språk, svenska, English).

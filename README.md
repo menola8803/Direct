@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.2.0** (se `CHANGELOG.md`)
+**Version 0.3.0** (se `CHANGELOG.md`)
 
 Chattapp utan server emellan. Meddelanden, samtal, röst- och videomeddelanden samt filer går direkt mellan telefonerna, krypterade. Gjord för människors integritet.
 
@@ -19,12 +19,15 @@ Det här repot innehåller **skärmdesignen** (mockups). Ingen app-kod ännu.
 7. Verifiera kontakt (säkerhetskod)
 8. Ny videokonferens (max 4 med video)
 9. Pågående konferens
-10. Inställningar (språk, uppdateringar, rensa cache/per kontakt/allt)
-11. Språk (telefonens språk, svenska, English)
-12. Uppdateringar (GitHub Releases)
-13. Lagring
-14. Rensa allt (bekräftelse)
-15. Om Direct (integritet)
+10. Inställningar
+11. Säkerhet (appslås, dölj IP, privat lagring, nyckelvarning)
+12. Språk (telefonens språk, svenska, English)
+13. Uppdateringar (GitHub Releases)
+14. Lagring
+15. Rensa allt (bekräftelse)
+16. Om Direct (integritet)
+17. Nyckeln har ändrats (varning)
+18. Applås
 
 Källfilerna ligger i `design/screens/*.dc.html`. `design/gen.py` genererar dem (kör `python3 ../gen.py` i `design/screens`, med `canvas.json` i den mappen).
 
@@ -32,7 +35,10 @@ Källfilerna ligger i `design/screens/*.dc.html`. `design/gen.py` genererar dem 
 Ljus gråbeige med antracit och brons som accent. Fraunces (rubriker) och IBM Plex Sans (brödtext). Reserverat utrymme upptill för Androids statusfält.
 
 ## Filer på telefonen
-`Download/Direct/<kontakt>/Ljud` (.m4a) och `Download/Direct/<kontakt>/Video` (.mp4). Användaren kan rensa cache, enskilda kontakter eller allt.
+Som standard lagras filer krypterat i appens privata lagring. Om användaren slår på "Spara kopior i Download/Direct" sparas de även som `Download/Direct/<kontakt>/Ljud` (.m4a) och `.../Video` (.mp4). Användaren kan rensa cache, enskilda kontakter eller allt.
 
 ## Arkitektur (förslag)
 Se `docs/ARCHITECTURE.md`.
+
+## Releaser
+Taggar `vX.Y.Z` skapar automatiskt en release med zip (se `.github/workflows/release.yml`). Äldre taggar kan läggas upp med `scripts/release-all.sh`.

@@ -65,6 +65,20 @@
       "x": 940,
       "y": 1200
     },
+    "Nyckelbyte.dc.html": {
+      "h": 844,
+      "title": "17 Nyckeln har ändrats",
+      "w": 390,
+      "x": 1410,
+      "y": 1200
+    },
+    "Applas.dc.html": {
+      "h": 844,
+      "title": "18 Applås",
+      "w": 390,
+      "x": 1880,
+      "y": 1200
+    },
     "Installningar.dc.html": {
       "h": 844,
       "title": "10 Inställningar",
@@ -72,39 +86,46 @@
       "x": 0,
       "y": 2400
     },
-    "Sprak.dc.html": {
+    "Sakerhet.dc.html": {
       "h": 844,
-      "title": "11 Språk",
+      "title": "11 Säkerhet",
       "w": 390,
       "x": 470,
       "y": 2400
     },
-    "Uppdatering.dc.html": {
+    "Sprak.dc.html": {
       "h": 844,
-      "title": "12 Uppdateringar",
+      "title": "12 Språk",
       "w": 390,
       "x": 940,
       "y": 2400
     },
-    "Lagring.dc.html": {
+    "Uppdatering.dc.html": {
       "h": 844,
-      "title": "13 Lagring",
+      "title": "13 Uppdateringar",
       "w": 390,
       "x": 1410,
       "y": 2400
     },
-    "Rensa.dc.html": {
+    "Lagring.dc.html": {
       "h": 844,
-      "title": "14 Rensa allt",
+      "title": "14 Lagring",
       "w": 390,
       "x": 1880,
       "y": 2400
     },
-    "Om.dc.html": {
+    "Rensa.dc.html": {
       "h": 844,
-      "title": "15 Om Direct",
+      "title": "15 Rensa allt",
       "w": 390,
       "x": 2350,
+      "y": 2400
+    },
+    "Om.dc.html": {
+      "h": 844,
+      "title": "16 Om Direct",
+      "w": 390,
+      "x": 2820,
       "y": 2400
     }
   },
@@ -126,14 +147,14 @@
     },
     "t2": {
       "kind": "title1",
-      "maxW": 1330,
-      "text": "Samtal och verifiering",
+      "maxW": 2270,
+      "text": "Samtal, verifiering och lås",
       "x": 0,
       "y": 940
     },
     "t3": {
       "kind": "title1",
-      "maxW": 2740,
+      "maxW": 3210,
       "text": "Inställningar, uppdatering, filer och integritet",
       "x": 0,
       "y": 2140
@@ -149,7 +170,10 @@
     "Sakerhetskod.dc.html",
     "Videokonferens.dc.html",
     "Samtal.dc.html",
+    "Nyckelbyte.dc.html",
+    "Applas.dc.html",
     "Installningar.dc.html",
+    "Sakerhet.dc.html",
     "Sprak.dc.html",
     "Uppdatering.dc.html",
     "Lagring.dc.html",

@@ -16,6 +16,8 @@ Expo SDK 58, React Native 0.88, TypeScript. Funktioner i v0.6.0:
 
 Ännu **inte** byggt: riktig kommunikation mellan telefoner (P2P/WebRTC), kryptering, samtal, röst-/videomeddelanden, filer och uppdatering via GitHub Releases. Chatten är en lokal demo med en demo-kontakt. Se `docs/ARCHITECTURE.md` för planen.
 
+Riktig APK att installera på Android (utan Expo Go): se `app/README.md`.
+
 Köra: `cd app && npm install && npx expo start`, och öppna med Expo Go på telefonen. Typkontroll: `npx tsc --noEmit`.
 
 

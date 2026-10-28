@@ -9,6 +9,7 @@ import { dict, Lang, LangChoice, Strings } from './i18n';
 import { Contact, Identity, newIdentity } from './core/crypto';
 import { FileKind, MsgStatus } from './core/protocol';
 import { DEFAULT_RETENTION, cutoffFor, pruneMessages } from './core/retention';
+import { keyFromText, keyToText, makeSaver, newDataKey, openStored, sealText } from './core/vault';
 import { deleteStored, probePublic, sweepOldFiles, wipeAllFiles } from './files';
 
 export type Attach = { name: string; mime: string; size: number; kind: FileKind; uri: string; dur?: number };
@@ -25,7 +26,9 @@ type Saved = {
   storagePrompted: boolean; // the question about the Download/Direct folder has been asked
   orphanAsked: boolean; // the question about files left by an earlier install has been asked
 };
-const KEY = 'direct.state.v2';
+const OLD_KEY = 'direct.state.v2'; // before 0.13.0: the state as plain text
+const KEY = 'direct.state.v3'; // from 0.13.0: the state sealed with the data key
+const DATA_KEY = 'direct.datakey.v1'; // the data key, in the phone's secure storage
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
   themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
@@ -54,21 +57,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [publicStorage, setPublicStorage] = useState(false);
   const sRef = useRef(s); sRef.current = s;
 
+  // The saved state is sealed with a data key that only lives in the phone's secure storage (see core/vault.ts).
+  const keyRef = useRef<Uint8Array | null>(null);
+  const canSave = useRef(false); // false when storage could not be read safely: then nothing is overwritten
+  const legacyLeft = useRef(false); // the old plain-text copy is deleted once the sealed one is written
+  const [saver] = useState(() => makeSaver(async text => {
+    const k = keyRef.current;
+    if (!canSave.current || !k) return;
+    await AsyncStorage.setItem(KEY, sealText(k, text));
+    if (legacyLeft.current) { legacyLeft.current = false; try { await AsyncStorage.removeItem(OLD_KEY); } catch { legacyLeft.current = true; } }
+  }));
+
   useEffect(() => {
     (async () => {
-      try {
-        const v = await AsyncStorage.getItem(KEY);
-        if (v) {
-          const saved = migrateSaved(JSON.parse(v)); // settings from older versions (theme name, single TURN server)
-          if (!themes[saved.themeName as ThemeName]) saved.themeName = empty.themeName;
-          setS({ ...empty, ...saved });
-        }
-      } catch {}
+      let sealed: string | null = null, legacy: string | null = null, key: Uint8Array | null = null, safe = true;
+      try { sealed = await AsyncStorage.getItem(KEY); legacy = await AsyncStorage.getItem(OLD_KEY); } catch { safe = false; }
+      try { key = keyFromText(await SecureStore.getItemAsync(DATA_KEY)); } catch { safe = false; }
+      // No key yet (first start, or an update from an older version): make one. If the secure storage fails we do not
+      // guess a new key, because that would overwrite data that might still be readable with the real one.
+      if (!key && safe) {
+        try { const k = newDataKey(); await SecureStore.setItemAsync(DATA_KEY, keyToText(k)); key = k; } catch { safe = false; }
+      }
+      const r = openStored(sealed, legacy, key);
+      if (r.state) {
+        const saved = migrateSaved(r.state); // settings from older versions (theme name, single TURN server)
+        if (!themes[saved.themeName as ThemeName]) saved.themeName = empty.themeName;
+        setS({ ...empty, ...saved });
+      }
+      keyRef.current = key; canSave.current = safe && !!key;
+      legacyLeft.current = legacy != null && safe;
       try { const v = await SecureStore.getItemAsync(ID_KEY); if (v) setIdentity(JSON.parse(v)); } catch {}
       setReady(true);
     })();
   }, []);
-  useEffect(() => { if (ready) AsyncStorage.setItem(KEY, JSON.stringify(s)).catch(() => {}); }, [s, ready]);
+  // Saved a moment after the last change, and straight away when the app leaves the screen.
+  useEffect(() => { if (ready) saver.schedule(() => JSON.stringify(sRef.current)); }, [s, ready, saver]);
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', st => { if (st !== 'active') saver.flush(); });
+    return () => { sub.remove(); saver.flush(); };
+  }, [saver]);
 
   // Is Download/Direct usable? Checked at start and every time the app comes back (for example from the Android setting).
   const refreshStorage = useCallback(() => setPublicStorage(probePublic()), []);
@@ -115,8 +142,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Everything this app has stored: files (also Download/Direct), messages, contacts and the key.
     wipeAll: async () => {
       wipeAllFiles();
+      await saver.cancel(); // nothing waiting may be written back after this
       try { await SecureStore.deleteItemAsync(ID_KEY); } catch {}
-      try { await AsyncStorage.removeItem(KEY); } catch {}
+      try { await AsyncStorage.removeItem(KEY); await AsyncStorage.removeItem(OLD_KEY); } catch {}
+      try { await SecureStore.deleteItemAsync(DATA_KEY); } catch {}
+      // The app goes on with an empty state (if the person cancels the uninstall), so it gets a new data key.
+      try { const k = newDataKey(); await SecureStore.setItemAsync(DATA_KEY, keyToText(k)); keyRef.current = k; canSave.current = true; legacyLeft.current = false; }
+      catch { keyRef.current = null; canSave.current = false; }
       setIdentity(null); setPublicStorage(false); setS({ ...empty });
     },
     setTheme: themeName => setS(o => ({ ...o, themeName })),
@@ -139,7 +171,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     unblock: id => setS(o => { const b = { ...o.blocked }; delete b[id]; return { ...o, blocked: b }; }),
     clearChat: id => setS(o => { const m = { ...o.messages }; delete m[id]; return { ...o, messages: m }; }),
     clearChats: () => setS(o => ({ ...o, messages: {} })),
-  }), [s, ready, identity, lang, addMessage, publicStorage, refreshStorage]);
+  }), [s, ready, identity, lang, addMessage, publicStorage, refreshStorage, saver]);
 
   return <C.Provider value={value}>{children}</C.Provider>;
 }

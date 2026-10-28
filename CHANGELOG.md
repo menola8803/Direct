@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.3 – Clearer app icon
+- The app icon (ring with a D and two peers) is bolder: bigger D, thicker ring, no thin inner ring, so it reads at launcher size.
+
 ## 0.9.2 – Start screen and app icon
 - **Animated start screen** (always dark): the logo ring draws itself, two peers orbit it, and Voice (sound bars), Video (recording dot) and Conference (connected nodes) light up in turn on a faint network where packets travel straight between nodes. About 3 s, tap to skip, shorter with "reduce motion".
 - **New app icon** (ring with a D and two peers) replaces the Expo default; adaptive and themed (monochrome) icons included. `scripts/make-icons.js` regenerates all icon files.

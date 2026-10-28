@@ -10,20 +10,20 @@ const root = path.resolve(__dirname, '..', 'app');
 const font = path.join(root, 'node_modules/@expo-google-fonts/cinzel/700Bold/Cinzel_700Bold.ttf');
 const out = path.join(root, 'assets');
 
-const GOLD = '#E8B04A', GOLD_DIM = '#8A6D2E', GOLD_PALE = '#F3D9A0', MINT = '#5FC4B4', BG = '#0B1416', HALO = '#0F2326';
+const GOLD = '#E8B04A', GOLD_PALE = '#F3D9A0', MINT = '#5FC4B4', BG = '#0B1416', HALO = '#0F2326';
 
 // scale k: 1 = ring radius 300 on a 1024 canvas
 function mark(k, { mono = false } = {}) {
   const c = 512, r = 300 * k, o = 212 * k; // o = distance of a peer from the center along each axis (r * cos 45)
-  const g = mono ? '#fff' : GOLD, g2 = mono ? '#fff' : GOLD_DIM, a = mono ? '#fff' : MINT, b = mono ? '#fff' : GOLD_PALE;
+  const g = mono ? '#fff' : GOLD, a = mono ? '#fff' : MINT, b = mono ? '#fff' : GOLD_PALE;
+  // Bold on purpose: it has to read at launcher size (a bit over 100 px at most), so no thin inner ring.
   return `
-    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${g}" stroke-width="${22 * k}"/>
-    <circle cx="${c}" cy="${c}" r="${248 * k}" fill="none" stroke="${g2}" stroke-width="${7 * k}" ${mono ? 'stroke-opacity=".7"' : ''}/>
-    <text x="${c}" y="${c + 120 * k}" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="${340 * k}" fill="${g}">D</text>
-    ${mono ? '' : `<circle cx="${c - o}" cy="${c - o}" r="${58 * k}" fill="${HALO}"/>`}
-    <circle cx="${c - o}" cy="${c - o}" r="${34 * k}" fill="${a}"/>
-    ${mono ? '' : `<circle cx="${c + o}" cy="${c + o}" r="${58 * k}" fill="${HALO}"/>`}
-    <circle cx="${c + o}" cy="${c + o}" r="${34 * k}" fill="${b}"/>`;
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${g}" stroke-width="${34 * k}"/>
+    <text x="${c}" y="${c + 152 * k}" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="${430 * k}" fill="${g}">D</text>
+    ${mono ? '' : `<circle cx="${c - o}" cy="${c - o}" r="${66 * k}" fill="${HALO}"/>`}
+    <circle cx="${c - o}" cy="${c - o}" r="${42 * k}" fill="${a}"/>
+    ${mono ? '' : `<circle cx="${c + o}" cy="${c + o}" r="${66 * k}" fill="${HALO}"/>`}
+    <circle cx="${c + o}" cy="${c + o}" r="${42 * k}" fill="${b}"/>`;
 }
 const bgDefs = `
   <defs>
@@ -39,8 +39,8 @@ const bgRect = `<rect width="1024" height="1024" fill="url(#bg)"/><circle cx="51
 const files = {
   'icon.png': { size: 1024, transparent: false, body: bgDefs + bgRect + mark(1) },
   'android-icon-background.png': { size: 1024, transparent: false, body: bgDefs + bgRect },
-  'android-icon-foreground.png': { size: 1024, transparent: true, body: mark(0.86) },
-  'android-icon-monochrome.png': { size: 1024, transparent: true, body: mark(0.86, { mono: true }) },
+  'android-icon-foreground.png': { size: 1024, transparent: true, body: mark(0.95) },
+  'android-icon-monochrome.png': { size: 1024, transparent: true, body: mark(0.95, { mono: true }) },
   'favicon.png': { size: 48, transparent: false, body: bgDefs + bgRect + mark(1), view: 1024 },
   'splash-blank.png': { size: 1024, transparent: true, body: '' }, // the native start screen is only the dark background
 };

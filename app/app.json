@@ -2,7 +2,7 @@
   "expo": {
     "name": "Direct",
     "slug": "direct",
-    "version": "0.12.1",
+    "version": "0.13.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -36,7 +36,7 @@
         "MANAGE_EXTERNAL_STORAGE",
         "VIBRATE"
       ],
-      "versionCode": 1201
+      "versionCode": 1300
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -65,6 +65,7 @@
       ],
       "expo-secure-store",
       ["expo-local-authentication", { "faceIDPermission": false }],
+      "./plugins/withReleaseSigning",
       "@config-plugins/react-native-webrtc",
       [
         "expo-audio",

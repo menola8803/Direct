@@ -61,6 +61,32 @@ export function openStored(sealed: string | null, legacy: string | null, key: Ui
   return { state: null, status: sealed != null || legacy != null ? 'lost' : 'fresh' };
 }
 
+export type VaultIO = {
+  readState(name: string): Promise<string | null>; // throws if the storage cannot be read
+  readKey(): Promise<string | null>; // throws if the secure storage cannot be read
+  writeKey(text: string): Promise<void>;
+};
+export type Loaded = {
+  state: unknown | null; status: Opened['status'];
+  key: Uint8Array | null;
+  canSave: boolean; // false when something could not be read or the key could not be stored: then nothing may be overwritten
+  legacyLeft: boolean; // an older plain-text copy exists and is to be deleted after the sealed one has been written
+};
+// Everything that happens when the app starts and reads its data. The safety rules are here so they can be tested:
+//  - a storage that cannot be read is never "fixed" by writing over it
+//  - a missing key is replaced by a new one only when the secure storage works (the old data is then unreadable anyway)
+//  - an older plain-text state is read, and kept until the sealed copy has been written
+export async function loadVault(io: VaultIO, names: { sealed: string; legacy: string }): Promise<Loaded> {
+  let sealed: string | null = null, legacy: string | null = null, key: Uint8Array | null = null, safe = true;
+  try { sealed = await io.readState(names.sealed); legacy = await io.readState(names.legacy); } catch { safe = false; }
+  try { key = keyFromText(await io.readKey()); } catch { safe = false; }
+  if (!key && safe) {
+    try { const k = newDataKey(); await io.writeKey(keyToText(k)); key = k; } catch { safe = false; }
+  }
+  const r = openStored(sealed, legacy, key);
+  return { state: r.state, status: r.status, key, canSave: safe && !!key, legacyLeft: legacy != null && safe };
+}
+
 // Saves with a short delay so a burst of changes is written once, and one write at a time, in order.
 // flush() writes at once (when the app goes to the background), cancel() drops what is waiting (when everything is wiped).
 export function makeSaver(write: (text: string) => Promise<void>, delay = 400) {

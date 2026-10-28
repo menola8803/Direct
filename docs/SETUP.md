@@ -1,4 +1,4 @@
-# Getting started (0.12.1)
+# Getting started (0.13.0)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -29,9 +29,15 @@ Contacts → *Invite* (or My code → *Share invite*) sends a message with a dow
 
 ## Files, retention and uninstall
 - **Where files go:** Download/Direct, one subfolder per contact (named `Name-<start of the id>`), for received and sent files, voice and video. A hidden `.nomedia` file keeps pictures and videos out of the Gallery. This needs Android's *Allow management of all files* for Direct (Android 11 or later). The app asks once after the start screen; Settings → Storage shows the status and has a button to open the Android setting. Without it, files stay in the app's private storage (also used by files from versions before 0.12.0).
-- **Updates:** installing a new version never changes anything in Download/Direct or the private folder, so the next update keeps voice, video and files. Both CI builds and local builds are signed with the same key, so they install over each other.
+- **Updates:** installing a new version never changes anything in Download/Direct or the private folder, so the next update keeps voice, video and files. CI builds and local builds must be signed with the same key to install over each other (see `docs/SIGNING.md`).
 - **Retention:** Settings → Keep conversations: 1 day, 1 week, 2 weeks (default), 1 month, 2 months, 3 months (longest). Messages and files older than that are deleted from this phone, also files in Download/Direct that no message points to. The first start after updating applies the default (2 weeks) to what is already stored. Everyone sets their own time; nothing is deleted on the other person's phone.
 - **Uninstall:** Android does not let an app run code or show a message when it is uninstalled from the phone's own menu, and it keeps public folders like Download/Direct. Use Settings → Storage → *Delete everything and uninstall*: it lists what is removed (messages, contacts, your key, Download/Direct), deletes it and opens Android's uninstall dialog. If you uninstall from Android's menu instead, the app's private data is removed but Download/Direct stays until you delete it; a later install offers to delete those old files. Automatic backup of app data is off, so a reinstall does not bring back old chats.
+
+## Security, lock and backup (0.13.0)
+- **Encrypted data:** contacts, messages and settings are stored sealed with a key in the Android Keystore. If that key is lost (for example the phone's secure storage is reset) the data cannot be read and the app starts empty; a backup is the way back.
+- **App lock:** Settings → App lock. Fingerprint, face or the phone's screen lock; choose *Immediately*, *After 1 minute* or *After 5 minutes*. Needs a screen lock on the phone. With *Immediately* the app also locks when you leave it for a moment, for example to pick a file. An incoming call shows on the lock screen; unlock to answer.
+- **File location:** Settings → File location. *Private and encrypted* keeps new files sealed in the app's own folder; to play or open one, Direct makes a readable copy in the cache that is removed after a while. Big files are slower (everything is done in JavaScript).
+- **Backup:** Settings → Backup (also on the start screen when you have no key yet). Choose a passphrase of at least 12 characters, ideally four or five random words: the file is only as safe as the passphrase. Save the `.direct` file somewhere safe. Restore replaces the key, contacts and conversations. Files are not in the backup. Remove the app on the old phone before using the same key on a new one.
 
 ## STUN servers
 A STUN server only tells a phone its public address; it never sees messages. Settings → STUN servers lets you paste addresses, test all of them on the phone (✓/✗ with response time), remove single servers or all that do not answer, and restore the defaults. The empty default uses Cloudflare, Nextcloud (port 443) and Telnyx (not Google).
@@ -45,6 +51,9 @@ See `docs/NETWORK.md`: why there are no built-in TURN servers, how to run your o
 - Conference is a mesh: every participant sends to all others. Max 4 with video, 8 audio only.
 - In-app update needs a public GitHub release with an `.apk` attached, and the user must allow the install.
 - Forward secrecy per connection; no post-compromise security (Double Ratchet) yet.
+- The app lock is a gate in the app and does not replace the phone's own screen lock. Encrypted storage protects the data folder, not a phone that is unlocked and open.
+- Calls and the media in them are protected by WebRTC's DTLS-SRTP only.
+- The app lock and encrypted files have only been run in tests, not on a real phone.
 - Tests run in Node (`npm test`). Phone-specific code (camera, microphone, WebRTC in React Native, installing, the Download/Direct permission and the uninstall dialog) has not been run on a device.
 
 ## Build the APK in the cloud (no tools needed)
@@ -53,9 +62,9 @@ Every push to `main` that touches `app/` builds an APK: open the repo → **Acti
 For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.12.1 -m "Direct 0.12.1" && git push origin v0.12.1
+git tag -a v0.13.0 -m "Direct 0.13.0" && git push origin v0.13.0
 ```
-The APK is signed with the Expo template's debug key, which is public. Fine for testing; before a real launch create your own keystore and keep it safe, since updates only install over an app signed with the same key.
+By default the APK is signed with the Expo template's debug key, which is public. Fine for testing. For a real launch use your own key: `docs/SIGNING.md` (updates only install over an app signed with the same key, and switching key needs a reinstall, so make a backup first).
 
 ## In-app update
 Attach the APK to a public GitHub release tagged `vX.Y.Z` (workflow in `.github/workflows/release.yml`). The app checks `menola8803/Direct`.

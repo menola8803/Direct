@@ -46,9 +46,32 @@ jobs:
       - name: Generate Android project
         working-directory: app
         run: npx expo prebuild --platform android --no-install
+      # Direct's own signing key is used when the secret is stored. Once app/signing/cert-sha256.txt exists in the repository
+      # (made by scripts/new-signing-key.sh) a release MUST be signed with that key: without the secret the build stops here,
+      # and the signature check below stops it too if the APK was signed with anything else. Before that file exists the
+      # release is signed with the public debug key as in earlier versions, so phones can still update in place.
+      - name: Signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.DIRECT_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            printf %s "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/direct.p12"
+            echo "DIRECT_KEYSTORE_FILE=$RUNNER_TEMP/direct.p12" >> "$GITHUB_ENV"
+          elif [ -s app/signing/cert-sha256.txt ]; then
+            echo "::error::app/signing/cert-sha256.txt says releases are signed with Direct's own key, but the secret DIRECT_KEYSTORE_BASE64 is missing. See docs/SIGNING.md."
+            exit 1
+          else
+            echo "::warning::No signing key is stored: this release is signed with the public debug key (see docs/SIGNING.md)."
+          fi
       - name: Build release APK
         working-directory: app/android
+        env:
+          DIRECT_KEYSTORE_PASSWORD: ${{ secrets.DIRECT_KEYSTORE_PASSWORD }}
+          DIRECT_KEY_ALIAS: ${{ secrets.DIRECT_KEY_ALIAS }}
+          DIRECT_KEY_PASSWORD: ${{ secrets.DIRECT_KEY_PASSWORD }}
         run: ./gradlew assembleRelease --no-daemon
+      - name: Check the signature
+        run: bash scripts/check-apk-signature.sh app/android/app/build/outputs/apk/release/app-release.apk
       - name: Attach APK to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

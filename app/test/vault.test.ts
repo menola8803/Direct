@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { SEALED_PREFIX, isSealed, keyFromText, keyToText, makeSaver, newDataKey, openStored, openText, sealText } from '../src/core/vault';
+import { SEALED_PREFIX, VaultIO, isSealed, keyFromText, keyToText, loadVault, makeSaver, newDataKey, openStored, openText, sealText } from '../src/core/vault';
 
 const key = newDataKey(), other = newDataKey();
 assert.equal(key.length, 32);
@@ -80,6 +80,69 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
   const sv2 = makeSaver(async t => { if (fail) { fail = false; throw new Error('first fails'); } ok.push(t); }, 10);
   sv2.schedule(() => '1'); await sv2.flush(); sv2.schedule(() => '2'); await sv2.flush();
   assert.deepEqual(ok, ['2'], 'after a failed write the next one still happens');
+
+
+  // ---- loading at start: the safety rules
+  const NAMES = { sealed: 'v3', legacy: 'v2' };
+  const fakeIO = (o: { state?: Record<string, string>; key?: string | null; failState?: boolean; failKeyRead?: boolean; failKeyWrite?: boolean } = {}) => {
+    const st = { ...(o.state ?? {}) }; let keyText: string | null = o.key ?? null; const wrote: string[] = [];
+    const io: VaultIO = {
+      readState: async n => { if (o.failState) throw new Error('storage'); return st[n] ?? null; },
+      readKey: async () => { if (o.failKeyRead) throw new Error('keystore'); return keyText; },
+      writeKey: async t => { if (o.failKeyWrite) throw new Error('keystore'); keyText = t; wrote.push(t); },
+    };
+    return { io, wrote, key: () => keyText };
+  };
+  const goodKey = keyToText(key);
+
+  let f = fakeIO();
+  let l = await loadVault(f.io, NAMES);
+  assert.equal(l.status, 'fresh'); assert.equal(l.canSave, true); assert.ok(l.key && l.key.length === 32, 'a fresh install makes a key');
+  assert.equal(f.wrote.length, 1, 'and stores it'); assert.equal(f.key(), keyToText(l.key!)); assert.equal(l.legacyLeft, false);
+
+  f = fakeIO({ state: { v2: plain } });
+  l = await loadVault(f.io, NAMES);
+  assert.deepEqual(l.state, { name: 'Old' }); assert.equal(l.status, 'legacy'); assert.equal(l.canSave, true);
+  assert.equal(l.legacyLeft, true, 'an update from before 0.13.0: the plain copy is deleted once the sealed one is written'); assert.equal(f.wrote.length, 1, 'a key is made');
+
+  f = fakeIO({ state: { v3: sealed }, key: goodKey });
+  l = await loadVault(f.io, NAMES);
+  assert.deepEqual(l.state, state); assert.equal(l.status, 'ok'); assert.equal(l.canSave, true); assert.equal(f.wrote.length, 0, 'an existing key is kept'); assert.equal(l.legacyLeft, false);
+
+  f = fakeIO({ state: { v3: sealed, v2: plain }, key: goodKey });
+  l = await loadVault(f.io, NAMES);
+  assert.equal(l.status, 'ok'); assert.equal(l.legacyLeft, true, 'both exist (an earlier run stopped in the middle): the old copy is still to be deleted');
+
+  f = fakeIO({ state: { v3: sealed }, failState: true, key: goodKey });
+  l = await loadVault(f.io, NAMES);
+  assert.equal(l.canSave, false, 'storage cannot be read: never write over it'); assert.equal(l.state, null);
+
+  f = fakeIO({ state: { v3: sealed }, failKeyRead: true });
+  l = await loadVault(f.io, NAMES);
+  assert.equal(l.canSave, false, 'secure storage cannot be read: no new key is made, nothing is overwritten');
+  assert.equal(f.wrote.length, 0, 'in particular the real key is not replaced'); assert.equal(l.state, null);
+  f = fakeIO({ state: { v2: plain }, failKeyRead: true });
+  l = await loadVault(f.io, NAMES);
+  assert.deepEqual(l.state, { name: 'Old' }, 'the plain older state can still be shown'); assert.equal(l.canSave, false); assert.equal(l.legacyLeft, false, 'and it is not deleted');
+
+  f = fakeIO({ state: { v3: sealed } });
+  l = await loadVault(f.io, NAMES);
+  assert.equal(l.status, 'lost', 'the key is gone: the sealed state cannot be read'); assert.equal(l.state, null);
+  assert.equal(l.canSave, true, 'the app starts empty with a new key'); assert.equal(f.wrote.length, 1);
+
+  f = fakeIO({ state: { v3: sealed }, key: 'AAAA' });
+  l = await loadVault(f.io, NAMES);
+  assert.equal(l.status, 'lost', 'a damaged key text is the same as no key'); assert.equal(l.canSave, true);
+
+  f = fakeIO({ state: { v2: plain }, failKeyWrite: true });
+  l = await loadVault(f.io, NAMES);
+  assert.equal(l.canSave, false, 'a key that cannot be stored is not used: data sealed with it could never be read again');
+  assert.deepEqual(l.state, { name: 'Old' }); assert.equal(l.legacyLeft, false);
+  assert.equal(l.key, null, 'and it is not handed on for sealing files either');
+
+  f = fakeIO({ state: { v3: sealText(other, JSON.stringify(state)) }, key: goodKey });
+  l = await loadVault(f.io, NAMES);
+  assert.equal(l.status, 'lost', 'sealed with another key'); assert.equal(l.canSave, true);
 
   console.log('vault.test.ts OK');
 })().catch(e => { console.error(e); process.exit(1); });

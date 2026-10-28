@@ -10,7 +10,7 @@ import { Contact, Identity, newIdentity } from './core/crypto';
 import { FileKind, MsgStatus } from './core/protocol';
 import { DEFAULT_RETENTION, cutoffFor, pruneMessages } from './core/retention';
 import { DEFAULT_LOCK_DELAY } from './core/lock';
-import { keyFromText, keyToText, makeSaver, newDataKey, openStored, sealText } from './core/vault';
+import { keyToText, loadVault, makeSaver, newDataKey, sealText } from './core/vault';
 import { clearBackupTemps, clearPlain, deleteFiles, deleteStored, probePublic, setFileKey, setFileMode, sweepOldFiles, wipeAllFiles } from './files';
 import { FileModeChoice } from './core/filemode';
 import { BackupData, applyBackup, backupState } from './core/backup';
@@ -84,21 +84,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      let sealed: string | null = null, legacy: string | null = null, key: Uint8Array | null = null, safe = true;
-      try { sealed = await AsyncStorage.getItem(KEY); legacy = await AsyncStorage.getItem(OLD_KEY); } catch { safe = false; }
-      try { key = keyFromText(await SecureStore.getItemAsync(DATA_KEY)); } catch { safe = false; }
-      // No key yet (first start, or an update from an older version): make one. If the secure storage fails we do not
-      // guess a new key, because that would overwrite data that might still be readable with the real one.
-      if (!key && safe) {
-        try { const k = newDataKey(); await SecureStore.setItemAsync(DATA_KEY, keyToText(k)); key = k; } catch { safe = false; }
-      }
-      const r = openStored(sealed, legacy, key);
-      if (r.state) {
-        setS(fromRaw(r.state));
-      }
-      keyRef.current = key; canSave.current = safe && !!key; setFileKey(key);
+      const r = await loadVault({
+        readState: n => AsyncStorage.getItem(n),
+        readKey: () => SecureStore.getItemAsync(DATA_KEY),
+        writeKey: t => SecureStore.setItemAsync(DATA_KEY, t),
+      }, { sealed: KEY, legacy: OLD_KEY });
+      if (r.state) setS(fromRaw(r.state));
+      keyRef.current = r.key; canSave.current = r.canSave; legacyLeft.current = r.legacyLeft; setFileKey(r.key);
       clearPlain(); clearBackupTemps(); // decrypted copies and backup files from an earlier run are not kept
-      legacyLeft.current = legacy != null && safe;
       try { const v = await SecureStore.getItemAsync(ID_KEY); if (v) setIdentity(JSON.parse(v)); } catch {}
       setReady(true);
     })();

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.1 – Test a TURN server with a long press
+- **TURN servers:** tap an address for a short explanation of how to test it. Press and hold the address to test just that server: a box shows *Testing…* and then *OK* (with the time) or *Not working*, and fades away by itself after a few seconds. The result also marks the row. The *Test TURN servers* button still tests all of them.
+
 ## 0.10.0 – Better invitations, TURN list, privacy mode
 - **Invite SMS:** says who invites and what Direct is, links to the newest APK, explains that Android asks to allow installing from the browser, and links to the invite page. The invite page (`docs/i.html`) now shows who invites, what the app does, a download button and step-by-step install help (Swedish and English).
 - **Always-newest download link:** `releases/latest/download/Direct.apk`. The release workflow uploads the APK under that fixed name. Needs a public repo.

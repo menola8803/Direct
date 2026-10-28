@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-export type ThemeName = 'beige' | 'usb';
+export type ThemeName = 'beige' | 'dark';
 
 export type Theme = {
   name: ThemeName;
@@ -23,7 +23,7 @@ export type Theme = {
   fonts: { regular?: string; medium?: string; semibold?: string; bold?: string; extrabold?: string; heading?: string; display?: string };
 };
 
-// The colors match the screen design in design/ (Beige and USB).
+// The colors match the screen design in design/ (Beige and Dark).
 export const themes: Record<ThemeName, Theme> = {
   beige: {
     name: 'beige', label: 'Beige', dark: false,
@@ -35,15 +35,15 @@ export const themes: Record<ThemeName, Theme> = {
     tabActive: '#26231F',
     fonts: { heading: Platform.select({ ios: 'Georgia', default: 'serif' }), display: Platform.select({ ios: 'Georgia', default: 'serif' }) },
   },
-  usb: {
-    name: 'usb', label: 'USB', dark: true,
+  dark: {
+    name: 'dark', label: 'Dark', dark: true,
     bg: '#0F1A1C', card: '#172629', chip: '#1E3236', line: '#25393D',
     ink: '#EAF1EF', muted: '#B7C6C3', accent: '#5FC4B4',
     primary: '#E8B04A', onPrimary: '#0F1A1C',
     good: '#5FC4B4', danger: '#E8776D',
     bubbleMine: '#4A3A18', onBubbleMine: '#EAF1EF',
     tabActive: '#E8B04A',
-    // Same look as USB Portlås: Plus Jakarta Sans for text, Cinzel for the wordmark.
+    // Plus Jakarta Sans for text, Cinzel for the wordmark.
     fonts: { regular: 'PlusJakartaSans_400Regular', medium: 'PlusJakartaSans_500Medium', semibold: 'PlusJakartaSans_600SemiBold', bold: 'PlusJakartaSans_700Bold', extrabold: 'PlusJakartaSans_800ExtraBold', heading: 'PlusJakartaSans_700Bold', display: 'Cinzel_700Bold' },
   },
 };

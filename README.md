@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.9.0** (see `CHANGELOG.md`)
+**Version 0.9.1** (see `CHANGELOG.md`)
 
 A chat app with no server in between. Messages, calls, voice and video messages and files go straight between the phones, encrypted. Built for people's privacy.
 
@@ -14,7 +14,7 @@ Expo SDK 58, React Native 0.88, TypeScript.
 - Delivery status (queued / sent / delivered), block contacts, phone-book import and SMS invites.
 - Voice and video calls, 1:1 and conference (max 4 with video, 8 audio only; mesh).
 - Voice messages, video messages and file transfer (max 50 MB), stored privately per contact; clear per contact, all files or cache.
-- Voice and video test, language (English, Swedish or phone language), two themes (Beige and USB), in-app update from GitHub Releases.
+- Voice and video test, language (English, Swedish or phone language), two themes (Beige and Dark), in-app update from GitHub Releases.
 - Reserved space for the Android status bar and bottom edge (safe area).
 
 Not yet verified on a real phone: camera scanning, recording, WebRTC in React Native, and APK installation (everything else is covered by Node tests, `npm test`).
@@ -28,7 +28,7 @@ Open `design/index.html` in a browser (built with `python3 design/build_gallery.
 
 ## Themes
 - **Beige** (default): light grey-beige, charcoal and bronze. Fraunces + IBM Plex Sans.
-- **USB**: dark teal with gold and mint, taken from the USB Portlås app.
+- **Dark** (default): dark teal with gold and mint, Plus Jakarta Sans and a Cinzel wordmark.
 
 ## Files on the phone
 Files are stored in the app's private storage per contact. Users can clear cache, a single contact, or everything.

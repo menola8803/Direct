@@ -1,7 +1,10 @@
 # Changelog
 
-## 0.9.0 – USB Portlås look, invite links, fixes
-- **USB Portlås look** (dark teal, gold, mint; Plus Jakarta Sans + Cinzel wordmark) is now the default theme.
+## 0.9.1 – Dark theme
+- The dark theme is now called **Dark** (was "USB"). An existing choice is migrated automatically.
+
+## 0.9.0 – New dark look, invite links, fixes
+- **Dark look** (dark teal, gold, mint; Plus Jakarta Sans + Cinzel wordmark) is now the default theme.
 - **Fixed phone-book import** (the old `expo-contacts` calls throw in SDK 58; now uses `expo-contacts/legacy`).
 - **Invite links:** `direct://add?c=…` deep links, web invite page `docs/i.html`, invite screen with *Send my code back*.
 - **STUN servers screen:** add, test all (✓/✗ with ms), remove single or failed servers, restore defaults. Defaults are no longer Google.

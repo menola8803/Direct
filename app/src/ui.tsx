@@ -148,10 +148,10 @@ export function ThemePreview({ th }: { th: Theme }) {
 export const styles = StyleSheet.create({ fill: { flex: 1 } });
 
 
-// Branded page header (as in USB Portlås): ring logo, spaced wordmark and a small spaced tagline.
+// Branded page header (Dark theme): ring logo, spaced wordmark and a small spaced tagline.
 export function BrandHeader({ tagline }: { tagline: string }) {
   const { theme } = useApp();
-  if (theme.name !== 'usb') return <H1>Direct</H1>;
+  if (theme.name !== 'dark') return <H1>Direct</H1>;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#162B2E', borderRadius: 24, borderWidth: 1, borderColor: '#2D322B', paddingVertical: 14, paddingHorizontal: 16 }}>
       <View style={{ width: 52, height: 52, borderRadius: 26, borderWidth: 2, borderColor: theme.primary, alignItems: 'center', justifyContent: 'center' }}>

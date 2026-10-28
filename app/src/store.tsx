@@ -20,7 +20,7 @@ type Saved = {
 const KEY = 'direct.state.v2';
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
-  themeName: 'usb', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
+  themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
   signalUrl: '', stunList: '', turnUrl: '', turnUser: '', turnCred: '', hideIp: false,
 };
 
@@ -44,7 +44,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      try { const v = await AsyncStorage.getItem(KEY); if (v) setS({ ...empty, ...JSON.parse(v) }); } catch {}
+      try {
+        const v = await AsyncStorage.getItem(KEY);
+        if (v) {
+          const saved = JSON.parse(v);
+          // The dark theme was called 'usb' before 0.9.1.
+          if (saved.themeName === 'usb') saved.themeName = 'dark';
+          if (!themes[saved.themeName as ThemeName]) saved.themeName = empty.themeName;
+          setS({ ...empty, ...saved });
+        }
+      } catch {}
       try { const v = await SecureStore.getItemAsync(ID_KEY); if (v) setIdentity(JSON.parse(v)); } catch {}
       setReady(true);
     })();

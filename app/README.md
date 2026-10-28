@@ -9,7 +9,7 @@ npm run typecheck
 npx expo start      # note: calls and direct connections need the installed APK, not Expo Go
 ```
 
-Themes are defined in `src/theme.ts` (Beige and USB), texts in `src/i18n.ts` (English and Swedish), state in `src/store.tsx`, networking in `src/net/`, crypto and protocol in `src/core/`.
+Themes are defined in `src/theme.ts` (Beige and Dark), texts in `src/i18n.ts` (English and Swedish), state in `src/store.tsx`, networking in `src/net/`, crypto and protocol in `src/core/`.
 
 ## Build a real APK (Android)
 Cloud build with EAS (free Expo account, no Android Studio needed):

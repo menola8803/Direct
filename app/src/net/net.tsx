@@ -3,7 +3,7 @@ import { useApp, Attach } from '../store';
 import { Contact } from '../core/crypto';
 import { FileKind, newId, Plain } from '../core/protocol';
 import { Receiver, sendFile } from '../core/transfer';
-import { fileSource, makeSink, storeOutgoing } from '../files';
+import { fileSource, makeSink, openSource, storeOutgoing } from '../files';
 import { LinkState, PeerManager, SignalState } from './peers';
 import { CallController, CallView } from './calls';
 import { mediaDevices, rtc } from './rtc';
@@ -44,9 +44,9 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
     const msg = a.messages[c.id]?.find(x => x.id === msgId);
     if (!m || !msg?.file || sending.current.has(msgId) || !m.isOpen(c.id)) return;
     sending.current.add(msgId);
-    let h: ReturnType<typeof fileSource> | null = null;
+    let h: Awaited<ReturnType<typeof openSource>> | null = null;
     try {
-      h = fileSource(msg.file.uri);
+      h = await openSource(msg.file.uri);
       const f = msg.file;
       const ok = await sendFile({ id: msgId, name: f.name, mime: f.mime, size: f.size, kind: f.kind, at: msg.at, dur: f.dur }, h.src, {
         send: p => m.send(c, p), buffered: () => m.bufferedAmount(c.id), isOpen: () => m.isOpen(c.id),

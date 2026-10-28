@@ -3,10 +3,14 @@
 //    Android does not delete it when the app is uninstalled (see "Delete everything and uninstall" in Settings → Storage).
 //  - The app's own private folder: the fallback without that permission, and where files from older versions stay.
 //    Android deletes it when the app is uninstalled.
-// An update of the app never touches either place.
+// A third place is chosen in Settings → Storage: "private and encrypted". Files are then sealed with a key from the phone's
+// secure storage (core/filecrypt.ts) and kept in the app's own folder direct-enc, where neither the Files app nor the
+// Gallery sees them. Android deletes that folder when the app is uninstalled too.
+// An update of the app never touches any of these places.
 import { Directory, File, FileMode, Paths } from 'expo-file-system';
 import { Meta, Sink, Source, safeName } from './core/transfer';
 import { folderName, folderTag, sameUri, uniqueName } from './core/retention';
+import { FRAME, FileEncryptor, decryptAll, openEncrypted } from './core/filecrypt';
 
 export const PUBLIC_LABEL = 'Download/Direct';
 const DOWNLOADS_URI = 'file:///storage/emulated/0/Download';
@@ -17,6 +21,16 @@ const publicRoot = () => new Directory(PUBLIC_URI);
 const privateRoot = () => new Directory(Paths.document, 'direct');
 const cleanId = (id: string) => id.replace(/[^a-z0-9]/gi, '');
 const legacyDir = (id: string) => new Directory(privateRoot(), cleanId(id));
+const encRoot = () => new Directory(Paths.document, 'direct-enc');
+const encDir = (id: string) => new Directory(encRoot(), cleanId(id));
+
+// Where new files go, set by the store from the Settings choice, and the key that seals the private files.
+export type StoreMode = 'visible' | 'private';
+let mode: StoreMode = 'visible';
+let dataKey: Uint8Array | null = null;
+export const setFileMode = (m: StoreMode) => { mode = m === 'private' ? 'private' : 'visible'; };
+export const setFileKey = (k: Uint8Array | null) => { dataKey = k; };
+const pause = () => new Promise<void>(r => setTimeout(r, 0)); // lets the app draw between two steps of heavy work
 
 let publicOk = false;
 export const usingPublic = () => publicOk;
@@ -48,17 +62,21 @@ export function probePublic(): boolean {
   return publicOk;
 }
 
+// An encrypted file is recognised by where it is kept, not by its name.
+export const isEncrypted = (uri: string) => uri.startsWith(slash(encRoot().uri));
+
 const openDir = (id: string, name: string): Directory => (publicOk
   ? ensureDir(publicRoot(), folderName(name, id))
   : ensureDir(ensureDir(Paths.document, 'direct'), cleanId(id)));
 // The folder for new files of a contact. If Download/Direct stops working (permission taken away) the private folder is used.
 function usableDir(id: string, name: string): Directory {
+  if (mode === 'private') return ensureDir(ensureDir(Paths.document, 'direct-enc'), cleanId(id));
   try { return openDir(id, name); }
   catch (e) { if (!publicOk) throw e; publicOk = false; return openDir(id, name); }
 }
 // The folders that belong to one contact, in both places.
 function dirsOf(id: string): Directory[] {
-  const out: Directory[] = [legacyDir(id)];
+  const out: Directory[] = [legacyDir(id), encDir(id)];
   try {
     const r = publicRoot();
     if (r.exists) for (const x of r.list()) if (x instanceof Directory && x.name.endsWith(folderTag(id))) out.push(x);
@@ -67,7 +85,7 @@ function dirsOf(id: string): Directory[] {
 }
 function allContactDirs(): Directory[] {
   const out: Directory[] = [];
-  for (const r of [publicRoot(), privateRoot()]) {
+  for (const r of [publicRoot(), privateRoot(), encRoot()]) {
     try { if (r.exists) for (const x of r.list()) if (x instanceof Directory) out.push(x); } catch {}
   }
   return out;
@@ -75,7 +93,7 @@ function allContactDirs(): Directory[] {
 const freeName = (dir: Directory, name: string) => uniqueName(n => new File(dir, n).exists, name);
 const slash = (u: string) => (u.endsWith('/') ? u : `${u}/`);
 // Only files inside the app's own places may be deleted by the retention rules.
-const ours = (uri: string) => [PUBLIC_URI, privateRoot().uri, Paths.cache.uri].some(p => uri.startsWith(slash(p)));
+const ours = (uri: string) => [PUBLIC_URI, privateRoot().uri, encRoot().uri, Paths.cache.uri].some(p => uri.startsWith(slash(p)));
 
 export function fileSource(uri: string): { src: Source; close: () => void } {
   const f = new File(uri);
@@ -86,8 +104,65 @@ export function fileSource(uri: string): { src: Source; close: () => void } {
   };
 }
 
-// A received file is written to the contact's folder as it arrives.
+// The same for a file that may be encrypted: the content is decrypted piece by piece as it is read.
+export async function openSource(uri: string): Promise<{ src: Source; close: () => void }> {
+  if (!isEncrypted(uri)) return fileSource(uri);
+  if (!dataKey) throw new Error('no key');
+  const f = new File(uri);
+  const h = f.open(FileMode.ReadOnly);
+  try {
+    const src = await openEncrypted(dataKey, f.size, async (o, n) => { h.offset = o; return h.readBytes(n); });
+    return { src, close: () => { src.close(); try { h.close(); } catch {} } };
+  } catch (e) { try { h.close(); } catch {} throw e; }
+}
+
+// A plain copy of a file for playing, opening or sharing. An ordinary file is used as it is; an encrypted one is
+// decrypted into the cache folder (cache/dec), so a readable copy exists only for as long as it is needed.
+// Remove it with discardPlain() when done; clearPlain() removes old ones.
+export async function plainCopy(uri: string, name: string): Promise<string> {
+  if (!isEncrypted(uri)) return uri;
+  if (!dataKey) throw new Error('no key');
+  const dir = ensureDir(Paths.cache, 'dec');
+  const dest = makeFile(dir, `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}-${safeName(name)}`);
+  const f = new File(uri);
+  let sh: ReturnType<File['open']> | null = null, dh: ReturnType<File['open']> | null = null;
+  try {
+    sh = f.open(FileMode.ReadOnly); dh = dest.open(FileMode.ReadWrite);
+    const r = sh, w = dh;
+    await decryptAll(dataKey, f.size, async (o, n) => { r.offset = o; return r.readBytes(n); }, async b => { await w.writeBytes(b); }, pause);
+    return dest.uri;
+  } catch (e) { try { dh?.close(); } catch {} try { dest.delete(); } catch {} throw e; } // never leave a half-written readable copy
+  finally { try { sh?.close(); } catch {} try { dh?.close(); } catch {} }
+}
+export function discardPlain(uri: string) {
+  try { if (uri.startsWith(slash(new Directory(Paths.cache, 'dec').uri))) { const f = new File(uri); if (f.exists) f.delete(); } } catch {}
+}
+// Removes decrypted copies older than `maxAgeMs` (0 = all). Called when the app starts and now and then.
+export function clearPlain(maxAgeMs = 0) {
+  try {
+    const d = new Directory(Paths.cache, 'dec');
+    if (!d.exists) return;
+    const cut = Date.now() - maxAgeMs;
+    for (const x of d.list()) { try { if (maxAgeMs === 0 || (x instanceof File && (x.modificationTime ?? 0) < cut)) x.delete(); } catch {} }
+  } catch {}
+}
+
+// A received file is written to the contact's folder as it arrives. In private mode it is encrypted on the way.
+async function encryptedSink(contactId: string, m: Meta): Promise<Sink> {
+  if (!dataKey) throw new Error('no key'); // never fall back to an unencrypted copy
+  const dir = usableDir(contactId, '');
+  const file = makeFile(dir, `${cleanId(m.id) || Date.now().toString(36)}.denc`, true);
+  const enc = new FileEncryptor(dataKey);
+  const h = file.open(FileMode.ReadWrite);
+  try { await h.writeBytes(enc.header()); } catch (e) { try { h.close(); } catch {} try { file.delete(); } catch {} throw e; }
+  return {
+    write: async b => { const out = enc.push(b); if (out.length) await h.writeBytes(out); },
+    finish: async () => { await h.writeBytes(enc.finish()); h.close(); return file.uri; },
+    abort: async () => { try { h.close(); } catch {} try { file.delete(); } catch {} },
+  };
+}
 export const makeSink = (contactId: string, contactName: string) => async (m: Meta): Promise<Sink> => {
+  if (mode === 'private') return encryptedSink(contactId, m);
   const dir = usableDir(contactId, contactName);
   const file = publicOk ? makeFile(dir, freeName(dir, safeName(m.name))) : makeFile(dir, `${m.id}-${safeName(m.name)}`, true);
   const h = file.open(FileMode.ReadWrite);
@@ -100,8 +175,34 @@ export const makeSink = (contactId: string, contactName: string) => async (m: Me
 
 // A file you send is copied to the same place as received files, so it stays in the conversation (and is cleaned up
 // by the same rules). Returns the address to use; the original address if copying fails.
+async function encryptOutgoing(contactId: string, uri: string): Promise<string> {
+  if (!dataKey) throw new Error('no key');
+  const dir = usableDir(contactId, '');
+  const dest = makeFile(dir, uniqueName(n => new File(dir, n).exists, `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.denc`));
+  const src = new File(uri);
+  let sh: ReturnType<File['open']> | null = null, dh: ReturnType<File['open']> | null = null;
+  try {
+    sh = src.open(FileMode.ReadOnly); dh = dest.open(FileMode.ReadWrite);
+    const enc = new FileEncryptor(dataKey), size = src.size;
+    await dh.writeBytes(enc.header());
+    for (let off = 0; off < size; off += FRAME) {
+      sh.offset = off;
+      const out = enc.push(await sh.readBytes(Math.min(FRAME, size - off)));
+      if (out.length) await dh.writeBytes(out);
+      await pause();
+    }
+    await dh.writeBytes(enc.finish());
+  } catch (e) { try { dh?.close(); } catch {} try { dest.delete(); } catch {} throw e; } // no empty leftover
+  finally { try { sh?.close(); } catch {} try { dh?.close(); } catch {} }
+  return dest.uri;
+}
 export async function storeOutgoing(contactId: string, contactName: string, uri: string, name: string): Promise<string> {
   try {
+    if (mode === 'private') {
+      const out = await encryptOutgoing(contactId, uri);
+      if (uri.startsWith(Paths.cache.uri)) { try { new File(uri).delete(); } catch {} }
+      return out;
+    }
     const dir = usableDir(contactId, contactName);
     const src = new File(uri);
     const dest = makeFile(dir, freeName(dir, safeName(name)));
@@ -155,9 +256,9 @@ export function sweepOldFiles(cutoff: number, keep: string[]) {
 export function hasPublicFiles(): boolean {
   try { const r = publicRoot(); return r.exists && r.list().some(x => x.name !== NOMEDIA); } catch { return false; }
 }
-// Removes all the app's files: Download/Direct (the whole folder), the private folder and the cache.
+// Removes all the app's files: Download/Direct (the whole folder), the private folders and the cache.
 export function wipeAllFiles() {
-  for (const d of [publicRoot(), privateRoot()]) { try { if (d.exists) d.delete(); } catch {} }
+  for (const d of [publicRoot(), privateRoot(), encRoot()]) { try { if (d.exists) d.delete(); } catch {} }
   deleteCache();
   publicOk = false;
 }

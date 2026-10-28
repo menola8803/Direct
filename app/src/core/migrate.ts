@@ -1,3 +1,4 @@
+import { normFileMode } from './filemode';
 import { normLockDelay } from './lock';
 import { normRetention } from './retention';
 
@@ -22,5 +23,7 @@ export function migrateSaved(raw: any): any {
   // 0.13.0: app lock. Only a saved `true` switches it on; the delay is one of the choices.
   if (s.lockOn !== undefined) s.lockOn = s.lockOn === true;
   if (s.lockDelay !== undefined) s.lockDelay = normLockDelay(s.lockDelay);
+  // 0.13.0: where new files go. Only 'private' changes the default ('visible').
+  if (s.fileMode !== undefined) s.fileMode = normFileMode(s.fileMode);
   return s;
 }

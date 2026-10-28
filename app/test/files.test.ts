@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import Module from 'node:module';
+import nacl from 'tweetnacl';
 
 const BASE = fs.mkdtempSync(path.join(os.tmpdir(), 'direct-files-'));
 const real = (uri: string) => path.join(BASE, uri.replace(/^file:\/\//, ''));
@@ -139,6 +140,106 @@ const exists = (uri: string) => fs.existsSync(real(uri));
   // ---- after a wipe the next file goes to the private folder again, until the folder is usable
   u = await receive('m8', cid, 'Anna', 'again.txt');
   assert.ok(u.includes('/files/direct/'));
+
+
+  // ---- private and encrypted mode (Settings → Storage → file place)
+  const key = nacl.randomBytes(32);
+  files.setFileKey(key); files.setFileMode('private');
+  const ENC = 'file:///data/user/0/app/files/direct-enc';
+  const plainOf = async (uri: string) => { const h = await files.openSource(uri); const b = await h.src.read(0, h.src.size); h.close(); return b; };
+  const bytes = (n: number) => { const b = new Uint8Array(n); for (let i = 0; i < n; i += 65536) b.set(nacl.randomBytes(Math.min(65536, n - i)), i); return b; };
+
+  const big = bytes(200_000);
+  const sink = await files.makeSink(cid, 'Anna')(meta('e1', 'secret.pdf'));
+  for (let i = 0; i < big.length; i += 8192) await sink.write(big.subarray(i, i + 8192));
+  const e1 = await sink.finish() as string;
+  assert.ok(e1.startsWith(`${ENC}/${cid}/`) && e1.endsWith('.denc'), 'a received file is kept in the encrypted folder');
+  assert.ok(!e1.includes('secret'), 'the real file name is not used on disk');
+  assert.equal(files.isEncrypted(e1), true);
+  assert.equal(files.isEncrypted('file:///data/user/0/app/files/direct/x/a.denc'), false, 'a name ending in .denc elsewhere is not an encrypted file');
+  assert.equal(files.isEncrypted(`${PUB}/Anna-a1b2c3d4/a.denc`), false);
+  const onDisk = fs.readFileSync(real(e1));
+  assert.equal(onDisk.includes(Buffer.from(big.subarray(5000, 5100))), false, 'the content is not readable on disk');
+  assert.ok(Buffer.compare(Buffer.from(await plainOf(e1)), Buffer.from(big)) === 0, 'reads back as the original, also across frames');
+
+  // a plain copy for playing and sharing lives in cache/dec and can be thrown away
+  const pc = await files.plainCopy(e1, 'secret.pdf');
+  assert.ok(pc.startsWith('file:///data/user/0/app/cache/dec/') && pc.endsWith('-secret.pdf'));
+  assert.ok(Buffer.compare(fs.readFileSync(real(pc)), Buffer.from(big)) === 0, 'the decrypted copy equals the original');
+  const pc2 = await files.plainCopy(e1, 'secret.pdf');
+  assert.notEqual(pc, pc2, 'every copy has its own name, so one can be removed while another is in use');
+  files.discardPlain(pc);
+  assert.equal(exists(pc), false, 'discarded');
+  assert.equal(exists(pc2), true, 'the other copy is untouched');
+  files.discardPlain(e1);
+  assert.equal(exists(e1), true, 'discardPlain never removes a stored file');
+  const oldT = new Date(Date.now() - 3_600_000); fs.utimesSync(real(pc2), oldT, oldT);
+  const pc3 = await files.plainCopy(e1, 'x.bin');
+  files.clearPlain(1_800_000);
+  assert.equal(exists(pc2), false, 'old plain copies are removed');
+  assert.equal(exists(pc3), true, 'new ones stay');
+  files.clearPlain();
+  assert.equal(exists(pc3), false, 'clearPlain() removes them all');
+  assert.equal(await files.plainCopy('file:///x/plain.txt', 'plain.txt'), 'file:///x/plain.txt', 'an ordinary file is used as it is');
+
+  // a file you send is encrypted into the same place; the temporary original is removed
+  const tmp2 = 'file:///data/user/0/app/cache/rec2.m4a';
+  const voice = bytes(70_000); fs.writeFileSync(real(tmp2), voice);
+  const sent2 = await files.storeOutgoing(cid, 'Anna', tmp2, 'rec2.m4a');
+  assert.ok(sent2.startsWith(`${ENC}/${cid}/`) && files.isEncrypted(sent2), 'sent file stored encrypted');
+  assert.equal(exists(tmp2), false, 'cache original removed');
+  assert.ok(Buffer.compare(Buffer.from(await plainOf(sent2)), Buffer.from(voice)) === 0, 'sent file reads back');
+  const h5 = await files.openSource(sent2); assert.equal(h5.src.size, 70_000, 'the size seen when sending is the plain size'); h5.close();
+  const emptyTmp = 'file:///data/user/0/app/cache/empty.bin'; fs.writeFileSync(real(emptyTmp), '');
+  const emptyEnc = await files.storeOutgoing(cid, 'Anna', emptyTmp, 'empty.bin');
+  assert.equal((await plainOf(emptyEnc)).length, 0, 'an empty file works');
+  assert.equal(await files.storeOutgoing(cid, 'Anna', 'file:///nope/missing.bin', 'x.bin'), 'file:///nope/missing.bin', 'copy failure keeps the original address');
+  assert.equal(fs.readdirSync(real(`${ENC}/${cid}`)).length, 3, 'a failed copy leaves nothing behind');
+
+  // tampering is detected
+  const hurt = fs.readFileSync(real(e1)); hurt[100] ^= 1; fs.writeFileSync(real(e1), hurt);
+  await assert.rejects(() => plainOf(e1), 'a changed file does not open');
+  await assert.rejects(() => files.plainCopy(e1, 'secret.pdf'), 'and no decrypted copy is left behind');
+  assert.equal(fs.existsSync(real('file:///data/user/0/app/cache/dec')) ? fs.readdirSync(real('file:///data/user/0/app/cache/dec')).length : 0, 0);
+
+  // without the key nothing is stored in the clear
+  files.setFileKey(null);
+  await assert.rejects(() => files.makeSink(cid, 'Anna')(meta('e2', 'a.txt')), 'no key: a received file is refused, not stored in the clear');
+  const tmp3 = 'file:///data/user/0/app/cache/k.bin'; fs.writeFileSync(real(tmp3), 'abc');
+  assert.equal(await files.storeOutgoing(cid, 'Anna', tmp3, 'k.bin'), tmp3, 'no key: the original is kept, nothing is copied');
+  assert.equal(fs.readdirSync(real(`${ENC}/${cid}`)).length, 3, 'nothing new was written');
+  await assert.rejects(() => plainOf(sent2), 'no key: nothing can be opened');
+  files.setFileKey(key);
+  assert.equal((await plainOf(sent2)).length, 70_000, 'with the key it opens again');
+
+  // switching back: new files are plain again, old encrypted ones stay readable
+  files.setFileMode('visible');
+  const back = await receive('m9', cid, 'Anna', 'plain-again.txt');
+  assert.ok(!files.isEncrypted(back) && !back.includes('.denc'), 'visible mode: plain file');
+  assert.equal((await plainOf(sent2)).length, 70_000, 'the encrypted file is still there and readable');
+  files.setFileMode('private');
+
+  // retention, sizes, deleting and wiping reach the encrypted folder as well
+  assert.ok(files.usedBytes(cid) > 270_000, 'size counts encrypted files');
+  files.deleteStored([e1]);
+  assert.equal(exists(e1), false, 'a removed message deletes its encrypted file');
+  const old2 = (uri: string, days: number) => { const t = new Date(Date.now() - days * 86_400_000); fs.utimesSync(real(uri), t, t); };
+  old2(sent2, 30);
+  files.sweepOldFiles(Date.now() - 14 * 86_400_000, []);
+  assert.equal(exists(sent2), false, 'old encrypted files are swept like any other');
+  const e3 = await receive('m10', other, 'Bo', 'z.bin');
+  assert.ok(files.isEncrypted(e3));
+  files.deleteFiles(other);
+  assert.equal(exists(e3), false, 'deleting one contact\'s files removes the encrypted ones');
+  assert.equal(exists(`${ENC}/${other}`), false, 'with the folder');
+  const e4 = await receive('m11', cid, 'Anna', 'last.bin');
+  files.deleteFiles();
+  assert.equal(exists(e4), false, 'delete all removes encrypted files');
+  const e5 = await receive('m12', cid, 'Anna', 'wipe.bin');
+  files.wipeAllFiles();
+  assert.equal(exists(e5), false, 'wipe removes encrypted files');
+  assert.equal(exists(ENC), false, 'and the encrypted folder');
+  files.setFileMode('visible'); files.setFileKey(null);
 
   fs.rmSync(BASE, { recursive: true, force: true });
   console.log('files.test.ts OK');

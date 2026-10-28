@@ -7,7 +7,8 @@ import { openAllFilesAccess, startUninstall } from '../storageaccess';
 import { Btn, Card, Header, Label, Row, Screen } from '../ui';
 
 export default function Storage({ onBack }: { onBack: () => void }) {
-  const { t, theme, contacts, clearChats, clearChat, publicStorage, wipeAll } = useApp();
+  const { t, theme, contacts, clearChats, clearChat, publicStorage, wipeAll, fileMode } = useApp();
+  const priv = fileMode === 'private';
   const [tick, setTick] = useState(0);
   const [note, setNote] = useState('');
   const sure = (title: string, run: () => void) => Alert.alert(title, t.clearConfirm, [{ text: t.cancel, style: 'cancel' }, { text: t.delete, style: 'destructive', onPress: () => { run(); setTick(x => x + 1); } }]);
@@ -22,9 +23,9 @@ export default function Storage({ onBack }: { onBack: () => void }) {
       <ScrollView contentContainerStyle={{ gap: 14, paddingBottom: 12 }} key={tick}>
         <Card>
           <Label>{t.spotTitle}</Label>
-          <Text style={{ fontWeight: '700', color: theme.ink }}>{publicStorage ? PUBLIC_LABEL : t.spotPrivate}</Text>
-          <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{publicStorage ? t.spotPublicSub : t.spotPrivateSub}</Text>
-          {!publicStorage && Platform.OS === 'android' ? <Btn title={t.spotGrant} onPress={openAllFilesAccess} /> : null}
+          <Text style={{ fontWeight: '700', color: theme.ink }}>{priv ? t.fmPrivate : publicStorage ? PUBLIC_LABEL : t.spotPrivate}</Text>
+          <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{priv ? t.fmPrivateShort : publicStorage ? t.spotPublicSub : t.spotPrivateSub}</Text>
+          {!priv && !publicStorage && Platform.OS === 'android' ? <Btn title={t.spotGrant} onPress={openAllFilesAccess} /> : null}
         </Card>
         <Card>
           <Row title={t.clearAllFiles} sub={`${t.used}: ${fmtSize(usedBytes())}`} danger onPress={() => sure(t.clearAllFiles, () => deleteFiles())} />

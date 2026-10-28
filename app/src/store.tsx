@@ -11,7 +11,8 @@ import { FileKind, MsgStatus } from './core/protocol';
 import { DEFAULT_RETENTION, cutoffFor, pruneMessages } from './core/retention';
 import { DEFAULT_LOCK_DELAY } from './core/lock';
 import { keyFromText, keyToText, makeSaver, newDataKey, openStored, sealText } from './core/vault';
-import { deleteStored, probePublic, sweepOldFiles, wipeAllFiles } from './files';
+import { clearPlain, deleteStored, probePublic, setFileKey, setFileMode, sweepOldFiles, wipeAllFiles } from './files';
+import { FileModeChoice } from './core/filemode';
 
 export type Attach = { name: string; mime: string; size: number; kind: FileKind; uri: string; dur?: number };
 export type Msg = { id: string; mine: boolean; text: string; at: number; status?: MsgStatus; file?: Attach };
@@ -26,6 +27,7 @@ type Saved = {
   retentionDays: number; // how long conversations and files are kept on this phone
   storagePrompted: boolean; // the question about the Download/Direct folder has been asked
   orphanAsked: boolean; // the question about files left by an earlier install has been asked
+  fileMode: FileModeChoice; // where new files go: 'visible' (Download/Direct) or 'private' (encrypted, in the app)
   lockOn: boolean; // the app asks for fingerprint, face or screen lock before it is shown
   lockDelay: number; // seconds in the background before it asks again (0 = every time)
 };
@@ -36,7 +38,7 @@ const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
   themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
   signalUrl: '', stunList: '', turnList: '', hideIp: false, tcpOnly: false, introSeen: false,
-  retentionDays: DEFAULT_RETENTION, storagePrompted: false, orphanAsked: false, lockOn: false, lockDelay: DEFAULT_LOCK_DELAY,
+  retentionDays: DEFAULT_RETENTION, storagePrompted: false, orphanAsked: false, fileMode: 'visible', lockOn: false, lockDelay: DEFAULT_LOCK_DELAY,
 };
 
 type Ctx = Saved & {
@@ -47,7 +49,7 @@ type Ctx = Saved & {
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
-  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen' | 'retentionDays' | 'storagePrompted' | 'orphanAsked' | 'lockOn' | 'lockDelay'>>) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen' | 'retentionDays' | 'storagePrompted' | 'orphanAsked' | 'fileMode' | 'lockOn' | 'lockDelay'>>) => void;
   clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
@@ -87,7 +89,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!themes[saved.themeName as ThemeName]) saved.themeName = empty.themeName;
         setS({ ...empty, ...saved });
       }
-      keyRef.current = key; canSave.current = safe && !!key;
+      keyRef.current = key; canSave.current = safe && !!key; setFileKey(key);
+      clearPlain(); // decrypted copies from an earlier run are not kept
       legacyLeft.current = legacy != null && safe;
       try { const v = await SecureStore.getItemAsync(ID_KEY); if (v) setIdentity(JSON.parse(v)); } catch {}
       setReady(true);
@@ -99,6 +102,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const sub = AppState.addEventListener('change', st => { if (st !== 'active') saver.flush(); });
     return () => { sub.remove(); saver.flush(); };
   }, [saver]);
+
+  useEffect(() => { setFileMode(s.fileMode); }, [s.fileMode]);
+  // Decrypted copies in the cache are short-lived: old ones are removed now and then.
+  useEffect(() => {
+    const iv = setInterval(() => clearPlain(1_800_000), 600_000);
+    return () => clearInterval(iv);
+  }, []);
 
   // Is Download/Direct usable? Checked at start and every time the app comes back (for example from the Android setting).
   const refreshStorage = useCallback(() => setPublicStorage(probePublic()), []);
@@ -150,8 +160,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try { await AsyncStorage.removeItem(KEY); await AsyncStorage.removeItem(OLD_KEY); } catch {}
       try { await SecureStore.deleteItemAsync(DATA_KEY); } catch {}
       // The app goes on with an empty state (if the person cancels the uninstall), so it gets a new data key.
-      try { const k = newDataKey(); await SecureStore.setItemAsync(DATA_KEY, keyToText(k)); keyRef.current = k; canSave.current = true; legacyLeft.current = false; }
-      catch { keyRef.current = null; canSave.current = false; }
+      try { const k = newDataKey(); await SecureStore.setItemAsync(DATA_KEY, keyToText(k)); keyRef.current = k; canSave.current = true; legacyLeft.current = false; setFileKey(k); }
+      catch { keyRef.current = null; canSave.current = false; setFileKey(null); }
       setIdentity(null); setPublicStorage(false); setS({ ...empty });
     },
     setTheme: themeName => setS(o => ({ ...o, themeName })),

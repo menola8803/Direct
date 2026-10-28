@@ -8,11 +8,11 @@ import { openAllFilesAccess } from './storageaccess';
 // 1. Use the folder Download/Direct? (needs Android's "all files access", Android 11 or later)
 // 2. Delete files that an earlier install left in Download/Direct? (Android keeps that folder when an app is uninstalled)
 export function StoragePrompts() {
-  const { ready, identity, t, publicStorage, storagePrompted, orphanAsked, contacts, setSettings } = useApp();
+  const { ready, identity, t, publicStorage, storagePrompted, orphanAsked, contacts, setSettings, fileMode } = useApp();
   const open = useRef(false); // one dialog at a time
 
   useEffect(() => {
-    if (!ready || !identity || storagePrompted || publicStorage || open.current) return;
+    if (!ready || !identity || storagePrompted || publicStorage || fileMode === 'private' || open.current) return; // private mode does not need the folder
     if (Platform.OS !== 'android' || Number(Platform.Version) < 30) { setSettings({ storagePrompted: true }); return; }
     open.current = true;
     const done = (go: boolean) => { open.current = false; setSettings({ storagePrompted: true }); if (go) openAllFilesAccess(); };
@@ -20,7 +20,7 @@ export function StoragePrompts() {
       { text: t.laterBtn, style: 'cancel', onPress: () => done(false) },
       { text: t.spotGrant, onPress: () => done(true) },
     ], { cancelable: false });
-  }, [ready, identity, storagePrompted, publicStorage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready, identity, storagePrompted, publicStorage, fileMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!ready || !identity || orphanAsked || !publicStorage || open.current) return;

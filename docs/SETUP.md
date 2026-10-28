@@ -10,6 +10,15 @@
 `cd server && npm i && PORT=8080 node server.js` behind TLS, then enter `wss://your.domain` under Settings → Connection.
 The server only relays encrypted connection messages, never chat, files or calls.
 
+### Free signaling server on Render (no credit card)
+Tested in October 2026: the *Test signal server* button gave 201 ms from a phone.
+1. render.com → **New → Web Service → Public Git Repository** → `https://github.com/menola8803/Direct` (the repo must be public).
+2. Name `direct-signal`, Region *Frankfurt*, Branch `main`, **Root Directory `server`**, Runtime *Node*, Build Command `npm install`, Start Command `npm start`, Instance Type **Free**. Leave *Health Check Path* empty: the server only answers WebSocket, so a path check would fail.
+3. When the log says `Direct signaling listening on port …` and the service is *Live*, take its address and change `https://` to `wss://`, for example `wss://direct-signal.onrender.com` (no port).
+4. On every phone: Settings → Connection → paste the address → Save → press and hold *Test signal server*. Everyone must use exactly the same address.
+
+What to expect: the free instance sleeps after 15 minutes without inbound traffic and needs about a minute to wake, so the first test after a pause can fail; try again after a minute. The app reconnects by itself with growing delays (at most 30 seconds). Once two phones are connected, messages and calls go directly between them and the server is not involved. Render's free limits change, so check their pricing page (at the time of writing: 750 free instance hours per month and a monthly bandwidth cap). The server only sees public keys, IP addresses and timing, never content.
+
 ## Invite friends (link)
 Contacts → *Invite* (or My code → *Share invite*) sends a message with a download link and an invite link. Someone who already has Direct taps the invite link, lands on a page with an **Open in Direct** button, sees the sender's name and safety code, and can add them. After adding, the app offers *Send my code back*, so both sides have each other and can connect.
 - **The SMS** (Contacts → Invite, or My code → Share invite) says who invites and what Direct is, links to the newest APK, explains that Android asks to allow installing from the browser, and links to the invite page that adds the sender. It is about 700 characters, so phones send it as several linked SMS parts.

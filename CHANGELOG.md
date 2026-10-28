@@ -1,10 +1,15 @@
 # Changelog
 
-## 0.8.0 – No server, calls, files, forward secrecy
+## 0.9.0 – USB Portlås look, invite links, fixes
 - **USB Portlås look** (dark teal, gold, mint; Plus Jakarta Sans + Cinzel wordmark) is now the default theme.
 - **Fixed phone-book import** (the old `expo-contacts` calls throw in SDK 58; now uses `expo-contacts/legacy`).
 - **Invite links:** `direct://add?c=…` deep links, web invite page `docs/i.html`, invite screen with *Send my code back*.
-- **Configurable STUN servers** with a per-server test; defaults are no longer Google.
+- **STUN servers screen:** add, test all (✓/✗ with ms), remove single or failed servers, restore defaults. Defaults are no longer Google.
+- **R8 fix** for release builds (WebRTC keep/dontwarn rules).
+- **CI:** every push to `main` builds an APK (Actions → Artifacts); tags build the release APK.
+- Android `versionCode` is now set (900 for 0.9.0) so updates install over older builds.
+
+## 0.8.0 – No server, calls, files, forward secrecy
 - **Connect without a server:** manual pairing with encrypted codes (QR/text). The signaling server is optional.
 - **Forward secrecy:** fresh one-time keys per connection plus a hash chain per message (`core/session.ts`).
 - **Calls and conference:** voice/video 1:1 and up to 4 people with video (8 audio only), mesh over WebRTC, negotiated over the encrypted data channel.

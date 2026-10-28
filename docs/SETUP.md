@@ -1,4 +1,4 @@
-# Getting started (0.8.0)
+# Getting started (0.9.0)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -27,9 +27,12 @@ A STUN server only tells a phone its public address; it never sees messages. Set
 - Tests run in Node (`npm test`). Phone-specific code (camera, microphone, WebRTC in React Native, installing) has not been run on a device.
 
 ## Build the APK in the cloud (no tools needed)
+Every push to `main` that touches `app/` builds an APK: open the repo → **Actions** → the latest *Build APK* run → **Artifacts** → download `Direct-<version>-<commit>.apk` and install it.
+
+For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.8.0 -m "Direct 0.8.0" && git push origin v0.8.0
+git tag -a v0.9.0 -m "Direct 0.9.0" && git push origin v0.9.0
 ```
 The APK is signed with the Expo template's debug key, which is public. Fine for testing; before a real launch create your own keystore and keep it safe, since updates only install over an app signed with the same key.
 

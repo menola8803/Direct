@@ -1,24 +1,22 @@
-import React, { useRef, useState } from 'react';
-import { Linking, Pressable, ScrollView, Vibration, View } from 'react-native';
+import React, { useState } from 'react';
+import { Linking, ScrollView } from 'react-native';
 import { Text, TextInput } from '../ui';
 import { useApp } from '../store';
 import { rtc } from '../net/rtc';
 import { MAX_TURN, Turn, parseTurn, pingTurn, turnText } from '../net/turn';
 import { Btn, Card, Header, Label, Screen } from '../ui';
-import { useToast } from '../toast';
+import { Res, TestBtn, TestRow, useTestBox } from '../testkit';
 
-type Res = number | null | undefined; // ms, null = no relay, undefined = not tested
 const DOCS = 'https://github.com/menola8803/Direct/blob/main/docs/NETWORK.md';
 
 export default function TurnServers({ onBack }: { onBack: () => void }) {
   const { theme, t, turnList, setSettings } = useApp();
   const list = parseTurn(turnList);
   const [url, setUrl] = useState(''), [user, setUser] = useState(''), [pass, setPass] = useState('');
-  const [bad, setBad] = useState(false), [testing, setTesting] = useState(false);
+  const [bad, setBad] = useState(false);
   const [res, setRes] = useState<Record<string, Res>>({});
   const key = (x: Turn) => `${x.urls} ${x.username ?? ''}`;
-  const toast = useToast();
-  const running = useRef(false);
+  const box = useTestBox();
   const save = (l: Turn[]) => setSettings({ turnList: turnText(l) });
 
   const add = () => {
@@ -29,24 +27,21 @@ export default function TurnServers({ onBack }: { onBack: () => void }) {
     setUrl(''); setUser(''); setPass(''); setBad(false);
   };
   const remove = (x: Turn) => { save(list.filter(y => key(y) !== key(x))); setRes(o => { const n = { ...o }; delete n[key(x)]; return n; }); };
-  const testAll = async () => {
-    if (!rtc || running.current) return;
-    running.current = true; setTesting(true); setRes({});
-    await Promise.all(list.map(async x => { const ms = await pingTurn(rtc!, x); setRes(o => ({ ...o, [key(x)]: ms })); }));
-    setTesting(false); running.current = false;
-  };
-  // Hold an address: test just that server and show the answer in a box that fades away.
-  const testOne = async (x: Turn) => {
-    if (running.current) return;
-    if (!rtc) { toast.show({ kind: 'fail', title: t.turnFail, detail: t.rtcMissing }, 3000); return; }
-    running.current = true; Vibration.vibrate(25);
-    const where = x.urls.replace(/^turns?:/, '').replace(/\?.*$/, '');
-    toast.show({ kind: 'busy', title: t.turnTesting, detail: where });
+  const where = (x: Turn) => x.urls.replace(/^turns?:/, '').replace(/\?.*$/, '');
+  // Hold an address: test just that server. Hold the button: test them all.
+  const testOne = (x: Turn) => box.run(where(x), async () => {
+    if (!rtc) return { ok: false, detail: t.rtcMissing };
     const ms = await pingTurn(rtc, x);
     setRes(o => ({ ...o, [key(x)]: ms }));
-    running.current = false;
-    toast.show(ms === null ? { kind: 'fail', title: t.turnFail, detail: t.turnNoRelay } : { kind: 'ok', title: t.turnOk, detail: `${ms} ms · ${where}` }, 2500);
-  };
+    return ms === null ? { ok: false, detail: t.turnNoRelay } : { ok: true, detail: `${ms} ms · ${where(x)}` };
+  });
+  const testAll = () => box.run(t.turnTest, async () => {
+    if (!rtc) return { ok: false, detail: t.rtcMissing };
+    setRes({});
+    const all = await Promise.all(list.map(async x => { const ms = await pingTurn(rtc!, x); setRes(o => ({ ...o, [key(x)]: ms })); return ms; }));
+    const n = all.filter(m => m !== null).length;
+    return { ok: n === all.length, detail: `${n} / ${all.length}` };
+  });
   const failed = list.filter(x => res[key(x)] === null);
   const input = (v: string, set: (s: string) => void, ph: string, secure?: boolean) => (
     <TextInput value={v} onChangeText={x => { set(x); setBad(false); }} autoCapitalize="none" autoCorrect={false} secureTextEntry={secure} placeholder={ph} placeholderTextColor={theme.muted}
@@ -69,38 +64,19 @@ export default function TurnServers({ onBack }: { onBack: () => void }) {
           <Btn title={t.add} onPress={add} />
         </Card>
         <Card>
-          {list.length === 0 ? <Text style={{ color: theme.muted }}>{t.turnEmpty}</Text> : <Text style={{ fontSize: 12, color: theme.muted }}>{t.turnHoldHint}</Text>}
-          {list.map(x => {
-            const r = res[key(x)];
-            return (
-              <View key={key(x)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}>
-                <Text style={{ width: 22, fontSize: 16, color: r === undefined ? theme.muted : r === null ? theme.danger : theme.good }}>{r === undefined ? '•' : r === null ? '✗' : '✓'}</Text>
-                <Pressable
-                  style={{ flex: 1, paddingVertical: 6 }}
-                  delayLongPress={500}
-                  onPress={() => toast.show({ kind: 'info', title: t.turnHowToTitle, detail: t.turnHowTo }, 7000)}
-                  onLongPress={() => testOne(x)}
-                  accessibilityRole="button"
-                  accessibilityHint={t.turnHowTo}
-                  accessibilityActions={[{ name: 'test', label: t.turnTest }]}
-                  onAccessibilityAction={() => testOne(x)}>
-                  <Text style={{ fontSize: 14, color: theme.ink }}>{x.urls.replace(/^turns?:/, m => (m === 'turns:' ? 'TLS ' : ''))}</Text>
-                  <Text style={{ fontSize: 12, color: theme.muted }}>{r === null ? t.turnNoRelay : r !== undefined ? `${r} ms` : x.username ?? ''}</Text>
-                </Pressable>
-                <Pressable accessibilityRole="button" accessibilityLabel={t.delete} onPress={() => remove(x)} hitSlop={8}
-                  style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: theme.line }}>
-                  <Text style={{ color: theme.danger, fontWeight: '600' }}>{t.delete}</Text>
-                </Pressable>
-              </View>
-            );
-          })}
+          {list.length === 0 ? <Text style={{ color: theme.muted }}>{t.turnEmpty}</Text> : <Text style={{ fontSize: 12, color: theme.muted }}>{t.holdHintRow}</Text>}
+          {list.map(x => (
+            <TestRow key={key(x)} label={x.urls.replace(/^turns?:/, m => (m === 'turns:' ? 'TLS ' : ''))} sub={x.username ?? ''} res={res[key(x)] as Res}
+              noAnswer={t.turnNoRelay} helpText={t.turnHowTo} testLabel={t.turnTest}
+              onHelp={() => box.help(t.turnHowToTitle, t.turnHowTo)} onTest={() => testOne(x)} onDelete={() => remove(x)} />
+          ))}
         </Card>
         {!rtc ? <Text style={{ color: theme.danger }}>{t.rtcMissing}</Text> : null}
-        {list.length > 0 ? <Btn title={testing ? t.connecting : t.turnTest} kind="secondary" onPress={testAll} /> : null}
+        {list.length > 0 ? <TestBtn title={t.turnTest} onHelp={() => box.help(t.turnAllTitle, t.turnAllHowTo)} onTest={testAll} /> : null}
         {failed.length > 0 ? <Btn title={`${t.stunRemoveFailed} (${failed.length})`} kind="danger" onPress={() => save(list.filter(x => res[key(x)] !== null))} /> : null}
         <Btn title={t.turnDocs} kind="secondary" onPress={() => Linking.openURL(DOCS).catch(() => {})} />
       </ScrollView>
-      {toast.node}
+      {box.node}
     </Screen>
   );
 }

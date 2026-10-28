@@ -17,4 +17,5 @@ export type Route =
   | { name: 'theme' }
   | { name: 'language' }
   | { name: 'blocked' }
+  | { name: 'guide' }
   | { name: 'about' };

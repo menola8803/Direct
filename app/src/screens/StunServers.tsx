@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { Text, TextInput } from '../ui';
 import { useApp } from '../store';
 import { rtc } from '../net/rtc';
 import { DEFAULT_STUN, parseStun, pingStun } from '../net/stun';
 import { Btn, Card, Header, Screen } from '../ui';
-
-type Res = number | null | undefined; // ms, null = no answer, undefined = not tested
+import { Res, TestBtn, TestRow, useTestBox } from '../testkit';
 
 export default function StunServers({ onBack }: { onBack: () => void }) {
   const { theme, t, stunList, setSettings } = useApp();
@@ -15,7 +14,7 @@ export default function StunServers({ onBack }: { onBack: () => void }) {
   const usingDefaults = saved.length === 0;
   const [res, setRes] = useState<Record<string, Res>>({});
   const [text, setText] = useState('');
-  const [testing, setTesting] = useState(false);
+  const box = useTestBox();
 
   const save = (l: string[]) => { setSettings({ stunList: l.join('\n') }); };
   const add = () => {
@@ -26,12 +25,21 @@ export default function StunServers({ onBack }: { onBack: () => void }) {
     setText('');
   };
   const remove = (u: string) => { save(list.filter(x => x !== u)); setRes(o => { const n = { ...o }; delete n[u]; return n; }); };
-  const testAll = async () => {
-    if (!rtc) return;
-    setTesting(true); setRes({});
-    await Promise.all(list.map(async u => { const ms = await pingStun(rtc!, u); setRes(o => ({ ...o, [u]: ms })); }));
-    setTesting(false);
-  };
+  const host = (u: string) => u.replace(/^stuns?:/, '');
+  // Hold an address: test just that server. Hold the button: test them all.
+  const testOne = (u: string) => box.run(host(u), async () => {
+    if (!rtc) return { ok: false, detail: t.rtcMissing };
+    const ms = await pingStun(rtc, u);
+    setRes(o => ({ ...o, [u]: ms }));
+    return ms === null ? { ok: false, detail: t.stunNoAnswer } : { ok: true, detail: `${ms} ms · ${host(u)}` };
+  });
+  const testAll = () => box.run(t.testStun, async () => {
+    if (!rtc) return { ok: false, detail: t.rtcMissing };
+    setRes({});
+    const all = await Promise.all(list.map(async u => { const ms = await pingStun(rtc!, u); setRes(o => ({ ...o, [u]: ms })); return ms; }));
+    const n = all.filter(m => m !== null).length;
+    return { ok: n === all.length, detail: `${n} / ${all.length}` };
+  });
   const removeFailed = () => save(list.filter(u => res[u] !== null));
   const failed = list.filter(u => res[u] === null).length;
 
@@ -46,29 +54,19 @@ export default function StunServers({ onBack }: { onBack: () => void }) {
         </Card>
         <Card>
           {usingDefaults ? <Text style={{ fontSize: 13, color: theme.muted }}>{t.stunDefaultsNote}</Text> : null}
-          {list.map(u => {
-            const r = res[u];
-            return (
-              <View key={u} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}>
-                <Text style={{ width: 22, fontSize: 16, color: r === undefined ? theme.muted : r === null ? theme.danger : theme.good }}>{r === undefined ? '•' : r === null ? '✗' : '✓'}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 14, color: theme.ink }}>{u.replace(/^stuns?:/, '')}</Text>
-                  {r !== undefined ? <Text style={{ fontSize: 12, color: theme.muted }}>{r === null ? t.stunNoAnswer : `${r} ms`}</Text> : null}
-                </View>
-                <Pressable accessibilityRole="button" accessibilityLabel={t.delete} onPress={() => remove(u)} hitSlop={8}
-                  style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: theme.line }}>
-                  <Text style={{ color: theme.danger, fontWeight: '600' }}>{t.delete}</Text>
-                </Pressable>
-              </View>
-            );
-          })}
+          {list.length > 0 ? <Text style={{ fontSize: 12, color: theme.muted }}>{t.holdHintRow}</Text> : null}
+          {list.map(u => (
+            <TestRow key={u} label={host(u)} res={res[u] as Res} noAnswer={t.stunNoAnswer} helpText={t.stunHowTo} testLabel={t.testStun}
+              onHelp={() => box.help(t.stunHowToTitle, t.stunHowTo)} onTest={() => testOne(u)} onDelete={() => remove(u)} />
+          ))}
           {list.length === 0 ? <Text style={{ color: theme.muted }}>{t.stunEmpty}</Text> : null}
         </Card>
         {!rtc ? <Text style={{ color: theme.danger }}>{t.rtcMissing}</Text> : null}
-        <Btn title={testing ? t.connecting : t.testStun} kind="secondary" onPress={testAll} />
+        <TestBtn title={t.testStun} onHelp={() => box.help(t.stunAllTitle, t.stunAllHowTo)} onTest={testAll} />
         {failed > 0 ? <Btn title={`${t.stunRemoveFailed} (${failed})`} kind="danger" onPress={removeFailed} /> : null}
         <Btn title={t.stunReset} kind="secondary" onPress={() => { save([]); setRes({}); }} />
       </ScrollView>
+      {box.node}
     </Screen>
   );
 }

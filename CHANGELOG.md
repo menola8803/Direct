@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.0 – Getting-started guide, one way to test, centered start screen
+- **Getting-started guide:** after the start screen on a fresh install the app shows five pages: welcome (with language choice), how to create your key, how to invite and connect others, everything you can do (chat, files, voice and video calls, voice and video messages, conference) and good to know. Then the key screen. Open it again any time under *Settings → Getting started guide*. Installs that are older than the guide do not get it as a first-run screen.
+- **Tests work the same everywhere in Settings:** tap = a box explains the test, press and hold = the test runs, a box says *Testing…*, then *OK* or *Not working*, and fades away by itself. Applies to STUN servers (each address and the test-all button), TURN servers, the voice/video test (microphone, camera, WebRTC) and a new *Test signal server* button on the Connection screen. A hint line on each screen says so.
+- **Centered:** the wordmark DIRECT and the tagline on the start screen and in the Dark header are now exactly centered on the logo, and the tagline is stretched to the same width as DIRECT. (Wide letter-spacing used to leave an extra gap after the last letter, so the text sat off-center.)
+- **Language:** the *Video* button in the chat was the one text that did not follow the language choice. Every text now comes from the language files (Swedish and English).
+
 ## 0.10.1 – Test a TURN server with a long press
 - **TURN servers:** tap an address for a short explanation of how to test it. Press and hold the address to test just that server: a box shows *Testing…* and then *OK* (with the time) or *Not working*, and fades away by itself after a few seconds. The result also marks the row. The *Test TURN servers* button still tests all of them.
 

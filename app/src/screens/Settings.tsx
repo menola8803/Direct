@@ -14,6 +14,7 @@ export default function Settings({ go }: { go: (r: Route) => void }) {
       <Card>
         <Row title={t.theme} sub={t.themeSub} right={theme.label} onPress={() => go({ name: 'theme' })} />
         <Row title={t.language} sub={t.languageSub} right={langLabel} onPress={() => go({ name: 'language' })} />
+        <Row title={t.guideRowTitle} sub={t.guideRowSub} onPress={() => go({ name: 'guide' })} />
         <Row title={t.connection} sub={t.connectionSub} onPress={() => go({ name: 'connection' })} />
         <Row title={t.stunTitle} sub={t.stunSub} onPress={() => go({ name: 'stun' })} />
         <Row title={t.turnTitle} sub={t.turnSub} onPress={() => go({ name: 'turn' })} />

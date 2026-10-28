@@ -34,11 +34,14 @@ assert.deepEqual(planIce({ stunList: '', turnList: '', hideIp: true, tcpOnly: fa
 assert.equal(asTcp('turn:a.org:3478?transport=udp'), 'turn:a.org:3478?transport=udp', 'an explicit transport is respected');
 
 // ---- migrateSaved
-assert.deepEqual(migrateSaved({ themeName: 'usb', turnUrl: 'turn:a.org:3478', turnUser: 'u', turnCred: 'p', hideIp: true }), { themeName: 'dark', turnList: 'turn:a.org:3478 u p', hideIp: true });
-assert.deepEqual(migrateSaved({ turnUrl: '', turnUser: '', turnCred: '' }), {}, 'empty old fields vanish');
-assert.deepEqual(migrateSaved({ turnList: 'turn:x.org:3478', turnUrl: 'turn:old.org:1' }), { turnList: 'turn:x.org:3478' }, 'an existing list wins');
+assert.deepEqual(migrateSaved({ themeName: 'usb', turnUrl: 'turn:a.org:3478', turnUser: 'u', turnCred: 'p', hideIp: true }), { themeName: 'dark', turnList: 'turn:a.org:3478 u p', hideIp: true, introSeen: true });
+assert.deepEqual(migrateSaved({ turnUrl: '', turnUser: '', turnCred: '' }), { introSeen: true }, 'empty old fields vanish');
+assert.deepEqual(migrateSaved({ turnList: 'turn:x.org:3478', turnUrl: 'turn:old.org:1' }), { turnList: 'turn:x.org:3478', introSeen: true }, 'an existing list wins');
 assert.deepEqual(migrateSaved(null), {});
 assert.equal(migrateSaved({ themeName: 'beige' }).themeName, 'beige');
+assert.equal(migrateSaved({ themeName: 'dark' }).introSeen, true, 'an older install does not get the first-run guide');
+assert.equal(migrateSaved({ introSeen: false }).introSeen, false, 'a fresh install that has not finished the guide keeps it');
+assert.equal(migrateSaved({ introSeen: true }).introSeen, true);
 
 // ---- an address that cannot hand out a relay must report failure (and not hang)
 (async () => {

@@ -13,6 +13,7 @@ import { NetProvider } from './src/net/net';
 import { Route } from './src/nav';
 import { Screen, TabBar } from './src/ui';
 import Welcome from './src/screens/Welcome';
+import Guide from './src/screens/Guide';
 import Chats from './src/screens/Chats';
 import ContactsScreen from './src/screens/Contacts';
 import Settings from './src/screens/Settings';
@@ -38,7 +39,7 @@ import Splash from './src/screens/Splash';
 import { useNet } from './src/net/net';
 
 function Content() {
-  const { ready, identity } = useApp();
+  const { ready, identity, introSeen, setSettings } = useApp();
   const { call } = useNet();
   const [stack, setStack] = useState<Route[]>([{ name: 'tabs' }]);
   const [pending, setPending] = useState<string | null>(null);
@@ -66,7 +67,8 @@ function Content() {
   }, [stack.length, pop]);
 
   if (!ready) return <View style={{ flex: 1 }} />;
-  if (!identity) return <Welcome />;
+  // First start after install: the guide, then the screen where the key is created.
+  if (!identity) return introSeen ? <Welcome /> : <Guide first onClose={() => setSettings({ introSeen: true })} />;
   if (call.status !== 'idle') return <CallScreen />;
 
   const r = stack[stack.length - 1];
@@ -88,6 +90,7 @@ function Content() {
     case 'theme': return <ThemePicker onBack={pop} />;
     case 'language': return <LanguagePicker onBack={pop} />;
     case 'blocked': return <Blocked onBack={pop} />;
+    case 'guide': return <Guide onClose={pop} />;
     case 'about': return <About onBack={pop} />;
     default:
       return (

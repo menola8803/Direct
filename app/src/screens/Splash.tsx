@@ -3,6 +3,7 @@ import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, View,
 import Svg, { Circle, Defs, G, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { StatusBar } from 'expo-status-bar';
 import { useApp } from '../store';
+import { Spaced } from '../spaced';
 
 // Start screen. Always dark, whatever theme is chosen.
 // Designed on a 390 x 844 canvas and scaled to the screen (see design "Direct startbild").
@@ -179,9 +180,12 @@ function Logo({ reduce }: { reduce: boolean }) {
 function Wordmark({ tagline, reduce }: { tagline: string; reduce: boolean }) {
   const v = useEntrance(550, 700, reduce);
   return (
-    <Animated.View style={{ position: 'absolute', left: 0, top: 376, width: W0, alignItems: 'center', opacity: v, transform: [{ translateY: lerp(v, 16, 0) }] }}>
-      <Text style={{ fontFamily: DISPLAY, fontSize: 40, lineHeight: 48, letterSpacing: 12, paddingLeft: 12, color: C.gold, textShadowColor: 'rgba(232,176,74,0.3)', textShadowRadius: 18, textShadowOffset: { width: 0, height: 0 } }}>DIRECT</Text>
-      <Text style={{ marginTop: 8, fontFamily: SANS, fontSize: 11, letterSpacing: 4, paddingLeft: 4, color: C.mint }}>— {tagline} —</Text>
+    <Animated.View style={{ position: 'absolute', left: 0, top: 384, width: W0, alignItems: 'center', opacity: v, transform: [{ translateY: lerp(v, 16, 0) }] }}>
+      {/* The block is as wide as the wider of the two lines. Both are stretched to that width, so they read as one block centered on the logo. */}
+      <View style={{ alignItems: 'stretch', gap: 12 }}>
+        <Spaced text="DIRECT" spacing={10} justify style={{ fontFamily: DISPLAY, fontSize: 42, lineHeight: 50, color: C.gold, textShadowColor: 'rgba(232,176,74,0.3)', textShadowRadius: 18, textShadowOffset: { width: 0, height: 0 } }} />
+        <Spaced text={`— ${tagline} —`} spacing={2} justify style={{ fontFamily: SANS, fontSize: 11, color: C.mint }} />
+      </View>
     </Animated.View>
   );
 }
@@ -242,7 +246,9 @@ function Feature({ x, label, enter, glow, reduce, children }: { x: number; label
         <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: C.panel, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' }}>{children}</View>
         <Animated.View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: 72, height: 72, borderRadius: 36, borderWidth: 1.5, borderColor: C.gold, opacity: pulse }} />
       </Animated.View>
-      <Animated.Text style={{ position: 'absolute', left: x + 36 - 54, top: 606, width: 108, textAlign: 'center', fontFamily: SANS, fontSize: 10.5, letterSpacing: 2.2, paddingLeft: 2, color: C.ink, opacity: lab }}>{label}</Animated.Text>
+      <Animated.View style={{ position: 'absolute', left: x + 36 - 54, top: 606, width: 108, alignItems: 'center', opacity: lab }}>
+        <Spaced text={label} spacing={2} style={{ fontFamily: SANS, fontSize: 10.5, color: C.ink }} />
+      </Animated.View>
     </>
   );
 }
@@ -270,7 +276,7 @@ function Encrypted({ text, reduce }: { text: string; reduce: boolean }) {
           <Path d="M3.5 6V4.2a2.5 2.5 0 0 1 5 0V6" />
         </G>
       </Svg>
-      <Text style={{ marginLeft: 8, fontFamily: SANS, fontSize: 10, letterSpacing: 2.4, color: C.dim }}>{text}</Text>
+      <Spaced text={text} spacing={2.2} style={{ fontFamily: SANS, fontSize: 10, color: C.dim }} containerStyle={{ marginLeft: 8 }} />
     </Animated.View>
   );
 }

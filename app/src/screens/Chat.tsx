@@ -41,7 +41,7 @@ export default function Chat({ id, onBack, onVerify, onPair }: { id: string; onB
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <View style={{ flex: 1 }}><Header title={c.name} sub={sub} onBack={onBack} /></View>
         <SmallBtn title={t.call} onPress={() => startCall(false)} />
-        <SmallBtn title="Video" onPress={() => startCall(true)} />
+        <SmallBtn title={t.video} onPress={() => startCall(true)} />
         <Pressable accessibilityLabel={t.verify} onPress={onVerify}><Avatar name={c.name} size={36} ring={st === 'open' ? theme.good : theme.line} /></Pressable>
       </View>
       <FlatList ref={ref} data={list} keyExtractor={m => m.id} contentContainerStyle={{ gap: 10, paddingVertical: 6 }}

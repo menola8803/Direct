@@ -11,5 +11,8 @@ export function migrateSaved(raw: any): any {
     }
     delete s.turnUrl; delete s.turnUser; delete s.turnCred;
   }
+  // 0.11.0: the getting-started guide is shown once on a fresh install. An install that is older than the
+  // guide (saved state without the flag) has long since started, so it does not get it as a first-run screen.
+  if (typeof s.introSeen !== 'boolean') s.introSeen = true;
   return s;
 }

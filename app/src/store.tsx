@@ -17,12 +17,13 @@ type Saved = {
   themeName: ThemeName; langChoice: LangChoice; name: string;
   contacts: Record<string, Contact>; blocked: Record<string, string>; messages: Record<string, Msg[]>;
   signalUrl: string; stunList: string; turnList: string; hideIp: boolean; tcpOnly: boolean;
+  introSeen: boolean; // the getting-started guide has been shown after install
 };
 const KEY = 'direct.state.v2';
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
   themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
-  signalUrl: '', stunList: '', turnList: '', hideIp: false, tcpOnly: false,
+  signalUrl: '', stunList: '', turnList: '', hideIp: false, tcpOnly: false, introSeen: false,
 };
 
 type Ctx = Saved & {
@@ -32,7 +33,7 @@ type Ctx = Saved & {
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
-  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly'>>) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen'>>) => void;
   clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text as RNText, TextInput as RNTextInput, TextIn
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from './store';
 import { Theme } from './theme';
+import { Spaced } from './spaced';
 
 // Text and TextInput that pick the theme's font family from fontWeight (custom fonts need one family per weight).
 function familyFor(theme: Theme, weight: unknown, explicit?: string) {
@@ -53,12 +54,12 @@ export function Card({ children, style }: { children: React.ReactNode; style?: V
   return <View style={[{ backgroundColor: theme.card, borderColor: theme.line, borderWidth: 1, borderRadius: 22, padding: 16, gap: 14 }, style]}>{children}</View>;
 }
 
-export function Btn({ title, onPress, kind = 'primary' }: { title: string; onPress: () => void; kind?: 'primary' | 'secondary' | 'danger' }) {
+export function Btn({ title, onPress, onLongPress, hint, kind = 'primary' }: { title: string; onPress: () => void; onLongPress?: () => void; hint?: string; kind?: 'primary' | 'secondary' | 'danger' }) {
   const { theme } = useApp();
   const bg = kind === 'primary' ? theme.primary : theme.card;
   const fg = kind === 'primary' ? theme.onPrimary : kind === 'danger' ? theme.danger : theme.ink;
   return (
-    <Pressable accessibilityRole="button" onPress={onPress}
+    <Pressable accessibilityRole="button" accessibilityHint={hint} onPress={onPress} onLongPress={onLongPress} delayLongPress={500}
       style={({ pressed }) => ({ minHeight: 52, borderRadius: 16, backgroundColor: bg, opacity: pressed ? 0.85 : 1, alignItems: 'center', justifyContent: 'center', borderWidth: kind === 'primary' ? 0 : 1, borderColor: kind === 'danger' ? theme.danger : theme.line })}>
       <Text style={{ color: fg, fontSize: 16, fontWeight: '600' }}>{title}</Text>
     </Pressable>
@@ -148,20 +149,21 @@ export function ThemePreview({ th }: { th: Theme }) {
 export const styles = StyleSheet.create({ fill: { flex: 1 } });
 
 
-// Branded page header (Dark theme): ring logo, spaced wordmark and a small spaced tagline.
+// Branded page header (Dark theme): ring logo and the wordmark with the tagline under it.
+// The whole group is centered in the card; the tagline is stretched to the width of DIRECT.
 export function BrandHeader({ tagline }: { tagline: string }) {
   const { theme } = useApp();
   if (theme.name !== 'dark') return <H1>Direct</H1>;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#162B2E', borderRadius: 24, borderWidth: 1, borderColor: '#2D322B', paddingVertical: 14, paddingHorizontal: 16 }}>
-      <View style={{ width: 52, height: 52, borderRadius: 26, borderWidth: 2, borderColor: theme.primary, alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: '#8A6D2E', alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 22 }}>D</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 18, backgroundColor: '#162B2E', borderRadius: 24, borderWidth: 1, borderColor: '#2D322B', paddingVertical: 16, paddingHorizontal: 16 }}>
+      <View style={{ width: 54, height: 54, borderRadius: 27, borderWidth: 2, borderColor: theme.primary, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: 42, height: 42, borderRadius: 21, borderWidth: 1, borderColor: '#8A6D2E', alignItems: 'center', justifyContent: 'center' }}>
+          <RNText style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 22, lineHeight: 26, textAlign: 'center', includeFontPadding: false }}>D</RNText>
         </View>
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 32, letterSpacing: 8 }}>DIRECT</Text>
-        <Text style={{ color: theme.accent, fontWeight: '700', fontSize: 11, letterSpacing: 3.5 }}>— {tagline} —</Text>
+      <View style={{ alignItems: 'stretch', gap: 5 }}>
+        <Spaced text="DIRECT" spacing={7} justify style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 34, lineHeight: 40 }} />
+        <Spaced text={`— ${tagline} —`} spacing={1} justify style={{ color: theme.accent, fontFamily: theme.fonts.bold, fontSize: 10 }} />
       </View>
     </View>
   );

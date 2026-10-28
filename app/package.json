@@ -1,6 +1,6 @@
 {
   "name": "direct",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "main": "index.ts",
   "dependencies": {
     "@config-plugins/react-native-webrtc": "^15.0.2",
@@ -48,7 +48,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "tsx test/core.test.ts && tsx test/session.test.ts && tsx test/calls.test.ts && tsx test/peers.test.ts && tsx test/manual.test.ts && tsx test/stun.test.ts && tsx test/invite.test.ts && node ../server/test.js",
+    "test": "tsx test/core.test.ts && tsx test/session.test.ts && tsx test/calls.test.ts && tsx test/peers.test.ts && tsx test/manual.test.ts && tsx test/stun.test.ts && tsx test/invite.test.ts && tsx test/ice.test.ts && node ../server/test.js",
     "typecheck": "tsc --noEmit"
   },
   "private": true

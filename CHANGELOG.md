@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.0 – Better invitations, TURN list, privacy mode
+- **Invite SMS:** says who invites and what Direct is, links to the newest APK, explains that Android asks to allow installing from the browser, and links to the invite page. The invite page (`docs/i.html`) now shows who invites, what the app does, a download button and step-by-step install help (Swedish and English).
+- **Always-newest download link:** `releases/latest/download/Direct.apk`. The release workflow uploads the APK under that fixed name. Needs a public repo.
+- **STUN:** `stun.stunprotocol.org` (did not answer) replaced by `stun.telnyx.com:3478`.
+- **TURN servers:** a list of up to five (Settings → TURN servers) with a test that checks the server really hands out a relay address. The old single TURN server is migrated. No built-in TURN defaults, see `docs/NETWORK.md`.
+- **Privacy and Tor/VPN:** *Hide my IP* (relay only) no longer falls back to a direct connection when no TURN server is set. New *Tor/VPN mode* (TCP-only relays, no STUN) for use with Orbot or a VPN, with buttons for VPN settings and Orbot.
+- Connection screen now only holds the signal server.
+
 ## 0.9.3 – Clearer app icon
 - The app icon (ring with a D and two peers) is bolder: bigger D, thicker ring, no thin inner ring, so it reads at launcher size.
 

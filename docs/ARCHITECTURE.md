@@ -2,7 +2,7 @@
 
 ## What is built (0.8.0)
 - **Identity:** two NaCl key pairs (X25519 for encryption, Ed25519 for signing) created on the phone and kept in secure storage. A contact is added by exchanging a card (`direct1:` code or QR). The contact id is derived from both public keys.
-- **Transport:** WebRTC data channels, straight between phones. STUN for address discovery; TURN is optional (also enables "hide my IP").
+- **Transport:** WebRTC data channels, straight between phones. STUN for address discovery; TURN is optional (up to five servers; also enables "hide my IP" and the TCP-only Tor/VPN mode, see `docs/NETWORK.md`).
 - **Introduction (two options):**
   1. *No server:* phones exchange compressed, encrypted offer/answer codes (QR, SMS, e-mail, paste).
   2. *Signaling relay (optional, `server/`):* forwards sealed offer/answer/ICE messages between authenticated keys (challenge/response with an Ed25519 signature). Stores nothing, never sees chat, files or calls.

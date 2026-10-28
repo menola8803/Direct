@@ -42,7 +42,7 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
     { text: t.cancel, style: 'cancel' },
   ]);
   const invite = (p: Person) => {
-    const body = identity ? inviteMessage(encodeCard(identity, name), t) : t.inviteText;
+    const body = identity ? inviteMessage(encodeCard(identity, name), t, name) : t.inviteText;
     Linking.openURL(`sms:${p.phone ?? ''}?body=${encodeURIComponent(body)}`).catch(() => {});
   };
 

@@ -27,6 +27,8 @@ import Verify from './src/screens/Verify';
 import Connection from './src/screens/Connection';
 import Update from './src/screens/Update';
 import StunServers from './src/screens/StunServers';
+import TurnServers from './src/screens/TurnServers';
+import Privacy from './src/screens/Privacy';
 import ManualPair from './src/screens/ManualPair';
 import Conference from './src/screens/Conference';
 import MediaTest from './src/screens/MediaTest';
@@ -80,6 +82,8 @@ function Content() {
     case 'add': return <AddContact onBack={pop} onAdded={id => setStack(s => [...s.slice(0, -1), { name: 'chat', id }])} />;
     case 'connection': return <Connection onBack={pop} />;
     case 'stun': return <StunServers onBack={pop} />;
+    case 'turn': return <TurnServers onBack={pop} />;
+    case 'privacy': return <Privacy onBack={pop} go={push} />;
     case 'update': return <Update onBack={pop} />;
     case 'theme': return <ThemePicker onBack={pop} />;
     case 'language': return <LanguagePicker onBack={pop} />;

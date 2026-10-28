@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { getLocales } from 'expo-localization';
 import { Theme, ThemeName, themes } from './theme';
+import { migrateSaved } from './core/migrate';
 import { dict, Lang, LangChoice, Strings } from './i18n';
 import { Contact, Identity, newIdentity } from './core/crypto';
 import { FileKind, MsgStatus } from './core/protocol';
@@ -15,13 +16,13 @@ export type Person = { id: string; name: string; phone?: string };
 type Saved = {
   themeName: ThemeName; langChoice: LangChoice; name: string;
   contacts: Record<string, Contact>; blocked: Record<string, string>; messages: Record<string, Msg[]>;
-  signalUrl: string; stunList: string; turnUrl: string; turnUser: string; turnCred: string; hideIp: boolean;
+  signalUrl: string; stunList: string; turnList: string; hideIp: boolean; tcpOnly: boolean;
 };
 const KEY = 'direct.state.v2';
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
   themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
-  signalUrl: '', stunList: '', turnUrl: '', turnUser: '', turnCred: '', hideIp: false,
+  signalUrl: '', stunList: '', turnList: '', hideIp: false, tcpOnly: false,
 };
 
 type Ctx = Saved & {
@@ -31,7 +32,7 @@ type Ctx = Saved & {
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
-  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnUrl' | 'turnUser' | 'turnCred' | 'hideIp'>>) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly'>>) => void;
   clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
@@ -47,9 +48,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         const v = await AsyncStorage.getItem(KEY);
         if (v) {
-          const saved = JSON.parse(v);
-          // The dark theme was called 'usb' before 0.9.1.
-          if (saved.themeName === 'usb') saved.themeName = 'dark';
+          const saved = migrateSaved(JSON.parse(v)); // settings from older versions (theme name, single TURN server)
           if (!themes[saved.themeName as ThemeName]) saved.themeName = empty.themeName;
           setS({ ...empty, ...saved });
         }

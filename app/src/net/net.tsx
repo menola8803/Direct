@@ -4,10 +4,10 @@ import { Contact } from '../core/crypto';
 import { FileKind, newId, Plain } from '../core/protocol';
 import { Receiver, sendFile } from '../core/transfer';
 import { fileSource, makeSink } from '../files';
-import { IceServer, LinkState, PeerManager, SignalState } from './peers';
+import { LinkState, PeerManager, SignalState } from './peers';
 import { CallController, CallView } from './calls';
 import { mediaDevices, rtc } from './rtc';
-import { stunOrDefault } from './stun';
+import { planIce } from './ice';
 
 const idleCall: CallView = { status: 'idle', cid: '', video: false, peers: {}, muted: false, camOff: false, local: null };
 export type SendFileArgs = { uri: string; name: string; mime: string; kind: FileKind; dur?: number };
@@ -37,7 +37,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
   const [remote, setRemote] = useState<Record<string, any>>({});
   const [calls, setCalls] = useState<CallController | null>(null);
 
-  const { identity, signalUrl, stunList, turnUrl, turnUser, turnCred, hideIp } = app;
+  const { identity, signalUrl, stunList, turnList, hideIp, tcpOnly } = app;
 
   const pushFile = useCallback(async (c: Contact, msgId: string) => {
     const a = appRef.current, m = mgr.current;
@@ -72,8 +72,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!rtc || !identity) return;
-    const ice: IceServer[] = [{ urls: stunOrDefault(stunList) }];
-    if (turnUrl) ice.push({ urls: turnUrl, username: turnUser || undefined, credential: turnCred || undefined });
+    const plan = planIce({ stunList, turnList, hideIp, tcpOnly });
     const byId = (id: string) => appRef.current.contacts[id];
     const receiverFor = (c: Contact) => {
       let r = receivers.current.get(c.id);
@@ -107,7 +106,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
     setCalls(cc);
 
     const m = new PeerManager({
-      identity, signalUrl, iceServers: hideIp && turnUrl ? ice.slice(1) : ice, relayOnly: hideIp && !!turnUrl, rtc,
+      identity, signalUrl, iceServers: plan.iceServers, relayOnly: plan.relayOnly, rtc,
       getContactBySign: s => Object.values(appRef.current.contacts).find(c => c.signPub === s && !appRef.current.blocked[c.id]),
       onPlain: (c, p: Plain) => {
         if (p.t === 'msg') {
@@ -140,7 +139,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
       });
     }, 10000);
     return () => { clearInterval(iv); cc.end(); m.stop(); mgr.current = null; setCalls(null); receivers.current.clear(); setLink({}); setSignal('offline'); };
-  }, [identity, signalUrl, stunList, turnUrl, turnUser, turnCred, hideIp, flush]);
+  }, [identity, signalUrl, stunList, turnList, hideIp, tcpOnly, flush]);
 
   const connect = useCallback((c: Contact) => { mgr.current?.connect(c); }, []);
   const sendText = useCallback((c: Contact, text: string) => {

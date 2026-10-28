@@ -55,4 +55,6 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
           cp app/android/app/build/outputs/apk/release/app-release.apk "Direct-${TAG}.apk"
-          gh release upload "$TAG" "Direct-${TAG}.apk" --clobber
+          # Fixed name: https://github.com/<owner>/<repo>/releases/latest/download/Direct.apk always points at the newest release.
+          cp "Direct-${TAG}.apk" Direct.apk
+          gh release upload "$TAG" "Direct-${TAG}.apk" Direct.apk --clobber

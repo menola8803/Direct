@@ -1,8 +1,9 @@
 // STUN servers: parsing the user's list and testing whether a server actually answers.
 import type { RtcApi } from './peers';
 
-// Neutral public defaults (not Google). Unverified from the build environment: use "Test STUN" in the app.
-export const DEFAULT_STUN = ['stun:stun.cloudflare.com:3478', 'stun:stun.nextcloud.com:443', 'stun:stun.stunprotocol.org:3478'];
+// Neutral public defaults (not Google). stun.telnyx.com is on the list the Tor Project validated for Snowflake in 2026
+// (tor-browser-build issue 41775). Not testable from the build environment (no UDP/DNS): use "Test STUN" in the app.
+export const DEFAULT_STUN = ['stun:stun.cloudflare.com:3478', 'stun:stun.nextcloud.com:443', 'stun:stun.telnyx.com:3478'];
 
 // Accepts "host:port", "stun:host:port" or "stun://host:port", one per line or comma/space separated. Max 8.
 export function parseStun(text: string): string[] {

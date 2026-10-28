@@ -11,6 +11,8 @@ export type Route =
   | { name: 'add' }
   | { name: 'connection' }
   | { name: 'stun' }
+  | { name: 'turn' }
+  | { name: 'privacy' }
   | { name: 'update' }
   | { name: 'theme' }
   | { name: 'language' }

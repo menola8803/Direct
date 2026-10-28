@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.9.3** (see `CHANGELOG.md`)
+**Version 0.10.0** (see `CHANGELOG.md`)
 
 A chat app with no server in between. Messages, calls, voice and video messages and files go straight between the phones, encrypted. Built for people's privacy.
 
@@ -14,6 +14,7 @@ Expo SDK 58, React Native 0.88, TypeScript.
 - Delivery status (queued / sent / delivered), block contacts, phone-book import and SMS invites.
 - Voice and video calls, 1:1 and conference (max 4 with video, 8 audio only; mesh).
 - Voice messages, video messages and file transfer (max 50 MB), stored privately per contact; clear per contact, all files or cache.
+- Invite SMS with a link that always points to the newest APK, up to five TURN servers with a test, a privacy mode (hide IP, TCP only for Tor/VPN), see `docs/NETWORK.md`.
 - Animated dark start screen with the Direct logo and Voice, Video and Conference icons; new app icon.
 - Voice and video test, language (English, Swedish or phone language), two themes (Beige and Dark), in-app update from GitHub Releases.
 - Reserved space for the Android status bar and bottom edge (safe area).

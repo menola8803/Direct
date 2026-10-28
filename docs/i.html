@@ -4,54 +4,113 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
 <title>Direct invite</title>
 <style>
   :root { --bg:#0F1A1C; --card:#172629; --line:#25393D; --ink:#EAF1EF; --muted:#B7C6C3; --gold:#E8B04A; --mint:#5FC4B4; }
   * { box-sizing: border-box; }
-  body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; display:flex; align-items:center; justify-content:center; padding:16px; }
-  main { width:100%; max-width:420px; background:var(--card); border:1px solid var(--line); border-radius:24px; padding:24px; display:grid; gap:14px; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; display:flex; justify-content:center; padding:16px; }
+  main { width:100%; max-width:440px; background:var(--card); border:1px solid var(--line); border-radius:24px; padding:24px; display:grid; gap:16px; align-self:flex-start; }
   h1 { margin:0; font-size:30px; letter-spacing:.35em; color:var(--gold); font-family:Cinzel,Georgia,serif; }
   .tag { margin:0; color:var(--mint); font-size:11px; letter-spacing:.3em; font-weight:700; }
+  h2 { margin:0; font-size:17px; color:var(--ink); }
+  .lead { margin:0; font-size:20px; font-weight:700; line-height:1.3; }
   p { margin:0; color:var(--muted); }
-  a.btn { display:block; text-align:center; text-decoration:none; padding:14px 16px; border-radius:16px; font-weight:700; }
+  ul { margin:0; padding-left:20px; color:var(--muted); display:grid; gap:4px; }
+  section { display:grid; gap:10px; }
+  a.btn { display:block; text-align:center; text-decoration:none; padding:15px 16px; border-radius:16px; font-weight:700; }
   a.primary { background:var(--gold); color:#0F1A1C; }
-  a.secondary { border:1px solid var(--line); color:var(--ink); }
-  code { word-break:break-all; font-size:12px; color:var(--muted); }
+  a.secondary { border:1px solid var(--mint); color:var(--ink); }
+  a.btn:focus-visible, summary:focus-visible { outline:3px solid var(--mint); outline-offset:2px; }
+  details { border:1px solid var(--line); border-radius:14px; padding:10px 14px; }
+  summary { cursor:pointer; font-weight:600; color:var(--ink); }
+  ol { margin:10px 0 0; padding-left:20px; color:var(--muted); display:grid; gap:6px; }
+  .small { font-size:13px; }
+  code { word-break:break-all; font-size:12px; color:var(--muted); display:block; margin-top:8px; }
   [hidden] { display:none !important; }
 </style>
 </head>
 <body>
 <main>
   <div><h1>DIRECT</h1><p class="tag">— PHONE TO PHONE —</p></div>
-  <p id="intro"></p>
-  <div id="have" hidden>
-    <a id="open" class="btn primary" href="#"></a>
-  </div>
-  <a id="get" class="btn secondary" href="https://github.com/menola8803/Direct/releases/latest"></a>
-  <p id="note"></p>
-  <details id="raw" hidden><summary id="rawl"></summary><code id="code"></code></details>
+  <p class="lead" id="lead"></p>
+  <p id="what"></p>
+  <ul id="points"></ul>
+
+  <section aria-labelledby="h1s">
+    <h2 id="h1s"></h2>
+    <a id="get" class="btn primary" href="https://github.com/menola8803/Direct/releases/latest/download/Direct.apk"></a>
+    <p class="small" id="getnote"></p>
+    <details open>
+      <summary id="allow"></summary>
+      <ol id="steps"></ol>
+      <p class="small" id="why" style="margin-top:10px"></p>
+    </details>
+  </section>
+
+  <section id="two" aria-labelledby="h2s" hidden>
+    <h2 id="h2s"></h2>
+    <a id="open" class="btn secondary" href="#"></a>
+    <p class="small" id="opennote"></p>
+    <details id="raw"><summary id="rawl"></summary><code id="code"></code></details>
+  </section>
+  <p id="bad" class="small" hidden></p>
 </main>
 <script>
 (function () {
   var sv = (navigator.language || '').toLowerCase().indexOf('sv') === 0;
-  var T = sv
-    ? { intro: 'Någon vill chatta med dig i Direct, en chattapp utan server emellan.', open: 'Öppna i Direct och lägg till', get: 'Hämta Direct (Android)', note: 'Har du redan Direct? Tryck på den gula knappen. Annars hämtar du appen först och öppnar sedan den här länken igen.', bad: 'Länken saknar en giltig kod.', raw: 'Visa koden' }
-    : { intro: 'Someone wants to chat with you in Direct, a chat app with no server in between.', open: 'Open in Direct and add', get: 'Get Direct (Android)', note: 'Already have Direct? Tap the gold button. Otherwise get the app first, then open this link again.', bad: 'This link has no valid code.', raw: 'Show the code' };
+  var T = sv ? {
+    leadNamed: function (n) { return n + ' bjuder in dig till Direct'; }, lead: 'Du är inbjuden till Direct',
+    what: 'Direct är en chatt- och samtalsapp utan server emellan.',
+    points: ['Meddelanden, röst- och videosamtal, konferens och filer går direkt mellan telefonerna.', 'Krypterat hela vägen. Ingen annan lagrar dina meddelanden.', 'Inget konto att skapa.'],
+    h1: '1. Hämta appen', get: 'Ladda ner Direct (Android)', getnote: 'Du får alltid den senaste versionen. Appen är en APK-fil och finns inte i Play Butik.',
+    allow: 'Android frågar om du vill tillåta installation. Så här gör du:',
+    steps: ['Öppna den nedladdade filen. Om webbläsaren varnar för filen, välj Ladda ner ändå eller Behåll.', 'Android säger att installation från den här källan inte är tillåten. Tryck Inställningar.', 'Slå på Tillåt från den här källan. Det är din webbläsare, till exempel Chrome.', 'Gå tillbaka och tryck Installera. Öppna sedan Direct.'],
+    why: 'Tillåtelsen behövs eftersom appen kommer från GitHub och inte från Play Butik. Du kan stänga av den igen efteråt.',
+    h2: function (n) { return '2. Lägg till ' + (n || 'avsändaren'); }, open: function (n) { return 'Öppna i Direct och lägg till ' + (n || 'avsändaren'); },
+    opennote: 'Tryck här när Direct är installerat.', raw: 'Visa koden', bad: 'Länken saknar en giltig kod. Be personen skicka inbjudan igen.'
+  } : {
+    leadNamed: function (n) { return n + ' invites you to Direct'; }, lead: 'You are invited to Direct',
+    what: 'Direct is a chat and call app with no server in between.',
+    points: ['Messages, voice and video calls, conference and files go straight between the phones.', 'End-to-end encrypted. Nobody else stores your messages.', 'No account to create.'],
+    h1: '1. Get the app', get: 'Download Direct (Android)', getnote: 'You always get the latest version. The app is an APK file and is not on Google Play.',
+    allow: 'Android asks you to allow the install. Here is how:',
+    steps: ['Open the downloaded file. If the browser warns about the file, choose Download anyway or Keep.', 'Android says installing from this source is not allowed. Tap Settings.', 'Switch on Allow from this source. That is your browser, for example Chrome.', 'Go back and tap Install. Then open Direct.'],
+    why: 'The permission is needed because the app comes from GitHub, not from Google Play. You can turn it off again afterwards.',
+    h2: function (n) { return '2. Add ' + (n || 'the sender'); }, open: function (n) { return 'Open in Direct and add ' + (n || 'the sender'); },
+    opennote: 'Tap this once Direct is installed.', raw: 'Show the code', bad: 'This link has no valid code. Ask the person to send the invitation again.'
+  };
   var $ = function (id) { return document.getElementById(id); };
-  $('intro').textContent = T.intro; $('open').textContent = T.open; $('get').textContent = T.get; $('note').textContent = T.note; $('rawl').textContent = T.raw;
-  // The code is in the URL fragment: browsers never send it to the web server.
-  function render() {
-    var card = ''; try { card = decodeURIComponent(location.hash.slice(1)); } catch (e) {}
-    if (/^direct1:[A-Za-z0-9_-]+$/.test(card) && card.length < 600) {
-      var link = 'direct://add?c=' + encodeURIComponent(card);
-      $('open').href = link; $('have').hidden = false; $('code').textContent = card; $('raw').hidden = false; $('note').textContent = T.note;
-      return link;
-    }
-    $('have').hidden = true; $('raw').hidden = true; $('note').textContent = T.bad;
-    return null;
+  document.documentElement.lang = sv ? 'sv' : 'en';
+  $('what').textContent = T.what;
+  T.points.forEach(function (p) { var li = document.createElement('li'); li.textContent = p; $('points').appendChild(li); });
+  $('h1s').textContent = T.h1; $('get').textContent = T.get; $('getnote').textContent = T.getnote; $('allow').textContent = T.allow; $('why').textContent = T.why;
+  T.steps.forEach(function (s) { var li = document.createElement('li'); li.textContent = s; $('steps').appendChild(li); });
+  $('rawl').textContent = T.raw; $('opennote').textContent = T.opennote;
+
+  // The code is in the URL fragment: browsers never send it to the web server. It carries the sender's name.
+  function nameOf(card) {
+    try {
+      var b = card.slice(8).replace(/-/g, '+').replace(/_/g, '/');
+      while (b.length % 4) b += '=';
+      var j = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b), function (c) { return c.charCodeAt(0); })));
+      return typeof j.n === 'string' ? j.n.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 40) : '';
+    } catch (e) { return ''; }
   }
-  var first = render();
-  if (first) setTimeout(function () { location.href = first; }, 600);
+  function render() {
+    var raw = location.hash.slice(1), card = '';
+    try { card = decodeURIComponent(raw); } catch (e) {}
+    var ok = /^direct1:[A-Za-z0-9_-]+$/.test(card) && card.length < 600;
+    var name = ok ? nameOf(card) : '';
+    $('lead').textContent = name ? T.leadNamed(name) : T.lead;
+    $('two').hidden = !ok; $('bad').hidden = !(raw && !ok); $('bad').textContent = T.bad;
+    if (ok) {
+      $('h2s').textContent = T.h2(name); $('open').textContent = T.open(name);
+      $('open').href = 'direct://add?c=' + encodeURIComponent(card);
+      $('code').textContent = card;
+    }
+  }
+  render();
   window.addEventListener('hashchange', render);
 })();
 </script>

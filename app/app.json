@@ -2,7 +2,7 @@
   "expo": {
     "name": "Direct",
     "slug": "direct",
-    "version": "0.9.3",
+    "version": "0.10.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -33,7 +33,7 @@
         "REQUEST_INSTALL_PACKAGES",
         "VIBRATE"
       ],
-      "versionCode": 903
+      "versionCode": 1000
     },
     "web": {
       "favicon": "./assets/favicon.png"

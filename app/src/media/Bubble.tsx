@@ -7,6 +7,7 @@ import * as Sharing from 'expo-sharing';
 import { Attach, useApp } from '../store';
 import { fmtSize } from '../files';
 import { Btn } from '../ui';
+import { holdLock } from '../lockhold';
 
 function Voice({ f, color }: { f: Attach; color: string }) {
   const { t } = useApp();
@@ -28,7 +29,7 @@ function Video({ f }: { f: Attach }) {
 
 export function FileBubble({ f, color, progress }: { f: Attach; color: string; progress?: number }) {
   const { t } = useApp();
-  const share = () => Sharing.shareAsync(f.uri, { mimeType: f.mime }).catch(() => {});
+  const share = () => { holdLock(); Sharing.shareAsync(f.uri, { mimeType: f.mime }).catch(() => {}); };
   return (
     <View style={{ gap: 8 }}>
       {f.kind === 'voice' ? <Voice f={f} color={color} /> : f.kind === 'video' ? <Video f={f} /> : (

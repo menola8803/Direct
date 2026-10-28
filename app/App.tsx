@@ -21,6 +21,8 @@ import Chat from './src/screens/Chat';
 import ThemePicker from './src/screens/ThemePicker';
 import LanguagePicker from './src/screens/LanguagePicker';
 import Retention from './src/screens/Retention';
+import AppLock from './src/screens/AppLock';
+import { LockProvider, useLocked } from './src/lock';
 import { StoragePrompts } from './src/storageprompts';
 import Blocked from './src/screens/Blocked';
 import About from './src/screens/About';
@@ -91,6 +93,7 @@ function Content() {
     case 'theme': return <ThemePicker onBack={pop} />;
     case 'language': return <LanguagePicker onBack={pop} />;
     case 'keep': return <Retention onBack={pop} />;
+    case 'lock': return <AppLock onBack={pop} />;
     case 'blocked': return <Blocked onBack={pop} />;
     case 'guide': return <Guide onClose={pop} />;
     case 'about': return <About onBack={pop} />;
@@ -115,11 +118,12 @@ function Root() {
   const { ready } = useApp();
   const [fontsLoaded] = useFonts({ PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold, Cinzel_700Bold });
   const [splashDone, setSplashDone] = useState(false);
+  const locked = useLocked();
   if (!ready || !fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#0B1416' }} />;
   return (
     <View style={{ flex: 1 }}>
       <Content />
-      {splashDone && <StoragePrompts />}
+      {splashDone && !locked && <StoragePrompts />}
       {!splashDone && <Splash onDone={() => setSplashDone(true)} />}
     </View>
   );
@@ -133,7 +137,7 @@ function Themed() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppProvider><NetProvider><Themed /></NetProvider></AppProvider>
+      <AppProvider><NetProvider><LockProvider><Themed /></LockProvider></NetProvider></AppProvider>
     </SafeAreaProvider>
   );
 }

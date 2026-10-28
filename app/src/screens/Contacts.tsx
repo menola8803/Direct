@@ -8,6 +8,7 @@ import { encodeCard } from '../core/crypto';
 import { inviteMessage } from '../core/invite';
 import { Route } from '../nav';
 import { Avatar, Btn, H1, Sub, SmallBtn } from '../ui';
+import { holdLock } from '../lockhold';
 
 export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) => void; go: (r: Route) => void }) {
   const { theme, t, contacts, blocked, block, identity, name } = useApp();
@@ -18,6 +19,7 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
   const [q, setQ] = useState('');
 
   const load = useCallback(async () => {
+    holdLock();
     const r = await Contacts.requestPermissionsAsync();
     if (r.status !== 'granted') { setDenied(true); return; }
     setDenied(false); setFailed('');
@@ -43,6 +45,7 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
   ]);
   const invite = (p: Person) => {
     const body = identity ? inviteMessage(encodeCard(identity, name), t, name) : t.inviteText;
+    holdLock();
     Linking.openURL(`sms:${p.phone ?? ''}?body=${encodeURIComponent(body)}`).catch(() => {});
   };
 

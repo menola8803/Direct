@@ -1,3 +1,4 @@
+import { normLockDelay } from './lock';
 import { normRetention } from './retention';
 
 // Upgrades saved settings from older versions. Pure, so it can be tested without the app.
@@ -18,5 +19,8 @@ export function migrateSaved(raw: any): any {
   if (typeof s.introSeen !== 'boolean') s.introSeen = true;
   // 0.12.0: how long conversations are kept. A missing value takes the app default (two weeks); a saved one is kept within the limits.
   if (s.retentionDays !== undefined) s.retentionDays = normRetention(s.retentionDays);
+  // 0.13.0: app lock. Only a saved `true` switches it on; the delay is one of the choices.
+  if (s.lockOn !== undefined) s.lockOn = s.lockOn === true;
+  if (s.lockDelay !== undefined) s.lockDelay = normLockDelay(s.lockDelay);
   return s;
 }

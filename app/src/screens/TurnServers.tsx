@@ -6,6 +6,7 @@ import { rtc } from '../net/rtc';
 import { MAX_TURN, Turn, parseTurn, pingTurn, turnText } from '../net/turn';
 import { Btn, Card, Header, Label, Screen } from '../ui';
 import { Res, TestBtn, TestRow, useTestBox } from '../testkit';
+import { holdLock } from '../lockhold';
 
 const DOCS = 'https://github.com/menola8803/Direct/blob/main/docs/NETWORK.md';
 
@@ -74,7 +75,7 @@ export default function TurnServers({ onBack }: { onBack: () => void }) {
         {!rtc ? <Text style={{ color: theme.danger }}>{t.rtcMissing}</Text> : null}
         {list.length > 0 ? <TestBtn title={t.turnTest} onHelp={() => box.help(t.turnAllTitle, t.turnAllHowTo)} onTest={testAll} /> : null}
         {failed.length > 0 ? <Btn title={`${t.stunRemoveFailed} (${failed.length})`} kind="danger" onPress={() => save(list.filter(x => res[key(x)] !== null))} /> : null}
-        <Btn title={t.turnDocs} kind="secondary" onPress={() => Linking.openURL(DOCS).catch(() => {})} />
+        <Btn title={t.turnDocs} kind="secondary" onPress={() => { holdLock(); Linking.openURL(DOCS).catch(() => {}); }} />
       </ScrollView>
       {box.node}
     </Screen>

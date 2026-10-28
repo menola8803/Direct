@@ -8,6 +8,7 @@ import { MAX_SIZE } from '../core/transfer';
 import { Avatar, Header, SmallBtn } from '../ui';
 import { FileBubble } from '../media/Bubble';
 import { Recorded, VideoRecorder, VoiceRecorder } from '../media/Recorder';
+import { holdLock } from '../lockhold';
 
 export default function Chat({ id, onBack, onVerify, onPair }: { id: string; onBack: () => void; onVerify: () => void; onPair: () => void }) {
   const { theme, t, messages, contacts } = useApp();
@@ -25,6 +26,7 @@ export default function Chat({ id, onBack, onVerify, onPair }: { id: string; onB
   const go = () => { const v = text.trim(); if (!v) return; net.sendText(c, v); setText(''); };
   const sendRec = (r: Recorded, kind: 'voice' | 'video') => { setMode(''); net.sendFile(c, { uri: r.uri, name: r.name, mime: r.mime, kind, dur: r.dur }); };
   const pick = async () => {
+    holdLock();
     const r = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true, multiple: false }).catch(() => null);
     const a = r && !r.canceled ? r.assets[0] : null;
     if (!a) return;

@@ -64,6 +64,7 @@
         }
       ],
       "expo-secure-store",
+      ["expo-local-authentication", { "faceIDPermission": false }],
       "@config-plugins/react-native-webrtc",
       [
         "expo-audio",

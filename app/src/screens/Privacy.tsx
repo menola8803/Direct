@@ -6,6 +6,7 @@ import { useApp } from '../store';
 import { planIce } from '../net/ice';
 import { Btn, Card, Header, Screen } from '../ui';
 import { Route } from '../nav';
+import { holdLock } from '../lockhold';
 
 const ORBOT = 'https://guardianproject.info/apps/org.torproject.android/';
 
@@ -21,7 +22,7 @@ export default function Privacy({ onBack, go }: { onBack: () => void; go: (r: Ro
       <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{help}</Text>
     </Card>
   );
-  const openVpn = () => IntentLauncher.startActivityAsync('android.settings.VPN_SETTINGS').catch(() => Linking.openSettings().catch(() => {}));
+  const openVpn = () => { holdLock(); return IntentLauncher.startActivityAsync('android.settings.VPN_SETTINGS').catch(() => Linking.openSettings().catch(() => {})); };
   return (
     <Screen>
       <Header title={t.privacyTitle} sub={t.privacySub} onBack={onBack} />
@@ -38,7 +39,7 @@ export default function Privacy({ onBack, go }: { onBack: () => void; go: (r: Ro
           <Text style={{ fontSize: 16, fontWeight: '600', color: theme.ink }}>{t.torTitle}</Text>
           <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{t.torBody}</Text>
           <Btn title={t.openVpn} kind="secondary" onPress={openVpn} />
-          <Btn title={t.getOrbot} kind="secondary" onPress={() => Linking.openURL(ORBOT).catch(() => {})} />
+          <Btn title={t.getOrbot} kind="secondary" onPress={() => { holdLock(); Linking.openURL(ORBOT).catch(() => {}); }} />
         </Card>
       </ScrollView>
     </Screen>

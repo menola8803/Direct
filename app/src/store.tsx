@@ -9,6 +9,7 @@ import { dict, Lang, LangChoice, Strings } from './i18n';
 import { Contact, Identity, newIdentity } from './core/crypto';
 import { FileKind, MsgStatus } from './core/protocol';
 import { DEFAULT_RETENTION, cutoffFor, pruneMessages } from './core/retention';
+import { DEFAULT_LOCK_DELAY } from './core/lock';
 import { keyFromText, keyToText, makeSaver, newDataKey, openStored, sealText } from './core/vault';
 import { deleteStored, probePublic, sweepOldFiles, wipeAllFiles } from './files';
 
@@ -25,6 +26,8 @@ type Saved = {
   retentionDays: number; // how long conversations and files are kept on this phone
   storagePrompted: boolean; // the question about the Download/Direct folder has been asked
   orphanAsked: boolean; // the question about files left by an earlier install has been asked
+  lockOn: boolean; // the app asks for fingerprint, face or screen lock before it is shown
+  lockDelay: number; // seconds in the background before it asks again (0 = every time)
 };
 const OLD_KEY = 'direct.state.v2'; // before 0.13.0: the state as plain text
 const KEY = 'direct.state.v3'; // from 0.13.0: the state sealed with the data key
@@ -33,7 +36,7 @@ const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
   themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
   signalUrl: '', stunList: '', turnList: '', hideIp: false, tcpOnly: false, introSeen: false,
-  retentionDays: DEFAULT_RETENTION, storagePrompted: false, orphanAsked: false,
+  retentionDays: DEFAULT_RETENTION, storagePrompted: false, orphanAsked: false, lockOn: false, lockDelay: DEFAULT_LOCK_DELAY,
 };
 
 type Ctx = Saved & {
@@ -44,7 +47,7 @@ type Ctx = Saved & {
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
-  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen' | 'retentionDays' | 'storagePrompted' | 'orphanAsked'>>) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen' | 'retentionDays' | 'storagePrompted' | 'orphanAsked' | 'lockOn' | 'lockDelay'>>) => void;
   clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);

@@ -16,6 +16,7 @@ export type Route =
   | { name: 'theme' }
   | { name: 'language' }
   | { name: 'keep' }
+  | { name: 'lock' }
   | { name: 'blocked' }
   | { name: 'guide' }
   | { name: 'about' };

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0 – Download/Direct, retention, delete-and-uninstall
+- **Download/Direct:** received and sent files, voice and video are saved in the folder Download/Direct (a subfolder per contact, `.nomedia` keeps them out of the Gallery) when Direct has Android's *all files access*. The app asks once after the start screen (Android 11 or later); Settings → Storage shows where files go and has a button for the Android setting. Without the permission files stay in the app's private storage, as before. Files you send are copied there too, so they stay in the conversation.
+- **Updates keep everything:** nothing in Download/Direct (or the private folder) is changed by an update.
+- **Keep conversations (Settings):** 1 day, 1 week, **2 weeks (default)**, 1 month, 2 months, **3 months (longest)**. Messages, voice, video and files older than the choice are deleted from this phone: at start, when the app comes back, hourly while open and at once when the setting changes. It is local, so each person has their own timeline. The first start after the update applies the default to existing data.
+- **Delete everything and uninstall (Settings → Storage):** shows what is removed (messages, contacts, your key, Download/Direct), deletes it and opens Android's uninstall dialog. Android does not allow an app to run code or warn when it is uninstalled from the phone's own menu, and it keeps public folders, so a plain uninstall leaves Download/Direct behind. A new install that finds old files there offers to delete them.
+- **Backup off:** `allowBackup` is false, so a reinstall does not restore old chats from Android's cloud backup.
+- New permissions: `MANAGE_EXTERNAL_STORAGE` (the Download/Direct folder) and `REQUEST_DELETE_PACKAGES` (the uninstall dialog). New tests: `test/retention.test.ts` and `test/files.test.ts` (the file rules against a fake file system).
+- Not yet tried on a phone: the permission screen, writing to Download/Direct and the uninstall dialog.
+
 ## 0.11.1 – Conference tab, header fix
 - **Conference tab:** Conference is now in the bottom bar (Chats, Contacts, Conference, Settings; the bar has icons). The tab shows three short steps, who can be picked (only connected contacts), and the *Call* (audio, up to 8) and *Video call* (up to 4) buttons. The row under Settings is gone.
 - **Help:** the getting-started guide has a new page *Conference calls* with the steps (open the tab, pick connected people, call, they answer, mute/camera/hang up) and the rules (everyone must have added each other as contacts, up to 4 with video or 8 audio only, use Wi-Fi).

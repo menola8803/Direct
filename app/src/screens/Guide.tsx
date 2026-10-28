@@ -130,7 +130,7 @@ export default function Guide({ first, onClose }: { first?: boolean; onClose: ()
           <ScrollView contentContainerStyle={scrollStyle} showsVerticalScrollIndicator={false}>
             <Text style={title}>{t.g5t}</Text>
             <Card>
-              {[t.g5a, t.g5b, t.g5c, t.g5d].map((s, i) => (
+              {[t.g5a, t.g5b, t.g5c, t.g5d, t.g5e].map((s, i) => (
                 <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
                   <Text style={{ color: theme.accent, fontSize: 15, lineHeight: 22 }}>•</Text>
                   <Text style={{ flex: 1, fontSize: 15, lineHeight: 22, color: theme.ink }}>{s}</Text>

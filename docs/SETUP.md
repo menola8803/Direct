@@ -1,4 +1,4 @@
-# Getting started (0.11.1)
+# Getting started (0.12.0)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -18,6 +18,12 @@ Contacts → *Invite* (or My code → *Share invite*) sends a message with a dow
 - The invite page is `docs/i.html`. To make the link work, enable GitHub Pages: repo **Settings → Pages → Branch `main`, folder `/docs`** (needs a public repo). The code sits in the URL fragment (`#…`), which is never sent to GitHub. If Pages is off the link in the SMS gives an error page. The recipient can still copy the whole link from the SMS and paste it under Contacts → + Add (the app finds the `direct1:` code inside it).
 - Without a server there is no way to look up *who in your phone book has Direct*: a phone number cannot be matched to a key without a directory. Invite links are the serverless way.
 
+## Files, retention and uninstall
+- **Where files go:** Download/Direct, one subfolder per contact (named `Name-<start of the id>`), for received and sent files, voice and video. A hidden `.nomedia` file keeps pictures and videos out of the Gallery. This needs Android's *Allow management of all files* for Direct (Android 11 or later). The app asks once after the start screen; Settings → Storage shows the status and has a button to open the Android setting. Without it, files stay in the app's private storage (also used by files from versions before 0.12.0).
+- **Updates:** installing a new version never changes anything in Download/Direct or the private folder, so the next update keeps voice, video and files. Both CI builds and local builds are signed with the same key, so they install over each other.
+- **Retention:** Settings → Keep conversations: 1 day, 1 week, 2 weeks (default), 1 month, 2 months, 3 months (longest). Messages and files older than that are deleted from this phone, also files in Download/Direct that no message points to. The first start after updating applies the default (2 weeks) to what is already stored. Everyone sets their own time; nothing is deleted on the other person's phone.
+- **Uninstall:** Android does not let an app run code or show a message when it is uninstalled from the phone's own menu, and it keeps public folders like Download/Direct. Use Settings → Storage → *Delete everything and uninstall*: it lists what is removed (messages, contacts, your key, Download/Direct), deletes it and opens Android's uninstall dialog. If you uninstall from Android's menu instead, the app's private data is removed but Download/Direct stays until you delete it; a later install offers to delete those old files. Automatic backup of app data is off, so a reinstall does not bring back old chats.
+
 ## STUN servers
 A STUN server only tells a phone its public address; it never sees messages. Settings → STUN servers lets you paste addresses, test all of them on the phone (✓/✗ with response time), remove single servers or all that do not answer, and restore the defaults. The empty default uses Cloudflare, Nextcloud (port 443) and Telnyx (not Google).
 
@@ -30,7 +36,7 @@ See `docs/NETWORK.md`: why there are no built-in TURN servers, how to run your o
 - Conference is a mesh: every participant sends to all others. Max 4 with video, 8 audio only.
 - In-app update needs a public GitHub release with an `.apk` attached, and the user must allow the install.
 - Forward secrecy per connection; no post-compromise security (Double Ratchet) yet.
-- Tests run in Node (`npm test`). Phone-specific code (camera, microphone, WebRTC in React Native, installing) has not been run on a device.
+- Tests run in Node (`npm test`). Phone-specific code (camera, microphone, WebRTC in React Native, installing, the Download/Direct permission and the uninstall dialog) has not been run on a device.
 
 ## Build the APK in the cloud (no tools needed)
 Every push to `main` that touches `app/` builds an APK: open the repo → **Actions** → the latest *Build APK* run → **Artifacts** → download `Direct-<version>-<commit>.apk` and install it.
@@ -38,7 +44,7 @@ Every push to `main` that touches `app/` builds an APK: open the repo → **Acti
 For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.11.1 -m "Direct 0.11.1" && git push origin v0.11.1
+git tag -a v0.12.0 -m "Direct 0.12.0" && git push origin v0.12.0
 ```
 The APK is signed with the Expo template's debug key, which is public. Fine for testing; before a real launch create your own keystore and keep it safe, since updates only install over an app signed with the same key.
 

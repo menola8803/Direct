@@ -20,6 +20,8 @@ import Settings from './src/screens/Settings';
 import Chat from './src/screens/Chat';
 import ThemePicker from './src/screens/ThemePicker';
 import LanguagePicker from './src/screens/LanguagePicker';
+import Retention from './src/screens/Retention';
+import { StoragePrompts } from './src/storageprompts';
 import Blocked from './src/screens/Blocked';
 import About from './src/screens/About';
 import MyCode from './src/screens/MyCode';
@@ -88,6 +90,7 @@ function Content() {
     case 'update': return <Update onBack={pop} />;
     case 'theme': return <ThemePicker onBack={pop} />;
     case 'language': return <LanguagePicker onBack={pop} />;
+    case 'keep': return <Retention onBack={pop} />;
     case 'blocked': return <Blocked onBack={pop} />;
     case 'guide': return <Guide onClose={pop} />;
     case 'about': return <About onBack={pop} />;
@@ -116,6 +119,7 @@ function Root() {
   return (
     <View style={{ flex: 1 }}>
       <Content />
+      {splashDone && <StoragePrompts />}
       {!splashDone && <Splash onDone={() => setSplashDone(true)} />}
     </View>
   );

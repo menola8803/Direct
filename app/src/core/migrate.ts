@@ -1,3 +1,5 @@
+import { normRetention } from './retention';
+
 // Upgrades saved settings from older versions. Pure, so it can be tested without the app.
 export function migrateSaved(raw: any): any {
   if (!raw || typeof raw !== 'object') return {};
@@ -14,5 +16,7 @@ export function migrateSaved(raw: any): any {
   // 0.11.0: the getting-started guide is shown once on a fresh install. An install that is older than the
   // guide (saved state without the flag) has long since started, so it does not get it as a first-run screen.
   if (typeof s.introSeen !== 'boolean') s.introSeen = true;
+  // 0.12.0: how long conversations are kept. A missing value takes the app default (two weeks); a saved one is kept within the limits.
+  if (s.retentionDays !== undefined) s.retentionDays = normRetention(s.retentionDays);
   return s;
 }

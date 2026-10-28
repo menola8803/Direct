@@ -15,6 +15,7 @@ export type Route =
   | { name: 'update' }
   | { name: 'theme' }
   | { name: 'language' }
+  | { name: 'keep' }
   | { name: 'blocked' }
   | { name: 'guide' }
   | { name: 'about' };

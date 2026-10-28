@@ -3,7 +3,7 @@ import { useApp, Attach } from '../store';
 import { Contact } from '../core/crypto';
 import { FileKind, newId, Plain } from '../core/protocol';
 import { Receiver, sendFile } from '../core/transfer';
-import { fileSource, makeSink } from '../files';
+import { fileSource, makeSink, storeOutgoing } from '../files';
 import { LinkState, PeerManager, SignalState } from './peers';
 import { CallController, CallView } from './calls';
 import { mediaDevices, rtc } from './rtc';
@@ -78,7 +78,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
       let r = receivers.current.get(c.id);
       if (!r) {
         r = new Receiver({
-          makeSink: makeSink(c.id),
+          makeSink: makeSink(c.id, c.name),
           onDone: (meta, uri) => {
             const file: Attach = { name: meta.name, mime: meta.mime, size: meta.size, kind: meta.kind, uri, dur: meta.dur };
             appRef.current.addMessage(c.id, { id: meta.id, mine: false, text: meta.name, at: meta.at, file });
@@ -149,11 +149,13 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
     if (m?.send(c, { t: 'msg', id: msg.id, text, at: msg.at })) appRef.current.setStatus(c.id, msg.id, 'sent');
     else m?.connect(c);
   }, []);
-  const sendFileMsg = useCallback((c: Contact, a: SendFileArgs) => {
+  const sendFileMsg = useCallback(async (c: Contact, a: SendFileArgs) => {
     let size = 0;
     try { const h = fileSource(a.uri); size = h.src.size; h.close(); } catch { return; }
     const id = newId();
-    appRef.current.addMessage(c.id, { id, mine: true, text: a.name, at: Date.now(), status: 'queued', file: { name: a.name, mime: a.mime, size, kind: a.kind, uri: a.uri, dur: a.dur } });
+    // Keep a copy next to the received files (Download/Direct), so what you sent stays in the conversation.
+    const uri = await storeOutgoing(c.id, c.name, a.uri, a.name);
+    appRef.current.addMessage(c.id, { id, mine: true, text: a.name, at: Date.now(), status: 'queued', file: { name: a.name, mime: a.mime, size, kind: a.kind, uri, dur: a.dur } });
     if (mgr.current?.isOpen(c.id)) setTimeout(() => pushFile(c, id), 0); else mgr.current?.connect(c);
   }, [pushFile]);
 

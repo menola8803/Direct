@@ -2,7 +2,7 @@
   "expo": {
     "name": "Direct",
     "slug": "direct",
-    "version": "0.11.1",
+    "version": "0.12.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -24,6 +24,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "se.sncab.direct",
+      "allowBackup": false,
       "permissions": [
         "READ_CONTACTS",
         "CAMERA",
@@ -31,9 +32,11 @@
         "MODIFY_AUDIO_SETTINGS",
         "INTERNET",
         "REQUEST_INSTALL_PACKAGES",
+        "REQUEST_DELETE_PACKAGES",
+        "MANAGE_EXTERNAL_STORAGE",
         "VIBRATE"
       ],
-      "versionCode": 1101
+      "versionCode": 1200
     },
     "web": {
       "favicon": "./assets/favicon.png"

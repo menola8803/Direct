@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { getLocales } from 'expo-localization';
@@ -7,6 +8,8 @@ import { migrateSaved } from './core/migrate';
 import { dict, Lang, LangChoice, Strings } from './i18n';
 import { Contact, Identity, newIdentity } from './core/crypto';
 import { FileKind, MsgStatus } from './core/protocol';
+import { DEFAULT_RETENTION, cutoffFor, pruneMessages } from './core/retention';
+import { deleteStored, probePublic, sweepOldFiles, wipeAllFiles } from './files';
 
 export type Attach = { name: string; mime: string; size: number; kind: FileKind; uri: string; dur?: number };
 export type Msg = { id: string; mine: boolean; text: string; at: number; status?: MsgStatus; file?: Attach };
@@ -18,22 +21,27 @@ type Saved = {
   contacts: Record<string, Contact>; blocked: Record<string, string>; messages: Record<string, Msg[]>;
   signalUrl: string; stunList: string; turnList: string; hideIp: boolean; tcpOnly: boolean;
   introSeen: boolean; // the getting-started guide has been shown after install
+  retentionDays: number; // how long conversations and files are kept on this phone
+  storagePrompted: boolean; // the question about the Download/Direct folder has been asked
+  orphanAsked: boolean; // the question about files left by an earlier install has been asked
 };
 const KEY = 'direct.state.v2';
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
   themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
   signalUrl: '', stunList: '', turnList: '', hideIp: false, tcpOnly: false, introSeen: false,
+  retentionDays: DEFAULT_RETENTION, storagePrompted: false, orphanAsked: false,
 };
 
 type Ctx = Saved & {
   ready: boolean; identity: Identity | null; theme: Theme; t: Strings; lang: Lang;
+  publicStorage: boolean; refreshStorage: () => void; wipeAll: () => Promise<void>;
   setTheme: (n: ThemeName) => void; setLang: (l: LangChoice) => void;
   createIdentity: (name: string) => Promise<void>;
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
-  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen'>>) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen' | 'retentionDays' | 'storagePrompted' | 'orphanAsked'>>) => void;
   clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
@@ -43,6 +51,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [s, setS] = useState<Saved>(empty);
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [ready, setReady] = useState(false);
+  const [publicStorage, setPublicStorage] = useState(false);
+  const sRef = useRef(s); sRef.current = s;
 
   useEffect(() => {
     (async () => {
@@ -60,6 +70,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
   useEffect(() => { if (ready) AsyncStorage.setItem(KEY, JSON.stringify(s)).catch(() => {}); }, [s, ready]);
 
+  // Is Download/Direct usable? Checked at start and every time the app comes back (for example from the Android setting).
+  const refreshStorage = useCallback(() => setPublicStorage(probePublic()), []);
+  useEffect(() => {
+    if (!ready) return;
+    refreshStorage();
+    const sub = AppState.addEventListener('change', st => { if (st === 'active') refreshStorage(); });
+    return () => sub.remove();
+  }, [ready, refreshStorage]);
+
+  // Retention: messages and files older than the chosen time are removed from this phone. Runs at start, when the
+  // app comes back, once an hour while it is open, and straight away when the setting changes.
+  useEffect(() => {
+    if (!ready) return;
+    const sweep = () => {
+      const o = sRef.current, now = Date.now();
+      const r = pruneMessages(o.messages, o.retentionDays, now);
+      if (r.changed) setS(x => ({ ...x, messages: pruneMessages(x.messages, x.retentionDays, now).messages }));
+      deleteStored(r.removedUris);
+      const keep = Object.values(r.messages).flat().flatMap(m => (m.file ? [m.file.uri] : []));
+      sweepOldFiles(cutoffFor(o.retentionDays, now), keep);
+    };
+    sweep();
+    const iv = setInterval(sweep, 3_600_000);
+    const sub = AppState.addEventListener('change', st => { if (st === 'active') sweep(); });
+    return () => { clearInterval(iv); sub.remove(); };
+  }, [ready, s.retentionDays]);
+
   const sys: Lang = getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en';
   const lang: Lang = s.langChoice === 'system' ? sys : s.langChoice;
 
@@ -74,7 +111,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<Ctx>(() => ({
-    ...s, ready, identity, lang, theme: themes[s.themeName], t: dict[lang],
+    ...s, ready, identity, lang, theme: themes[s.themeName], t: dict[lang], publicStorage, refreshStorage,
+    // Everything this app has stored: files (also Download/Direct), messages, contacts and the key.
+    wipeAll: async () => {
+      wipeAllFiles();
+      try { await SecureStore.deleteItemAsync(ID_KEY); } catch {}
+      try { await AsyncStorage.removeItem(KEY); } catch {}
+      setIdentity(null); setPublicStorage(false); setS({ ...empty });
+    },
     setTheme: themeName => setS(o => ({ ...o, themeName })),
     setLang: langChoice => setS(o => ({ ...o, langChoice })),
     createIdentity: async name => {
@@ -95,7 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     unblock: id => setS(o => { const b = { ...o.blocked }; delete b[id]; return { ...o, blocked: b }; }),
     clearChat: id => setS(o => { const m = { ...o.messages }; delete m[id]; return { ...o, messages: m }; }),
     clearChats: () => setS(o => ({ ...o, messages: {} })),
-  }), [s, ready, identity, lang, addMessage]);
+  }), [s, ready, identity, lang, addMessage, publicStorage, refreshStorage]);
 
   return <C.Provider value={value}>{children}</C.Provider>;
 }

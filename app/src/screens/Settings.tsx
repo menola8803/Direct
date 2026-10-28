@@ -4,9 +4,10 @@ import { Text } from '../ui';
 import { useApp } from '../store';
 import { Card, H1, Label, Row, Sub } from '../ui';
 import { Route } from '../nav';
+import { keepLabel } from './Retention';
 
 export default function Settings({ go }: { go: (r: Route) => void }) {
-  const { t, theme, langChoice, blocked } = useApp();
+  const { t, theme, langChoice, blocked, retentionDays } = useApp();
   const langLabel = langChoice === 'system' ? t.phoneLang : langChoice === 'sv' ? t.swedish : t.english;
   return (
     <ScrollView contentContainerStyle={{ gap: 14, paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
@@ -20,6 +21,7 @@ export default function Settings({ go }: { go: (r: Route) => void }) {
         <Row title={t.turnTitle} sub={t.turnSub} onPress={() => go({ name: 'turn' })} />
         <Row title={t.privacyTitle} sub={t.privacySub} onPress={() => go({ name: 'privacy' })} />
         <Row title={t.mediaTest} sub={t.mediaTestSub} onPress={() => go({ name: 'mediatest' })} />
+        <Row title={t.keepTitle} sub={t.keepSub} right={keepLabel(t, retentionDays)} onPress={() => go({ name: 'keep' })} />
         <Row title={t.storage} sub={t.storageSub} onPress={() => go({ name: 'storage' })} />
         <Row title={t.update} sub={t.updateSub} onPress={() => go({ name: 'update' })} />
         <Row title={t.blocked} sub={t.blockedSub} right={String(Object.keys(blocked).length)} onPress={() => go({ name: 'blocked' })} />

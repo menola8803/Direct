@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.11.1** (see `CHANGELOG.md`)
+**Version 0.12.0** (see `CHANGELOG.md`)
 
 A chat app with no server in between. Messages, calls, voice and video messages and files go straight between the phones, encrypted. Built for people's privacy.
 
@@ -33,7 +33,11 @@ Open `design/index.html` in a browser (built with `python3 design/build_gallery.
 - **Dark** (default): dark teal with gold and mint, Plus Jakarta Sans and a Cinzel wordmark.
 
 ## Files on the phone
-Files are stored in the app's private storage per contact. Users can clear cache, a single contact, or everything.
+Received and sent files, voice and video are saved in the folder **Download/Direct** (one subfolder per contact) when Android has given Direct "all files access" (Android 11 or later, asked once after the start screen; Settings → Storage shows the status). Without that permission they are kept in the app's private storage, as in earlier versions. The folder is never touched by an update of the app.
+
+**Retention:** Settings → Keep conversations sets how long messages, files, voice and video are kept on this phone: 1 day, 1 week, **2 weeks (default)**, 1 month, 2 months or **3 months (longest)**. Older items are deleted automatically (at start, when the app comes back, hourly while it is open). The setting is local: each person chooses their own timeline and nothing is deleted on the other person's phone.
+
+**Uninstall:** Android cannot let an app run code or show a warning when it is uninstalled from the phone's own menu, and it keeps public folders such as Download/Direct. Settings → Storage → *Delete everything and uninstall* therefore shows what will be removed (messages, contacts, your key, Download/Direct), deletes it and then opens Android's uninstall dialog. A new install that finds old files in Download/Direct offers to delete them. Automatic backup of app data is switched off.
 
 ## Architecture
 See `docs/ARCHITECTURE.md`.

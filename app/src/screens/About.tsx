@@ -1,8 +1,8 @@
 import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { Card, Header, Screen } from '../ui';
-import { headingFont } from '../theme';
 import pkg from '../../package.json';
 
 export default function About({ onBack }: { onBack: () => void }) {
@@ -12,7 +12,7 @@ export default function About({ onBack }: { onBack: () => void }) {
     <Screen>
       <Header title={t.about} onBack={onBack} />
       <ScrollView contentContainerStyle={{ gap: 14 }} showsVerticalScrollIndicator={false}>
-        <Text style={{ fontFamily: headingFont, fontWeight: '600', fontSize: 30, lineHeight: 34, color: theme.ink, letterSpacing: -0.6, paddingHorizontal: 4 }}>
+        <Text style={{ fontFamily: theme.fonts.heading, fontWeight: '600', fontSize: 30, lineHeight: 34, color: theme.ink, letterSpacing: -0.6, paddingHorizontal: 4 }}>
           {t.aboutHeadline1} <Text style={{ color: theme.accent }}>{t.aboutHeadline2}</Text>
         </Text>
         <Card>

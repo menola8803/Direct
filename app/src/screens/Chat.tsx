@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
+import { Text, TextInput } from '../ui';
 import { useApp } from '../store';
 import { useNet } from '../net/net';
 import * as DocumentPicker from 'expo-document-picker';

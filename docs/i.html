@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Direct invite</title>
+<style>
+  :root { --bg:#0F1A1C; --card:#172629; --line:#25393D; --ink:#EAF1EF; --muted:#B7C6C3; --gold:#E8B04A; --mint:#5FC4B4; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; display:flex; align-items:center; justify-content:center; padding:16px; }
+  main { width:100%; max-width:420px; background:var(--card); border:1px solid var(--line); border-radius:24px; padding:24px; display:grid; gap:14px; }
+  h1 { margin:0; font-size:30px; letter-spacing:.35em; color:var(--gold); font-family:Cinzel,Georgia,serif; }
+  .tag { margin:0; color:var(--mint); font-size:11px; letter-spacing:.3em; font-weight:700; }
+  p { margin:0; color:var(--muted); }
+  a.btn { display:block; text-align:center; text-decoration:none; padding:14px 16px; border-radius:16px; font-weight:700; }
+  a.primary { background:var(--gold); color:#0F1A1C; }
+  a.secondary { border:1px solid var(--line); color:var(--ink); }
+  code { word-break:break-all; font-size:12px; color:var(--muted); }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div><h1>DIRECT</h1><p class="tag">— PHONE TO PHONE —</p></div>
+  <p id="intro"></p>
+  <div id="have" hidden>
+    <a id="open" class="btn primary" href="#"></a>
+  </div>
+  <a id="get" class="btn secondary" href="https://github.com/menola8803/Direct/releases/latest"></a>
+  <p id="note"></p>
+  <details id="raw" hidden><summary id="rawl"></summary><code id="code"></code></details>
+</main>
+<script>
+(function () {
+  var sv = (navigator.language || '').toLowerCase().indexOf('sv') === 0;
+  var T = sv
+    ? { intro: 'Någon vill chatta med dig i Direct, en chattapp utan server emellan.', open: 'Öppna i Direct och lägg till', get: 'Hämta Direct (Android)', note: 'Har du redan Direct? Tryck på den gula knappen. Annars hämtar du appen först och öppnar sedan den här länken igen.', bad: 'Länken saknar en giltig kod.', raw: 'Visa koden' }
+    : { intro: 'Someone wants to chat with you in Direct, a chat app with no server in between.', open: 'Open in Direct and add', get: 'Get Direct (Android)', note: 'Already have Direct? Tap the gold button. Otherwise get the app first, then open this link again.', bad: 'This link has no valid code.', raw: 'Show the code' };
+  var $ = function (id) { return document.getElementById(id); };
+  $('intro').textContent = T.intro; $('open').textContent = T.open; $('get').textContent = T.get; $('note').textContent = T.note; $('rawl').textContent = T.raw;
+  // The code is in the URL fragment: browsers never send it to the web server.
+  function render() {
+    var card = ''; try { card = decodeURIComponent(location.hash.slice(1)); } catch (e) {}
+    if (/^direct1:[A-Za-z0-9_-]+$/.test(card) && card.length < 600) {
+      var link = 'direct://add?c=' + encodeURIComponent(card);
+      $('open').href = link; $('have').hidden = false; $('code').textContent = card; $('raw').hidden = false; $('note').textContent = T.note;
+      return link;
+    }
+    $('have').hidden = true; $('raw').hidden = true; $('note').textContent = T.bad;
+    return null;
+  }
+  var first = render();
+  if (first) setTimeout(function () { location.href = first; }, 600);
+  window.addEventListener('hashchange', render);
+})();
+</script>
+</body>
+</html>

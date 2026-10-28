@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, Linking, Pressable, Text, TextInput, View } from 'react-native';
-import * as Contacts from 'expo-contacts';
+import { Alert, FlatList, Linking, Pressable, View } from 'react-native';
+import { Text, TextInput } from '../ui';
+import * as Contacts from 'expo-contacts/legacy';
 import { Person, useApp } from '../store';
 import { useNet } from '../net/net';
 import { encodeCard } from '../core/crypto';
+import { inviteMessage } from '../core/invite';
 import { Route } from '../nav';
 import { Avatar, Btn, H1, Sub, SmallBtn } from '../ui';
 
@@ -12,16 +14,17 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
   const { link } = useNet();
   const [book, setBook] = useState<Person[]>([]);
   const [denied, setDenied] = useState(false);
+  const [failed, setFailed] = useState('');
   const [q, setQ] = useState('');
 
   const load = useCallback(async () => {
     const r = await Contacts.requestPermissionsAsync();
     if (r.status !== 'granted') { setDenied(true); return; }
-    setDenied(false);
+    setDenied(false); setFailed('');
     const { data } = await Contacts.getContactsAsync({ fields: [Contacts.Fields.PhoneNumbers], sort: Contacts.SortTypes.FirstName });
     setBook(data.filter(c => c.name && c.phoneNumbers?.length).map(c => ({ id: c.id ?? c.name!, name: c.name!, phone: c.phoneNumbers![0].number })));
   }, []);
-  useEffect(() => { load().catch(() => setDenied(true)); }, [load]);
+  useEffect(() => { load().catch(e => setFailed(String(e?.message ?? e))); }, [load]);
 
   const s = q.trim().toLowerCase();
   const mine = useMemo(() => Object.values(contacts).filter(c => !blocked[c.id] && (!s || c.name.toLowerCase().includes(s))).sort((a, b) => a.name.localeCompare(b.name)), [contacts, blocked, s]);
@@ -39,7 +42,7 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
     { text: t.cancel, style: 'cancel' },
   ]);
   const invite = (p: Person) => {
-    const body = identity ? `${t.inviteText}\n\n${encodeCard(identity, name)}` : t.inviteText;
+    const body = identity ? inviteMessage(encodeCard(identity, name), t) : t.inviteText;
     Linking.openURL(`sms:${p.phone ?? ''}?body=${encodeURIComponent(body)}`).catch(() => {});
   };
 
@@ -53,8 +56,9 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
       </View>
       <TextInput value={q} onChangeText={setQ} placeholder={t.search} placeholderTextColor={theme.muted}
         style={{ height: 48, borderRadius: 14, borderWidth: 1, borderColor: theme.line, backgroundColor: theme.card, paddingHorizontal: 16, fontSize: 15, color: theme.ink }} />
+      {failed ? <Text style={{ color: theme.danger, fontSize: 13 }}>{t.contactsLoadFail} {failed.slice(0, 160)}</Text> : null}
       {denied ? (
-        <View style={{ gap: 10 }}><Text style={{ color: theme.muted }}>{t.contactsDenied}</Text><Btn title={t.allowContacts} kind="secondary" onPress={() => load().catch(() => {})} /></View>
+        <View style={{ gap: 10 }}><Text style={{ color: theme.muted }}>{t.contactsDenied}</Text><Btn title={t.allowContacts} kind="secondary" onPress={() => load().catch(e => setFailed(String(e?.message ?? e)))} /></View>
       ) : null}
       <FlatList data={data} keyExtractor={(d, i) => (d.kind === 'h' ? 'h' + i : d.kind === 'c' ? d.id : 'p' + d.p.id)} contentContainerStyle={{ gap: 4, paddingBottom: 8 }}
         renderItem={({ item }) => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { themes, ThemeName } from '../theme';
 import { Btn, Header, Screen, ThemePreview } from '../ui';

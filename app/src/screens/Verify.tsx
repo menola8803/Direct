@@ -1,5 +1,6 @@
 import React from 'react';
-import { Alert, Text } from 'react-native';
+import { Alert } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { safetyCode } from '../core/crypto';
 import { Btn, Card, Header, Screen } from '../ui';

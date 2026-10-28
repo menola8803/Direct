@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { Text, TextInput } from '../ui';
 import { useApp } from '../store';
 import { rtc } from '../net/rtc';
 import { DEFAULT_STUN, parseStun, pingStun } from '../net/stun';

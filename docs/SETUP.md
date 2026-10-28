@@ -10,6 +10,11 @@
 `cd server && npm i && PORT=8080 node server.js` behind TLS, then enter `wss://your.domain` under Settings → Connection.
 The server only relays encrypted connection messages, never chat, files or calls.
 
+## Invite friends (link)
+Contacts → *Invite* (or My code → *Share invite*) sends a message with a download link and an invite link. Someone who already has Direct taps the invite link, lands on a page with an **Open in Direct** button, sees the sender's name and safety code, and can add them. After adding, the app offers *Send my code back*, so both sides have each other and can connect.
+- The invite page is `docs/i.html`. To make the link work, enable GitHub Pages: repo **Settings → Pages → Branch `main`, folder `/docs`** (needs a public repo). The code sits in the URL fragment (`#…`), which is never sent to GitHub. If Pages is off, the message also contains the plain code, which can be pasted under Contacts → Add.
+- Without a server there is no way to look up *who in your phone book has Direct*: a phone number cannot be matched to a key without a directory. Invite links are the serverless way.
+
 ## STUN servers
 A STUN server only tells a phone its public address; it never sees messages. Settings → STUN servers lets you paste addresses, test all of them on the phone (✓/✗ with response time), remove single servers or all that do not answer, and restore the defaults. The empty default uses Cloudflare, Nextcloud and stunprotocol.org (not Google).
 

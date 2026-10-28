@@ -1,5 +1,6 @@
 import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { Card, H1, Label, Row, Sub } from '../ui';
 import { Route } from '../nav';

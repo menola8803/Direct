@@ -1,8 +1,9 @@
 import React from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList, Pressable, View } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { useNet } from '../net/net';
-import { Avatar, H1 } from '../ui';
+import { Avatar, BrandHeader } from '../ui';
 
 export default function Chats({ onOpen }: { onOpen: (id: string) => void }) {
   const { theme, t, messages, blocked, contacts } = useApp();
@@ -11,7 +12,7 @@ export default function Chats({ onOpen }: { onOpen: (id: string) => void }) {
     .map(id => ({ id, last: messages[id][messages[id].length - 1] })).sort((a, b) => b.last.at - a.last.at);
   return (
     <View style={{ flex: 1, gap: 12 }}>
-      <H1>{t.chats}</H1>
+      <BrandHeader tagline={t.tagline} />
       {data.length === 0 ? <Text style={{ color: theme.muted, fontSize: 15, lineHeight: 22 }}>{t.noChats}</Text> : null}
       <FlatList data={data} keyExtractor={d => d.id} renderItem={({ item }) => (
         <Pressable onPress={() => onOpen(item.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64 }}>

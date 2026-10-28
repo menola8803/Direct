@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, Text } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { deleteCache, deleteFiles, fmtSize, usedBytes } from '../files';
 import { Card, Header, Label, Row, Screen } from '../ui';

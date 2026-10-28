@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { LangChoice } from '../i18n';
 import { Header, Screen } from '../ui';

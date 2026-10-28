@@ -20,7 +20,7 @@ type Saved = {
 const KEY = 'direct.state.v2';
 const ID_KEY = 'direct.identity.v1';
 const empty: Saved = {
-  themeName: 'beige', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
+  themeName: 'usb', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
   signalUrl: '', stunList: '', turnUrl: '', turnUser: '', turnCred: '', hideIp: false,
 };
 

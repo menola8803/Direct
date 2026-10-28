@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.8.0 – No server, calls, files, forward secrecy
+- **USB Portlås look** (dark teal, gold, mint; Plus Jakarta Sans + Cinzel wordmark) is now the default theme.
+- **Fixed phone-book import** (the old `expo-contacts` calls throw in SDK 58; now uses `expo-contacts/legacy`).
+- **Invite links:** `direct://add?c=…` deep links, web invite page `docs/i.html`, invite screen with *Send my code back*.
 - **Configurable STUN servers** with a per-server test; defaults are no longer Google.
 - **Connect without a server:** manual pairing with encrypted codes (QR/text). The signaling server is optional.
 - **Forward secrecy:** fresh one-time keys per connection plus a hash chain per message (`core/session.ts`).

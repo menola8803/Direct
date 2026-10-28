@@ -19,6 +19,8 @@ export type Theme = {
   danger: string;
   bubbleMine: string;
   onBubbleMine: string;
+  tabActive: string;
+  fonts: { regular?: string; medium?: string; semibold?: string; bold?: string; extrabold?: string; heading?: string; display?: string };
 };
 
 // The colors match the screen design in design/ (Beige and USB).
@@ -30,6 +32,8 @@ export const themes: Record<ThemeName, Theme> = {
     primary: '#26231F', onPrimary: '#F3E9D2',
     good: '#2F6E4C', danger: '#A8403A',
     bubbleMine: '#DCCBA8', onBubbleMine: '#26231F',
+    tabActive: '#26231F',
+    fonts: { heading: Platform.select({ ios: 'Georgia', default: 'serif' }), display: Platform.select({ ios: 'Georgia', default: 'serif' }) },
   },
   usb: {
     name: 'usb', label: 'USB', dark: true,
@@ -38,6 +42,9 @@ export const themes: Record<ThemeName, Theme> = {
     primary: '#E8B04A', onPrimary: '#0F1A1C',
     good: '#5FC4B4', danger: '#E8776D',
     bubbleMine: '#4A3A18', onBubbleMine: '#EAF1EF',
+    tabActive: '#E8B04A',
+    // Same look as USB Portlås: Plus Jakarta Sans for text, Cinzel for the wordmark.
+    fonts: { regular: 'PlusJakartaSans_400Regular', medium: 'PlusJakartaSans_500Medium', semibold: 'PlusJakartaSans_600SemiBold', bold: 'PlusJakartaSans_700Bold', extrabold: 'PlusJakartaSans_800ExtraBold', heading: 'PlusJakartaSans_700Bold', display: 'Cinzel_700Bold' },
   },
 };
 

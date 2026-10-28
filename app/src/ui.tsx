@@ -1,8 +1,28 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text as RNText, TextInput as RNTextInput, TextInputProps, TextProps, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from './store';
-import { headingFont, Theme } from './theme';
+import { Theme } from './theme';
+
+// Text and TextInput that pick the theme's font family from fontWeight (custom fonts need one family per weight).
+function familyFor(theme: Theme, weight: unknown, explicit?: string) {
+  if (explicit) return explicit;
+  const w = String(weight ?? '400');
+  const f = theme.fonts;
+  return w === '700' || w === 'bold' ? f.bold : w === '800' || w === '900' ? f.extrabold : w === '600' ? f.semibold : w === '500' ? f.medium : f.regular;
+}
+export function Text({ style, ...rest }: TextProps) {
+  const { theme } = useApp();
+  const f = StyleSheet.flatten(style) ?? {};
+  const fam = familyFor(theme, f.fontWeight, f.fontFamily);
+  return <RNText {...rest} style={[style, fam ? { fontFamily: fam, fontWeight: undefined } : null]} />;
+}
+export function TextInput({ style, ...rest }: TextInputProps) {
+  const { theme } = useApp();
+  const f = StyleSheet.flatten(style) ?? {};
+  const fam = familyFor(theme, f.fontWeight, f.fontFamily);
+  return <RNTextInput {...rest} style={[style, fam ? { fontFamily: fam, fontWeight: undefined } : null]} />;
+}
 
 // Screen frame that never ends up under the Android status bar or gesture bar.
 export function Screen({ children, bottom = true }: { children: React.ReactNode; bottom?: boolean }) {
@@ -17,7 +37,7 @@ export function Screen({ children, bottom = true }: { children: React.ReactNode;
 
 export function H1({ children, size = 28 }: { children: React.ReactNode; size?: number }) {
   const { theme } = useApp();
-  return <Text style={{ fontFamily: headingFont, fontWeight: '600', fontSize: size, color: theme.ink, letterSpacing: -0.4 }}>{children}</Text>;
+  return <Text style={{ fontFamily: theme.fonts.heading, fontWeight: '600', fontSize: size, color: theme.ink, letterSpacing: -0.4 }}>{children}</Text>;
 }
 export function Sub({ children }: { children: React.ReactNode }) {
   const { theme } = useApp();
@@ -61,7 +81,7 @@ export function Avatar({ name, size = 44, ring }: { name: string; size?: number;
   return (
     <View style={{ width: size + 8, height: size + 8, borderRadius: (size + 8) / 2, borderWidth: 2, borderColor: ring ?? theme.line, alignItems: 'center', justifyContent: 'center' }}>
       <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: theme.chip, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: theme.accent, fontFamily: headingFont, fontWeight: '600', fontSize: size / 3 }}>{ini}</Text>
+        <Text style={{ color: theme.accent, fontFamily: theme.fonts.heading, fontWeight: '600', fontSize: size / 3 }}>{ini}</Text>
       </View>
     </View>
   );
@@ -104,7 +124,7 @@ export function TabBar({ tab, setTab }: { tab: 'chats' | 'contacts' | 'settings'
       {items.map(([k, label]) => (
         <Pressable key={k} accessibilityRole="tab" accessibilityState={{ selected: tab === k }} onPress={() => setTab(k)}
           style={{ flex: 1, minHeight: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: tab === k ? theme.chip : 'transparent' }}>
-          <Text style={{ fontSize: 13, fontWeight: '600', color: tab === k ? theme.ink : theme.muted }}>{label}</Text>
+          <Text style={{ fontSize: 13, fontWeight: '600', color: tab === k ? theme.tabActive : theme.muted }}>{label}</Text>
         </Pressable>
       ))}
     </View>
@@ -126,3 +146,23 @@ export function ThemePreview({ th }: { th: Theme }) {
 }
 
 export const styles = StyleSheet.create({ fill: { flex: 1 } });
+
+
+// Branded page header (as in USB Portlås): ring logo, spaced wordmark and a small spaced tagline.
+export function BrandHeader({ tagline }: { tagline: string }) {
+  const { theme } = useApp();
+  if (theme.name !== 'usb') return <H1>Direct</H1>;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#162B2E', borderRadius: 24, borderWidth: 1, borderColor: '#2D322B', paddingVertical: 14, paddingHorizontal: 16 }}>
+      <View style={{ width: 52, height: 52, borderRadius: 26, borderWidth: 2, borderColor: theme.primary, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: '#8A6D2E', alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 22 }}>D</Text>
+        </View>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 32, letterSpacing: 8 }}>DIRECT</Text>
+        <Text style={{ color: theme.accent, fontWeight: '700', fontSize: 11, letterSpacing: 3.5 }}>— {tagline} —</Text>
+      </View>
+    </View>
+  );
+}

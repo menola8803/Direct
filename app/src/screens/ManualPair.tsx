@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Share, Text, TextInput, View } from 'react-native';
+import { ScrollView, Share, View } from 'react-native';
+import { Text, TextInput } from '../ui';
 import QRCode from 'react-native-qrcode-svg';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Clipboard from 'expo-clipboard';

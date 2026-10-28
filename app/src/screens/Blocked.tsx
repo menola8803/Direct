@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { Avatar, Card, Header, Screen, SmallBtn } from '../ui';
 

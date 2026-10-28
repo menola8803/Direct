@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ScrollView, Switch, Text, TextInput, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
+import { Text, TextInput } from '../ui';
 import { useApp } from '../store';
 import { useNet } from '../net/net';
 import { Btn, Card, Header, Label, Screen } from '../ui';

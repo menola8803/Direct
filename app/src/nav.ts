@@ -3,6 +3,7 @@ export type Route =
   | { name: 'chat'; id: string }
   | { name: 'verify'; id: string }
   | { name: 'mycode' }
+  | { name: 'invite'; card: string }
   | { name: 'pair'; id: string }
   | { name: 'conference' }
   | { name: 'mediatest' }

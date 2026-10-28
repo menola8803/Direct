@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { Text } from '../ui';
 import { useApp } from '../store';
 import { useNet } from '../net/net';
 import { MAX_AUDIO, MAX_VIDEO } from '../net/calls';

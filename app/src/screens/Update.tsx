@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Linking, Platform, Text } from 'react-native';
+import { Linking, Platform } from 'react-native';
+import { Text } from '../ui';
 import { File, Paths } from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import Constants from 'expo-constants';

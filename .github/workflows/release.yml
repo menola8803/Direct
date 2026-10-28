@@ -15,7 +15,12 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
           zip -qr "direct-${TAG}.zip" . -x '.git/*'
-          gh release create "$TAG" "direct-${TAG}.zip" --title "Direct ${TAG}" --generate-notes
+          # The release may already exist (e.g. created by hand with an APK): then only add the zip.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "direct-${TAG}.zip" --clobber
+          else
+            gh release create "$TAG" "direct-${TAG}.zip" --title "Direct ${TAG}" --generate-notes
+          fi
 
   apk:
     needs: release

@@ -181,10 +181,10 @@ function Wordmark({ tagline, reduce }: { tagline: string; reduce: boolean }) {
   const v = useEntrance(550, 700, reduce);
   return (
     <Animated.View style={{ position: 'absolute', left: 0, top: 384, width: W0, alignItems: 'center', opacity: v, transform: [{ translateY: lerp(v, 16, 0) }] }}>
-      {/* The block is as wide as the wider of the two lines. Both are stretched to that width, so they read as one block centered on the logo. */}
-      <View style={{ alignItems: 'stretch', gap: 12 }}>
-        <Spaced text="DIRECT" spacing={10} justify style={{ fontFamily: DISPLAY, fontSize: 42, lineHeight: 50, color: C.gold, textShadowColor: 'rgba(232,176,74,0.3)', textShadowRadius: 18, textShadowOffset: { width: 0, height: 0 } }} />
-        <Spaced text={`— ${tagline} —`} spacing={2} justify style={{ fontFamily: SANS, fontSize: 11, color: C.mint }} />
+      {/* Both lines are centered on the logo (each letter has fixed gaps, so nothing depends on how the platform handles letterSpacing). */}
+      <View style={{ alignItems: 'center', gap: 12 }}>
+        <Spaced text="DIRECT" spacing={12} style={{ fontFamily: DISPLAY, fontSize: 42, lineHeight: 50, color: C.gold, textShadowColor: 'rgba(232,176,74,0.3)', textShadowRadius: 18, textShadowOffset: { width: 0, height: 0 } }} />
+        <Spaced text={`— ${tagline} —`} spacing={3.2} style={{ fontFamily: SANS, fontSize: 11, color: C.mint }} />
       </View>
     </Animated.View>
   );

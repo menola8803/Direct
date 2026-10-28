@@ -15,7 +15,7 @@ export default function Invite({ card, onBack, onOpenChat }: { card: string; onB
   const contact = cardToContact(c);
   const isSelf = contact.signPub === identity.signPublic;
   const known = !!contacts[contact.id];
-  const shareBack = () => Share.share({ message: inviteMessage(encodeCard(identity, name), t) }).catch(() => {});
+  const shareBack = () => Share.share({ message: inviteMessage(encodeCard(identity, name), t, name) }).catch(() => {});
   return (
     <Screen>
       <Header title={t.inviteTitle} onBack={onBack} />

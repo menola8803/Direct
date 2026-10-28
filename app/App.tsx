@@ -11,7 +11,7 @@ import './src/net/random';
 import { AppProvider, useApp } from './src/store';
 import { NetProvider } from './src/net/net';
 import { Route } from './src/nav';
-import { Screen, TabBar } from './src/ui';
+import { Screen, TabBar, TabName } from './src/ui';
 import Welcome from './src/screens/Welcome';
 import Guide from './src/screens/Guide';
 import Chats from './src/screens/Chats';
@@ -43,7 +43,7 @@ function Content() {
   const { call } = useNet();
   const [stack, setStack] = useState<Route[]>([{ name: 'tabs' }]);
   const [pending, setPending] = useState<string | null>(null);
-  const [tab, setTab] = useState<'chats' | 'contacts' | 'settings'>('chats');
+  const [tab, setTab] = useState<TabName>('chats');
   const push = useCallback((r: Route) => setStack(s => [...s, r]), []);
   const pop = useCallback(() => setStack(s => (s.length > 1 ? s.slice(0, -1) : s)), []);
 
@@ -76,7 +76,6 @@ function Content() {
     case 'chat': return <Screen><Chat id={r.id} onBack={pop} onVerify={() => push({ name: 'verify', id: r.id })} onPair={() => push({ name: 'pair', id: r.id })} /></Screen>;
     case 'verify': return <Verify id={r.id} onBack={pop} onRemoved={() => setStack([{ name: 'tabs' }])} />;
     case 'pair': return <ManualPair id={r.id} onBack={pop} />;
-    case 'conference': return <Conference onBack={pop} />;
     case 'mediatest': return <MediaTest onBack={pop} />;
     case 'storage': return <Storage onBack={pop} />;
     case 'invite': return <Invite card={r.card} onBack={pop} onOpenChat={id => setStack(st => [...st.slice(0, -1), { name: 'chat', id }])} />;
@@ -98,6 +97,7 @@ function Content() {
           <View style={{ flex: 1 }}>
             {tab === 'chats' && <Chats onOpen={id => push({ name: 'chat', id })} />}
             {tab === 'contacts' && <ContactsScreen onOpen={id => push({ name: 'chat', id })} go={push} />}
+            {tab === 'conference' && <Conference go={push} />}
             {tab === 'settings' && <Settings go={push} />}
           </View>
           <TabBar tab={tab} setTab={setTab} />

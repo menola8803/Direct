@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.1 – Conference tab, header fix
+- **Conference tab:** Conference is now in the bottom bar (Chats, Contacts, Conference, Settings; the bar has icons). The tab shows three short steps, who can be picked (only connected contacts), and the *Call* (audio, up to 8) and *Video call* (up to 4) buttons. The row under Settings is gone.
+- **Help:** the getting-started guide has a new page *Conference calls* with the steps (open the tab, pick connected people, call, they answer, mute/camera/hang up) and the rules (everyone must have added each other as contacts, up to 4 with video or 8 audio only, use Wi-Fi).
+- **Header fix:** on a real phone the logo, DIRECT and the tagline were spread across the whole width and ran out of the card. The stretch mode is gone: every line is centered with fixed gaps. Applies to the Dark header and the start screen.
+- **Invite:** *Send my code back* now names you in the message (it said "Someone invites you").
+- Docs: if GitHub Pages is not enabled the invite link in the SMS fails; the whole link can be pasted under Contacts → + Add.
+
 ## 0.11.0 – Getting-started guide, one way to test, centered start screen
 - **Getting-started guide:** after the start screen on a fresh install the app shows five pages: welcome (with language choice), how to create your key, how to invite and connect others, everything you can do (chat, files, voice and video calls, voice and video messages, conference) and good to know. Then the key screen. Open it again any time under *Settings → Getting started guide*. Installs that are older than the guide do not get it as a first-run screen.
 - **Tests work the same everywhere in Settings:** tap = a box explains the test, press and hold = the test runs, a box says *Testing…*, then *OK* or *Not working*, and fades away by itself. Applies to STUN servers (each address and the test-all button), TURN servers, the voice/video test (microphone, camera, WebRTC) and a new *Test signal server* button on the Connection screen. A hint line on each screen says so.

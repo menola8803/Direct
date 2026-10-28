@@ -6,9 +6,9 @@ import { LangChoice } from '../i18n';
 import { Btn, Card, Screen } from '../ui';
 
 // Getting-started guide. Shown once after the first start (then the key is created), and any time from
-// Settings. Pages: welcome and language, create the key, invite and connect, what you can do, good to know.
+// Settings. Pages: welcome and language, create the key, invite and connect, what you can do, conference calls, good to know.
 
-const PAGES = 5;
+const PAGES = 6;
 
 export default function Guide({ first, onClose }: { first?: boolean; onClose: () => void }) {
   const { theme, t, langChoice, setLang } = useApp();
@@ -115,6 +115,14 @@ export default function Guide({ first, onClose }: { first?: boolean; onClose: ()
               <Feature icon="🎥" head={t.g4vrec} text={t.g4vrecb} />
               <Feature icon="👥" head={t.g4conf} text={t.g4confb} />
             </Card>
+          </ScrollView>
+        </View>
+
+        <View style={pageStyle}>
+          <ScrollView contentContainerStyle={scrollStyle} showsVerticalScrollIndicator={false}>
+            <Text style={title}>{t.gcT}</Text>
+            <Steps items={[t.gc1, t.gc2, t.gc3, t.gc4, t.gc5]} />
+            <Text style={body}>{t.gcN}</Text>
           </ScrollView>
         </View>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text as RNText, TextInput as RNTextInput, TextInputProps, TextProps, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { useApp } from './store';
 import { Theme } from './theme';
 import { Spaced } from './spaced';
@@ -117,17 +118,48 @@ export function Row({ title, sub, right, onPress, danger }: { title: string; sub
   );
 }
 
-export function TabBar({ tab, setTab }: { tab: 'chats' | 'contacts' | 'settings'; setTab: (t: 'chats' | 'contacts' | 'settings') => void }) {
-  const { theme, t } = useApp();
-  const items: ['chats' | 'contacts' | 'settings', string][] = [['chats', t.tabChats], ['contacts', t.tabContacts], ['settings', t.tabSettings]];
+export type TabName = 'chats' | 'contacts' | 'conference' | 'settings';
+
+// Line icons for the bottom bar (24 x 24, drawn with the text color of the tab).
+function TabIcon({ tab, color }: { tab: TabName; color: string }) {
+  const p = { stroke: color, strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none' } as const;
   return (
-    <View style={{ flexDirection: 'row', gap: 4, backgroundColor: theme.card, borderColor: theme.line, borderWidth: 1, borderRadius: 22, padding: 6 }}>
-      {items.map(([k, label]) => (
-        <Pressable key={k} accessibilityRole="tab" accessibilityState={{ selected: tab === k }} onPress={() => setTab(k)}
-          style={{ flex: 1, minHeight: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: tab === k ? theme.chip : 'transparent' }}>
-          <Text style={{ fontSize: 13, fontWeight: '600', color: tab === k ? theme.tabActive : theme.muted }}>{label}</Text>
-        </Pressable>
-      ))}
+    <Svg width={24} height={24} viewBox="0 0 24 24">
+      {tab === 'chats' ? <Path {...p} d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-8l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z" /> : null}
+      {tab === 'contacts' ? <><Circle {...p} cx={12} cy={8.5} r={3.5} /><Path {...p} d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" /></> : null}
+      {tab === 'conference' ? <>
+        <Circle {...p} cx={12} cy={8} r={3} />
+        <Path {...p} d="M7 20c0-3 2.2-5 5-5s5 2 5 5" />
+        <Circle {...p} cx={4.8} cy={10} r={2} />
+        <Path {...p} d="M1.5 18.5c0-2.2 1.4-3.6 3.3-3.8" />
+        <Circle {...p} cx={19.2} cy={10} r={2} />
+        <Path {...p} d="M22.5 18.5c0-2.2-1.4-3.6-3.3-3.8" />
+      </> : null}
+      {tab === 'settings' ? <>
+        <Path {...p} d="M4 7h8M18 7h2M4 12h2M12 12h8M4 17h10M20 17h0" />
+        <Circle {...p} cx={15} cy={7} r={2.2} />
+        <Circle {...p} cx={9} cy={12} r={2.2} />
+        <Circle {...p} cx={17} cy={17} r={2.2} />
+      </> : null}
+    </Svg>
+  );
+}
+
+export function TabBar({ tab, setTab }: { tab: TabName; setTab: (t: TabName) => void }) {
+  const { theme, t } = useApp();
+  const items: [TabName, string][] = [['chats', t.tabChats], ['contacts', t.tabContacts], ['conference', t.groupCall], ['settings', t.tabSettings]];
+  return (
+    <View style={{ flexDirection: 'row', gap: 2, backgroundColor: theme.card, borderColor: theme.line, borderWidth: 1, borderRadius: 22, padding: 5 }}>
+      {items.map(([k, label]) => {
+        const on = tab === k, color = on ? theme.tabActive : theme.muted;
+        return (
+          <Pressable key={k} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: on }} onPress={() => setTab(k)}
+            style={{ flex: 1, minHeight: 56, borderRadius: 17, alignItems: 'center', justifyContent: 'center', gap: 3, backgroundColor: on ? theme.chip : 'transparent' }}>
+            <TabIcon tab={k} color={color} />
+            <Text numberOfLines={1} style={{ fontSize: 11, fontWeight: '600', color, maxWidth: '100%', paddingHorizontal: 2 }}>{label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -150,7 +182,7 @@ export const styles = StyleSheet.create({ fill: { flex: 1 } });
 
 
 // Branded page header (Dark theme): ring logo and the wordmark with the tagline under it.
-// The whole group is centered in the card; the tagline is stretched to the width of DIRECT.
+// The whole group is centered in the card and the tagline is centered under DIRECT.
 export function BrandHeader({ tagline }: { tagline: string }) {
   const { theme } = useApp();
   if (theme.name !== 'dark') return <H1>Direct</H1>;
@@ -161,9 +193,9 @@ export function BrandHeader({ tagline }: { tagline: string }) {
           <RNText style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 22, lineHeight: 26, textAlign: 'center', includeFontPadding: false }}>D</RNText>
         </View>
       </View>
-      <View style={{ alignItems: 'stretch', gap: 5 }}>
-        <Spaced text="DIRECT" spacing={7} justify style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 34, lineHeight: 40 }} />
-        <Spaced text={`— ${tagline} —`} spacing={1} justify style={{ color: theme.accent, fontFamily: theme.fonts.bold, fontSize: 10 }} />
+      <View style={{ alignItems: 'center', gap: 5, flexShrink: 1 }}>
+        <Spaced text="DIRECT" spacing={8} style={{ color: theme.primary, fontFamily: theme.fonts.display, fontSize: 34, lineHeight: 40 }} />
+        <Spaced text={`— ${tagline} —`} spacing={2.2} style={{ color: theme.accent, fontFamily: theme.fonts.bold, fontSize: 10 }} />
       </View>
     </View>
   );

@@ -1,4 +1,4 @@
-# Getting started (0.11.0)
+# Getting started (0.11.1)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -15,7 +15,7 @@ Contacts → *Invite* (or My code → *Share invite*) sends a message with a dow
 - **The SMS** (Contacts → Invite, or My code → Share invite) says who invites and what Direct is, links to the newest APK, explains that Android asks to allow installing from the browser, and links to the invite page that adds the sender. It is about 700 characters, so phones send it as several linked SMS parts.
 - **Always-newest download link:** `https://github.com/menola8803/Direct/releases/latest/download/Direct.apk`. GitHub sends it to the asset named exactly `Direct.apk` in the latest release. The release workflow uploads the APK under that name (and as `Direct-<tag>.apk`). If you attach an APK by hand to a release, name it `Direct.apk` as well.
 - **Recipients are not signed in to GitHub**, so the repository must be **public** (or the releases and `docs/` must live in a public repo). With a private repo the link gives 404.
-- The invite page is `docs/i.html`. To make the link work, enable GitHub Pages: repo **Settings → Pages → Branch `main`, folder `/docs`** (needs a public repo). The code sits in the URL fragment (`#…`), which is never sent to GitHub. If Pages is off, the message also contains the plain code, which can be pasted under Contacts → Add.
+- The invite page is `docs/i.html`. To make the link work, enable GitHub Pages: repo **Settings → Pages → Branch `main`, folder `/docs`** (needs a public repo). The code sits in the URL fragment (`#…`), which is never sent to GitHub. If Pages is off the link in the SMS gives an error page. The recipient can still copy the whole link from the SMS and paste it under Contacts → + Add (the app finds the `direct1:` code inside it).
 - Without a server there is no way to look up *who in your phone book has Direct*: a phone number cannot be matched to a key without a directory. Invite links are the serverless way.
 
 ## STUN servers
@@ -38,7 +38,7 @@ Every push to `main` that touches `app/` builds an APK: open the repo → **Acti
 For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.11.0 -m "Direct 0.11.0" && git push origin v0.11.0
+git tag -a v0.11.1 -m "Direct 0.11.1" && git push origin v0.11.1
 ```
 The APK is signed with the Expo template's debug key, which is public. Fine for testing; before a real launch create your own keystore and keep it safe, since updates only install over an app signed with the same key.
 

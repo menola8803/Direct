@@ -65,6 +65,8 @@ function Video({ f }: { f: Attach }) {
 export function FileBubble({ f, color, progress }: { f: Attach; color: string; progress?: number }) {
   const { t } = useApp();
   const [opening, setOpening] = useState(false);
+  // Restored from a backup: the message is there, the file is not (backups hold no files).
+  if (!f.uri) return <View><Text style={{ color, fontWeight: '600' }}>{f.name}</Text><Text style={{ color, opacity: 0.7, fontSize: 12 }}>{t.fileGone}</Text></View>;
   // An encrypted file is decrypted into the cache first. That copy is removed after a while (see files.ts: clearPlain).
   const share = async () => {
     if (opening) return;

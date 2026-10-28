@@ -26,6 +26,7 @@ export default function Settings({ go }: { go: (r: Route) => void }) {
         <Row title={t.keepTitle} sub={t.keepSub} right={keepLabel(t, retentionDays)} onPress={() => go({ name: 'keep' })} />
         <Row title={t.fmTitle} sub={t.fmSub} right={fileModeLabel(t, fileMode)} onPress={() => go({ name: 'filemode' })} />
         <Row title={t.lockTitle} sub={t.lockSub} right={lockLabel(t, lockOn)} onPress={() => go({ name: 'lock' })} />
+        <Row title={t.bkTitle} sub={t.bkSub} onPress={() => go({ name: 'backup' })} />
         <Row title={t.storage} sub={t.storageSub} onPress={() => go({ name: 'storage' })} />
         <Row title={t.update} sub={t.updateSub} onPress={() => go({ name: 'update' })} />
         <Row title={t.blocked} sub={t.blockedSub} right={String(Object.keys(blocked).length)} onPress={() => go({ name: 'blocked' })} />

@@ -18,6 +18,7 @@ export type Route =
   | { name: 'keep' }
   | { name: 'lock' }
   | { name: 'filemode' }
+  | { name: 'backup' }
   | { name: 'blocked' }
   | { name: 'guide' }
   | { name: 'about' };

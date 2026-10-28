@@ -11,8 +11,9 @@ import { FileKind, MsgStatus } from './core/protocol';
 import { DEFAULT_RETENTION, cutoffFor, pruneMessages } from './core/retention';
 import { DEFAULT_LOCK_DELAY } from './core/lock';
 import { keyFromText, keyToText, makeSaver, newDataKey, openStored, sealText } from './core/vault';
-import { clearPlain, deleteStored, probePublic, setFileKey, setFileMode, sweepOldFiles, wipeAllFiles } from './files';
+import { clearBackupTemps, clearPlain, deleteFiles, deleteStored, probePublic, setFileKey, setFileMode, sweepOldFiles, wipeAllFiles } from './files';
 import { FileModeChoice } from './core/filemode';
+import { BackupData, applyBackup, backupState } from './core/backup';
 
 export type Attach = { name: string; mime: string; size: number; kind: FileKind; uri: string; dur?: number };
 export type Msg = { id: string; mine: boolean; text: string; at: number; status?: MsgStatus; file?: Attach };
@@ -44,6 +45,7 @@ const empty: Saved = {
 type Ctx = Saved & {
   ready: boolean; identity: Identity | null; theme: Theme; t: Strings; lang: Lang;
   publicStorage: boolean; refreshStorage: () => void; wipeAll: () => Promise<void>;
+  getBackup: () => BackupData | null; restoreBackup: (d: BackupData) => Promise<void>;
   setTheme: (n: ThemeName) => void; setLang: (l: LangChoice) => void;
   createIdentity: (name: string) => Promise<void>;
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
@@ -54,6 +56,13 @@ type Ctx = Saved & {
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
 export const useApp = () => useContext(C);
+
+// Saved state from storage or from a backup: older settings are upgraded (theme name, single TURN server) and a theme that does not exist is replaced.
+function fromRaw(raw: unknown): Saved {
+  const saved = migrateSaved(raw);
+  if (!themes[saved.themeName as ThemeName]) saved.themeName = empty.themeName;
+  return { ...empty, ...saved };
+}
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [s, setS] = useState<Saved>(empty);
@@ -85,12 +94,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const r = openStored(sealed, legacy, key);
       if (r.state) {
-        const saved = migrateSaved(r.state); // settings from older versions (theme name, single TURN server)
-        if (!themes[saved.themeName as ThemeName]) saved.themeName = empty.themeName;
-        setS({ ...empty, ...saved });
+        setS(fromRaw(r.state));
       }
       keyRef.current = key; canSave.current = safe && !!key; setFileKey(key);
-      clearPlain(); // decrypted copies from an earlier run are not kept
+      clearPlain(); clearBackupTemps(); // decrypted copies and backup files from an earlier run are not kept
       legacyLeft.current = legacy != null && safe;
       try { const v = await SecureStore.getItemAsync(ID_KEY); if (v) setIdentity(JSON.parse(v)); } catch {}
       setReady(true);
@@ -163,6 +170,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try { const k = newDataKey(); await SecureStore.setItemAsync(DATA_KEY, keyToText(k)); keyRef.current = k; canSave.current = true; legacyLeft.current = false; setFileKey(k); }
       catch { keyRef.current = null; canSave.current = false; setFileKey(null); }
       setIdentity(null); setPublicStorage(false); setS({ ...empty });
+    },
+    getBackup: () => (identity ? { v: 1, at: Date.now(), identity, state: backupState(sRef.current) } : null),
+    // Replaces the key, the contacts and the conversations with those of a backup. Files of the replaced conversations are removed (nothing is deleted on a fresh install).
+    restoreBackup: async data => {
+      await saver.cancel();
+      await SecureStore.setItemAsync(ID_KEY, JSON.stringify(data.identity));
+      if (Object.keys(sRef.current.contacts).length > 0) deleteFiles(); // the files belong to the conversations that are replaced; a fresh install has none of its own
+      setIdentity(data.identity);
+      setS(o => fromRaw(applyBackup(o, data)));
     },
     setTheme: themeName => setS(o => ({ ...o, themeName })),
     setLang: langChoice => setS(o => ({ ...o, langChoice })),

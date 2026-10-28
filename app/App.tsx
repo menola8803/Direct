@@ -23,6 +23,7 @@ import LanguagePicker from './src/screens/LanguagePicker';
 import Retention from './src/screens/Retention';
 import AppLock from './src/screens/AppLock';
 import FilePlace from './src/screens/FilePlace';
+import Backup from './src/screens/Backup';
 import { LockProvider, useLocked } from './src/lock';
 import { StoragePrompts } from './src/storageprompts';
 import Blocked from './src/screens/Blocked';
@@ -96,6 +97,7 @@ function Content() {
     case 'keep': return <Retention onBack={pop} />;
     case 'lock': return <AppLock onBack={pop} />;
     case 'filemode': return <FilePlace onBack={pop} />;
+    case 'backup': return <Backup onBack={pop} />;
     case 'blocked': return <Blocked onBack={pop} />;
     case 'guide': return <Guide onClose={pop} />;
     case 'about': return <About onBack={pop} />;

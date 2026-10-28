@@ -65,7 +65,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
     if (!m || !c) return;
     for (const msg of a.messages[cid] ?? []) {
       if (!msg.mine || msg.status === 'delivered') continue;
-      if (msg.file) { pushFile(c, msg.id); continue; }
+      if (msg.file) { if (msg.file.uri) pushFile(c, msg.id); continue; } // no address: restored from a backup, there is nothing to send
       if (m.send(c, { t: 'msg', id: msg.id, text: msg.text, at: msg.at })) a.setStatus(cid, msg.id, 'sent');
     }
   }, [pushFile]);

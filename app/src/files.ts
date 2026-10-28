@@ -137,6 +137,18 @@ export async function plainCopy(uri: string, name: string): Promise<string> {
 export function discardPlain(uri: string) {
   try { if (uri.startsWith(slash(new Directory(Paths.cache, 'dec').uri))) { const f = new File(uri); if (f.exists) f.delete(); } } catch {}
 }
+// The backup file for sharing is written to the cache (it is encrypted by its passphrase). Old ones are removed at start.
+export async function writeCacheText(name: string, text: string): Promise<string> {
+  const f = new File(Paths.cache, name);
+  if (f.exists) f.delete();
+  f.create();
+  await f.write(text);
+  return f.uri;
+}
+export async function readText(uri: string): Promise<string> { return new File(uri).text(); }
+export function clearBackupTemps() {
+  try { for (const x of Paths.cache.list()) { if (x instanceof File && x.name.startsWith('Direct-backup-')) { try { x.delete(); } catch {} } } } catch {}
+}
 // Removes decrypted copies older than `maxAgeMs` (0 = all). Called when the app starts and now and then.
 export function clearPlain(maxAgeMs = 0) {
   try {

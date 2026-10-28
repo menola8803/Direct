@@ -33,6 +33,7 @@
     "react-native-safe-area-context": "~5.10.1",
     "react-native-svg": "^15.16.0",
     "react-native-webrtc": "^155.0.1",
+    "scrypt-js": "3.0.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },
@@ -49,7 +50,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "tsx test/core.test.ts && tsx test/session.test.ts && tsx test/calls.test.ts && tsx test/peers.test.ts && tsx test/manual.test.ts && tsx test/stun.test.ts && tsx test/invite.test.ts && tsx test/ice.test.ts && tsx test/signal.test.ts && tsx test/retention.test.ts && tsx test/vault.test.ts && tsx test/lock.test.ts && tsx test/filecrypt.test.ts && tsx test/filemode.test.ts && tsx test/files.test.ts && node ../server/test.js",
+    "test": "tsx test/core.test.ts && tsx test/session.test.ts && tsx test/calls.test.ts && tsx test/peers.test.ts && tsx test/manual.test.ts && tsx test/stun.test.ts && tsx test/invite.test.ts && tsx test/ice.test.ts && tsx test/signal.test.ts && tsx test/retention.test.ts && tsx test/vault.test.ts && tsx test/lock.test.ts && tsx test/filecrypt.test.ts && tsx test/filemode.test.ts && tsx test/backup.test.ts && tsx test/files.test.ts && node ../server/test.js",
     "typecheck": "tsc --noEmit"
   },
   "private": true

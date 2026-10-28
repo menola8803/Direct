@@ -2,11 +2,21 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { Text, TextInput } from '../ui';
 import { useApp } from '../store';
-import { Btn, Card, H1, Screen } from '../ui';
+import { Btn, Card, H1, Header, Screen } from '../ui';
+import { RestoreCard } from './Backup';
 
 export default function Welcome() {
   const { theme, t, createIdentity } = useApp();
   const [name, setName] = useState('');
+  const [restoring, setRestoring] = useState(false);
+  if (restoring) {
+    return (
+      <Screen>
+        <Header title={t.bkRestore} sub={t.bkSub} onBack={() => setRestoring(false)} />
+        <RestoreCard replacing={false} onDone={() => setRestoring(false)} />
+      </Screen>
+    );
+  }
   return (
     <Screen>
       <KeyboardAvoidingView style={{ flex: 1, gap: 14 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -29,6 +39,7 @@ export default function Welcome() {
           <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{t.nameHint}</Text>
         </Card>
         <Btn title={t.create} onPress={() => name.trim() && createIdentity(name)} />
+        <Btn title={t.welcomeRestore} kind="secondary" onPress={() => setRestoring(true)} />
       </KeyboardAvoidingView>
     </Screen>
   );

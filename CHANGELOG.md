@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.1 – Download/Direct is really created
+- **Fix:** the folder Download/Direct was never created in 0.12.0, even with "all files access". The file library checks write permission on the exact path being created, and Android says no for a path that does not exist yet. Folders and files are now created inside the existing parent (Download, then Direct, then one folder per contact), which is allowed.
+- The test file system is now as strict as Android about this (it failed on the old code), and it also covers "no permission yet": nothing breaks and files go to the private folder until access is given.
+- A failed copy of a file you send no longer leaves an empty file in the folder.
+
 ## 0.12.0 – Download/Direct, retention, delete-and-uninstall
 - **Download/Direct:** received and sent files, voice and video are saved in the folder Download/Direct (a subfolder per contact, `.nomedia` keeps them out of the Gallery) when Direct has Android's *all files access*. The app asks once after the start screen (Android 11 or later); Settings → Storage shows where files go and has a button for the Android setting. Without the permission files stay in the app's private storage, as before. Files you send are copied there too, so they stay in the conversation.
 - **Updates keep everything:** nothing in Download/Direct (or the private folder) is changed by an update.

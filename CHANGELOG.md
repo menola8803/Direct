@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.2 – Start screen and app icon
+- **Animated start screen** (always dark): the logo ring draws itself, two peers orbit it, and Voice (sound bars), Video (recording dot) and Conference (connected nodes) light up in turn on a faint network where packets travel straight between nodes. About 3 s, tap to skip, shorter with "reduce motion".
+- **New app icon** (ring with a D and two peers) replaces the Expo default; adaptive and themed (monochrome) icons included. `scripts/make-icons.js` regenerates all icon files.
+- **Native start screen** is now dark (`expo-splash-screen`), so there is no white flash before the animated screen. New dependency: `expo-splash-screen`.
+
 ## 0.9.1 – Dark theme
 - The dark theme is now called **Dark** (was "USB"). An existing choice is migrated automatically.
 

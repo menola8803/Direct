@@ -61,6 +61,7 @@ const sv = {
 
   stunTitle: 'STUN-servrar', stunSub: 'Lägg till, testa och ta bort', stunAddPh: 'Klistra in en eller flera adresser, till exempel stun.example.org:3478', stunDefaultsNote: 'Standardlistan används. Lägg till egna så ersätter de den.', stunNoAnswer: 'Svarar inte', stunEmpty: 'Listan är tom. Standardservrar används.', stunRemoveFailed: 'Ta bort de som inte svarar', stunReset: 'Återställ standardlistan',
 
+  splashVoice: 'RÖST', splashVideo: 'VIDEO', splashConference: 'KONFERENS', splashEncrypted: 'KRYPTERAD HELA VÄGEN',
   tagline: 'DIREKT MELLAN TELEFONER', inviteGet: 'Hämta appen:', inviteHave: 'Har du Direct? Öppna länken och lägg till mig:', inviteCodeFallback: 'Kod:', shareInvite: 'Dela inbjudan', inviteTitle: 'Lägg till kontakt?', inviteBody: 'Du har fått en Direct-kod från', inviteAdded: 'Tillagd. Skicka din egen kod tillbaka så kan de lägga till dig.', shareBack: 'Skicka min kod tillbaka', openChat: 'Öppna chatt', alreadyAdded: 'Redan i din kontaktlista.', contactsLoadFail: 'Kunde inte läsa telefonboken.',
 };
 const en: typeof sv = {
@@ -120,6 +121,7 @@ const en: typeof sv = {
   installUpdate: 'Download and install', downloading: 'Downloading…', installAllow: 'Android asks whether to allow installs from Direct. Allow it and try again.', installFail: 'Could not install. Open the download page instead.', fsTitle: 'Forward secrecy', fsBody: 'Every connection uses fresh one-time keys. If your keys are stolen later, past conversations stay unreadable.',
   stunList: 'STUN servers (one per line)', stunHelp: 'Helps the phone find its public address. Empty = default list. The server never sees your messages.', testStun: 'Test STUN servers',
   stunTitle: 'STUN servers', stunSub: 'Add, test and remove', stunAddPh: 'Paste one or more addresses, for example stun.example.org:3478', stunDefaultsNote: 'The default list is in use. Add your own and they replace it.', stunNoAnswer: 'No answer', stunEmpty: 'The list is empty. Default servers are used.', stunRemoveFailed: 'Remove the ones that do not answer', stunReset: 'Restore default list',
+  splashVoice: 'VOICE', splashVideo: 'VIDEO', splashConference: 'CONFERENCE', splashEncrypted: 'END-TO-END ENCRYPTED',
   tagline: 'PHONE TO PHONE', inviteGet: 'Get the app:', inviteHave: 'Already have Direct? Open this link to add me:', inviteCodeFallback: 'Code:', shareInvite: 'Share invite', inviteTitle: 'Add contact?', inviteBody: 'You received a Direct code from', inviteAdded: 'Added. Send your own code back so they can add you too.', shareBack: 'Send my code back', openChat: 'Open chat', alreadyAdded: 'Already in your contacts.', contactsLoadFail: 'Could not read the phone book.',
 };
 export const dict = { sv, en };

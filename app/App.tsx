@@ -32,13 +32,13 @@ import Conference from './src/screens/Conference';
 import MediaTest from './src/screens/MediaTest';
 import Storage from './src/screens/Storage';
 import CallScreen from './src/screens/CallScreen';
+import Splash from './src/screens/Splash';
 import { useNet } from './src/net/net';
 
-function Root() {
-  const { ready, identity, theme } = useApp();
+function Content() {
+  const { ready, identity } = useApp();
   const { call } = useNet();
   const [stack, setStack] = useState<Route[]>([{ name: 'tabs' }]);
-  const [fontsLoaded] = useFonts({ PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold, Cinzel_700Bold });
   const [pending, setPending] = useState<string | null>(null);
   const [tab, setTab] = useState<'chats' | 'contacts' | 'settings'>('chats');
   const push = useCallback((r: Route) => setStack(s => [...s, r]), []);
@@ -63,7 +63,7 @@ function Root() {
     return () => sub.remove();
   }, [stack.length, pop]);
 
-  if (!ready || !fontsLoaded) return <View style={{ flex: 1, backgroundColor: theme.bg }} />;
+  if (!ready) return <View style={{ flex: 1 }} />;
   if (!identity) return <Welcome />;
   if (call.status !== 'idle') return <CallScreen />;
 
@@ -97,6 +97,21 @@ function Root() {
         </Screen>
       );
   }
+}
+
+// Fonts and saved state load first (on the same dark color as the native start screen),
+// then the animated start screen plays on top of the app while it gets ready.
+function Root() {
+  const { ready } = useApp();
+  const [fontsLoaded] = useFonts({ PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold, Cinzel_700Bold });
+  const [splashDone, setSplashDone] = useState(false);
+  if (!ready || !fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#0B1416' }} />;
+  return (
+    <View style={{ flex: 1 }}>
+      <Content />
+      {!splashDone && <Splash onDone={() => setSplashDone(true)} />}
+    </View>
+  );
 }
 
 function Themed() {

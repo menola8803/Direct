@@ -114,6 +114,15 @@ read -rs DIRECT_KEYSTORE_PASSWORD; export DIRECT_KEYSTORE_PASSWORD DIRECT_KEY_PA
 ```
 Förlorar du nyckelfilen eller lösenordet kan du aldrig mer ge en uppdatering som installerade appar godtar.
 
+**Pinnen `app/signing/cert-sha256.txt`.** När den filen finns i repot kräver bygget i GitHub (både *Build APK* och releaser) att
+APK:n är signerad med exakt den nyckeln, annars blir bygget rött med "the certificate is not the expected one". Det är avsikten:
+ett bygge med fel nyckel ska aldrig bli en release som telefonerna vägrar installera. Två följder:
+- Har du forkat repot och vill bygga med din egen nyckel: ersätt innehållet i pinnen med din nyckels fingeravtryck
+  (`scripts/new-signing-key.sh` skriver ut det) och lägg dina hemligheter under Settings → Secrets i ditt repo
+  (`DIRECT_KEYSTORE_BASE64`, `DIRECT_KEYSTORE_PASSWORD`, `DIRECT_KEY_PASSWORD`, `DIRECT_KEY_ALIAS`).
+- Lokala byggen påverkas inte av pinnen. De kontrolleras bara om du själv kör `bash scripts/check-apk-signature.sh <apk>`
+  (kräver `apksigner` från build-tools).
+
 ### Peka om uppdateringar och inbjudningar (bara om du flyttar till ett annat repo eller en annan plats)
 Följande rader i koden pekar på `menola8803/Direct`. Byt dem och bygg om:
 

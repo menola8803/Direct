@@ -30,7 +30,7 @@ export default function Settings({ go }: { go: (r: Route) => void }) {
         <Row title={t.storage} sub={t.storageSub} onPress={() => go({ name: 'storage' })} />
         <Row title={t.update} sub={t.updateSub} onPress={() => go({ name: 'update' })} />
         <Row title={t.blocked} sub={t.blockedSub} right={String(Object.keys(blocked).length)} onPress={() => go({ name: 'blocked' })} />
-        <Row title={t.about} sub={t.aboutSub} onPress={() => go({ name: 'about' })} />
+        <Row title={t.aboutShort} sub={t.developer} onPress={() => go({ name: 'about' })} />
       </Card>
       <Card>
         <Label>{t.fsTitle}</Label>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.2 – Simpler About row
+- **Settings:** the row now says just *About* (Swedish: *Om*) with the line *Developer: Claes Sundman Scandinavian Nexum Consulting AB - 2026* (Swedish: *Utvecklare: …*) under it. The About screen keeps its title *About Direct* and shows the same developer line, and the README credit line has the new company name.
+- Removed the text `aboutSub` ("How the app works"), which the row no longer uses.
+
 ## 0.13.1 – The invite flow as a picture in the guide
 - **Getting-started guide, page "Invite and connect":** the text steps are replaced by a picture of the whole flow: who does what (A invites, B installs and adds A, B sends their code back, A adds B), what travels between the phones (SMS with links, SMS with B's code), the two ways to connect (signal server or without a server) and the warning that skipping steps 4–5 means A cannot receive anything from B. It is drawn with the app's own views, so it follows the theme, the language (Swedish and English) and narrow screens, and it is read out step by step by a screen reader. The tips about QR codes and the safety code stay below it.
 - `docs/SETUP.md` and the README show the same diagram (`docs/img/invite-flow-sv.png`, in Swedish).

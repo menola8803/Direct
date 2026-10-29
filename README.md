@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.13.1** (see `CHANGELOG.md`)
+**Version 0.13.2** (see `CHANGELOG.md`)
 
 A chat app with no server in between. Messages, calls, voice and video messages and files go straight between the phones, encrypted. Built for people's privacy.
 
@@ -58,4 +58,4 @@ See `docs/ARCHITECTURE.md`.
 Tags `vX.Y.Z` automatically create a release with a zip (see `.github/workflows/release.yml`). Attach the built APK to the release so the in-app updater can find it. Older tags can be published with `scripts/release-all.sh`.
 
 ## Developer
-Claes Sundman SNC AB - 2026
+Claes Sundman Scandinavian Nexum Consulting AB - 2026

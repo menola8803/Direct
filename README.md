@@ -44,6 +44,7 @@ Received and sent files, voice and video are saved in the folder **Download/Dire
 - **Encrypted at rest:** the saved state is sealed with a random key that only exists in the phone's secure storage. This protects against a copy of the app's data (backup, forensic dump). It does not stop someone who can unlock your phone and open the app: switch on **Settings → App lock** for that (a gate in the app, on top of the phone's own lock).
 - **Files:** Settings → File location: *Visible folder* (Download/Direct, not encrypted) or *Private and encrypted* (in the app's own folder, opened only through Direct).
 - **Backup:** Settings → Backup creates a `.direct` file with your key, contacts and messages, encrypted with your passphrase. Without the passphrase nobody can open it, and nobody can recreate it for you. Do not use the same key on two phones at the same time.
+- **Build and host it yourself (Swedish):** `docs/BYGGA.md` is a step-by-step manual: tools, building the APK, your own key, your own signal server, releasing.
 - **Signing:** `docs/SIGNING.md` explains the app's own signing key and the one-time switch (it needs a reinstall, so make a backup first).
 
 ## Architecture

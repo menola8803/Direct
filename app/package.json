@@ -1,6 +1,6 @@
 {
   "name": "direct",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "main": "index.ts",
   "dependencies": {
     "@config-plugins/react-native-webrtc": "^15.0.2",

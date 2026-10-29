@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.13.3 – Developer line
+- The developer line in Settings, on the About screen and in the README now reads *Claes Sundman S.N.C AB - 2026* (Swedish: *Utvecklare: Claes Sundman S.N.C AB - 2026*).
+
 ## 0.13.2 – Simpler About row
 - **Settings:** the row now says just *About* (Swedish: *Om*) with the line *Developer: Claes Sundman Scandinavian Nexum Consulting AB - 2026* (Swedish: *Utvecklare: …*) under it. The About screen keeps its title *About Direct* and shows the same developer line, and the README credit line has the new company name.
 - Removed the text `aboutSub` ("How the app works"), which the row no longer uses.

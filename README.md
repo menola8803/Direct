@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.13.0** (see `CHANGELOG.md`)
+**Version 0.13.1** (see `CHANGELOG.md`)
 
 A chat app with no server in between. Messages, calls, voice and video messages and files go straight between the phones, encrypted. Built for people's privacy.
 
@@ -25,6 +25,10 @@ Not yet verified on a real phone: camera scanning, recording, WebRTC in React Na
 Setup, hosting the optional server, building the APK and known limitations: `docs/SETUP.md`. APK build details: `app/README.md`.
 
 Run: `cd app && npm install && npx expo start` (WebRTC needs the installed APK, not Expo Go). Type check: `npm run typecheck`. Tests: `npm test`.
+
+## Invite and connect
+![The invite and connect flow (diagram in Swedish; the same flow is in the app's getting-started guide in English and Swedish)](docs/img/invite-flow-sv.png)
+Both people add each other: A invites, B installs, creates a key, adds A and sends their own code back, A adds B, and the phones connect (through a signal server, or without a server by swapping codes). Details: `docs/SETUP.md`.
 
 ## Preview the design
 Open `design/index.html` in a browser (built with `python3 design/build_gallery.py <version>`). With GitHub Pages (Settings → Pages → branch `main`, folder `/design`) you get a public link. The design mockups are in Swedish.

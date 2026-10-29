@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.1 – The invite flow as a picture in the guide
+- **Getting-started guide, page "Invite and connect":** the text steps are replaced by a picture of the whole flow: who does what (A invites, B installs and adds A, B sends their code back, A adds B), what travels between the phones (SMS with links, SMS with B's code), the two ways to connect (signal server or without a server) and the warning that skipping steps 4–5 means A cannot receive anything from B. It is drawn with the app's own views, so it follows the theme, the language (Swedish and English) and narrow screens, and it is read out step by step by a screen reader. The tips about QR codes and the safety code stay below it.
+- `docs/SETUP.md` and the README show the same diagram (`docs/img/invite-flow-sv.png`, in Swedish).
+- Removed the guide texts `g3a`, `g3c` and `g3e`, which the picture replaces; `g3b` is reworded to read after the picture.
+- No change to the protocol, storage or signing.
+
 ## 0.13.0 – Encrypted storage, app lock, private files, backup, own signing key
 - **Encrypted at rest:** contacts, messages, settings and the TURN passwords are sealed (XSalsa20-Poly1305) with a random 32-byte key that lives only in the phone's secure storage (Android Keystore). A copy of the app's data folder is unreadable without it. Older plain-text data is read once and replaced. Saving is now debounced (a short delay, and straight away when the app leaves the screen). If the secure storage cannot be read, nothing is overwritten.
 - **App lock (Settings → App lock):** off by default. Asks for fingerprint, face or the phone's screen lock (PIN, pattern, password) at start and after the app has been in the background for the chosen time (immediately, 1 or 5 minutes). Covers the app in the recent-apps picture, shows an incoming call on the lock screen, and switches itself off if the phone's screen lock is removed. The lock is a gate in the app; it does not replace the phone's own lock.

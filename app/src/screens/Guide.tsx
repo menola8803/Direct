@@ -4,6 +4,7 @@ import { Text } from '../ui';
 import { useApp } from '../store';
 import { LangChoice } from '../i18n';
 import { Btn, Card, Screen } from '../ui';
+import InviteFlow from './InviteFlow';
 
 // Getting-started guide. Shown once after the first start (then the key is created), and any time from
 // Settings. Pages: welcome and language, create the key, invite and connect, what you can do, conference calls, good to know.
@@ -98,8 +99,15 @@ export default function Guide({ first, onClose }: { first?: boolean; onClose: ()
         <View style={pageStyle}>
           <ScrollView contentContainerStyle={scrollStyle} showsVerticalScrollIndicator={false}>
             <Text style={title}>{t.g3t}</Text>
-            <Steps items={[t.g3a, t.g3b, t.g3c, t.g3d]} />
-            <Text style={body}>{t.g3e}</Text>
+            <InviteFlow />
+            <Card>
+              {[t.g3b, t.g3d].map((s, i) => (
+                <View key={i} style={{ flexDirection: 'row', gap: 10 }}>
+                  <Text style={{ color: theme.accent, fontSize: 15, lineHeight: 22 }}>•</Text>
+                  <Text style={{ flex: 1, fontSize: 15, lineHeight: 22, color: theme.ink }}>{s}</Text>
+                </View>
+              ))}
+            </Card>
           </ScrollView>
         </View>
 

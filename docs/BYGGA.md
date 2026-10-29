@@ -1,4 +1,4 @@
-# Bygga och driva Direct själv (version 0.13.0)
+# Bygga och driva Direct själv (version 0.13.1)
 
 Den här manualen visar hur du bygger appen på din egen dator, skaffar en egen nyckel för den, och vilka tjänster du
 själv kan driva för att inte vara beroende av andra. Alla kommandon är för Arch Linux och zsh.

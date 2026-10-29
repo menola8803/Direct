@@ -1,4 +1,4 @@
-# Getting started (0.13.0)
+# Getting started (0.13.1)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -20,6 +20,10 @@ Tested in October 2026: the *Test signal server* button gave 201 ms from a phone
 What to expect: the free instance sleeps after 15 minutes without inbound traffic and needs about a minute to wake, so the first test after a pause can fail; try again after a minute. The app reconnects by itself with growing delays (at most 30 seconds). Once two phones are connected, messages and calls go directly between them and the server is not involved. Render's free limits change, so check their pricing page (at the time of writing: 750 free instance hours per month and a monthly bandwidth cap). The server only sees public keys, IP addresses and timing, never content.
 
 ## Invite friends (link)
+![The invite and connect flow: person A invites by SMS, person B installs, creates a key, taps the link and adds A, sends their own code back, A adds B, then the phones connect through a signal server or without a server (diagram in Swedish)](img/invite-flow-sv.png)
+
+The same flow, in the app's language and theme, is on the "Invite and connect" page of the getting-started guide (Settings → Getting-started guide). **Both** people must add each other: a phone ignores messages from someone it has not added, so if B skips steps 4–5, A cannot receive anything from B.
+
 Contacts → *Invite* (or My code → *Share invite*) sends a message with a download link and an invite link. Someone who already has Direct taps the invite link, lands on a page with an **Open in Direct** button, sees the sender's name and safety code, and can add them. After adding, the app offers *Send my code back*, so both sides have each other and can connect.
 - **The SMS** (Contacts → Invite, or My code → Share invite) says who invites and what Direct is, links to the newest APK, explains that Android asks to allow installing from the browser, and links to the invite page that adds the sender. It is about 700 characters, so phones send it as several linked SMS parts.
 - **Always-newest download link:** `https://github.com/menola8803/Direct/releases/latest/download/Direct.apk`. GitHub sends it to the asset named exactly `Direct.apk` in the latest release. The release workflow uploads the APK under that name (and as `Direct-<tag>.apk`). If you attach an APK by hand to a release, name it `Direct.apk` as well.
@@ -62,7 +66,7 @@ Every push to `main` that touches `app/` builds an APK: open the repo → **Acti
 For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.13.0 -m "Direct 0.13.0" && git push origin v0.13.0
+git tag -a v0.13.1 -m "Direct 0.13.1" && git push origin v0.13.1
 ```
 By default the APK is signed with the Expo template's debug key, which is public. Fine for testing. For a real launch use your own key: `docs/SIGNING.md` (updates only install over an app signed with the same key, and switching key needs a reinstall, so make a backup first).
 

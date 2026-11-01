@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.4 – New contacts connect without a restart
+- **Fix:** a contact that was added (or unblocked) while the app was already online stayed *offline* until the app was restarted or its chat was opened, because the app only started connecting to contacts when the signal server came online. New and unblocked contacts are now connected at once (`app/src/core/autoconnect.ts`).
+- **Fix:** if the phone that makes the offers (decided by the keys) had already offered to a phone that had not yet added it, that phone ignored the offer and the attempt hung for up to 20 seconds, during which the other phone's request to connect was turned away. Adding each other in quick succession, for example scanning each other's QR codes, therefore failed. The unanswered offer is now made again (after at least 3 seconds, and only when the other phone asks for a connection, never in the middle of a normal handshake or for a manual pairing). Also, a closing attempt can no longer remove a newer attempt for the same contact.
+- **Contacts screen:** when there are contacts but nobody can connect, a note says why and links to Settings → Connection: no signal server is set (the default), or it cannot be reached. A line under *Invite from your address book* explains that invited people move to *In the app* once they have installed Direct and you have added each other.
+- New test `autoconnect.test.ts`: the contact selection, and two real phones (real relay, real WebRTC) that add each other in every order, 1.2 and 4.5 seconds apart. It fails without the fixes.
+- Not tried on phones. Version 0.13.3 (the developer line) was not tagged when this was written; tag `v0.13.4` to get both.
+
 ## 0.13.3 – Developer line
 - The developer line in Settings, on the About screen and in the README now reads *Claes Sundman S.N.C AB - 2026* (Swedish: *Utvecklare: Claes Sundman S.N.C AB - 2026*).
 

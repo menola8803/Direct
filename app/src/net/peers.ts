@@ -24,12 +24,14 @@ export type PeerOpts = {
   onTrack?: (c: Contact, stream: any, track: any) => void;
   manualTimeoutMs?: number;
   connectTimeoutMs?: number;
+  resendAfterMs?: number; // an unanswered offer is made again after this long when the other phone asks for a connection (default 3000)
 };
 
 type Peer = {
   pc: any; dc: any | null; remoteSet: boolean; ice: any[]; state: LinkState; timer?: any;
   manual: boolean; eph: { pub: string; secret: Uint8Array }; sess: Session | null; sentEph: boolean;
   making: boolean; polite: boolean; senders: any[];
+  since: number; reoffer?: any; // when the attempt started, and the timer that offers again if no answer has come
 };
 const b64url = (s: string) => s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const unb64url = (s: string) => { const t = s.replace(/-/g, '+').replace(/_/g, '/'); return t + '='.repeat((4 - (t.length % 4)) % 4); };
@@ -195,7 +197,7 @@ export class PeerManager {
     if (!s || typeof s !== 'object') return;
     if (s.k === 'hello') {
       const ex = this.peers.get(c.id);
-      if (ex && ex.state !== 'closed') return; // attempt in progress, do not start another
+      if (ex && ex.state !== 'closed') { this.reofferIfUnanswered(c, ex); return; } // attempt in progress, do not start another
       if (isInitiator(this.o.identity.signPublic, c.signPub)) await this.startOffer(c);
       return;
     }
@@ -210,14 +212,14 @@ export class PeerManager {
   private makePeer(c: Contact, manual = false): Peer {
     this.drop(c.id, 'closed', true);
     const pc = new this.o.rtc.RTCPeerConnection({ iceServers: this.o.iceServers, iceTransportPolicy: this.o.relayOnly ? 'relay' : 'all' });
-    const p: Peer = { pc, dc: null, remoteSet: false, ice: [], state: 'connecting', manual, eph: Session.newEphemeral(), sess: null, sentEph: false, making: false, polite: !isInitiator(this.o.identity.signPublic, c.signPub), senders: [] };
+    const p: Peer = { pc, dc: null, remoteSet: false, ice: [], state: 'connecting', manual, eph: Session.newEphemeral(), sess: null, sentEph: false, making: false, polite: !isInitiator(this.o.identity.signPublic, c.signPub), senders: [], since: Date.now() };
     this.peers.set(c.id, p);
     this.o.onLink(c.id, 'connecting');
     pc.addEventListener('icecandidate', (e: any) => {
       if (e.candidate && !p.manual) this.sendSignal(c, { k: 'ice', c: { candidate: e.candidate.candidate, sdpMid: e.candidate.sdpMid, sdpMLineIndex: e.candidate.sdpMLineIndex } });
     });
     pc.addEventListener('connectionstatechange', () => {
-      if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) this.drop(c.id, 'closed');
+      if (['failed', 'closed', 'disconnected'].includes(pc.connectionState) && this.peers.get(c.id) === p) this.drop(c.id, 'closed'); // not a newer attempt
     });
     pc.addEventListener('datachannel', (e: any) => this.attach(c, p, e.channel));
     pc.addEventListener('track', (e: any) => this.o.onTrack?.(c, e.streams?.[0] ?? null, e.track));
@@ -246,7 +248,7 @@ export class PeerManager {
     };
     dc.addEventListener('open', hello);
     if (dc.readyState === 'open') hello();
-    dc.addEventListener('close', () => this.drop(c.id, 'closed'));
+    dc.addEventListener('close', () => { if (this.peers.get(c.id) === p) this.drop(c.id, 'closed'); }); // not a newer attempt
     dc.addEventListener('message', (e: any) => {
       let env: any; try { env = JSON.parse(String(e.data)); } catch { return; }
       if (env && env.s === 1) {
@@ -288,6 +290,21 @@ export class PeerManager {
     }
   }
 
+  // Our offer can reach a phone that has not added us yet. It ignores the offer (unknown sender) and the attempt then hangs
+  // until it times out. When that phone later adds us and asks for a connection (hello), offer again instead of making it
+  // wait: but only if our offer is still unanswered after a few seconds (a normal answer takes well under a second, and
+  // restarting in the middle of a handshake would break it), and never for a manual pairing.
+  private reofferIfUnanswered(c: Contact, p: Peer) {
+    if (!isInitiator(this.o.identity.signPublic, c.signPub) || p.manual || p.remoteSet || p.state !== 'connecting' || p.reoffer) return;
+    const again = () => {
+      p.reoffer = undefined;
+      if (this.peers.get(c.id) !== p || p.state !== 'connecting' || p.remoteSet || !this.isSignalOnline()) return;
+      this.startOffer(c).catch(() => {});
+    };
+    const wait = (this.o.resendAfterMs ?? 3000) - (Date.now() - p.since);
+    if (wait <= 0) again(); else p.reoffer = setTimeout(again, wait + 50);
+  }
+
   private async startOffer(c: Contact) {
     const p = this.makePeer(c);
     this.attach(c, p, p.pc.createDataChannel('direct'));
@@ -315,7 +332,7 @@ export class PeerManager {
     const p = this.peers.get(id);
     if (!p) return;
     this.peers.delete(id);
-    clearTimeout(p.timer);
+    clearTimeout(p.timer); clearTimeout(p.reoffer);
     const wasOpen = p.state === 'open';
     p.state = 'closed';
     p.sess?.close(); p.eph.secret.fill(0);

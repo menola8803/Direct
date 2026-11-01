@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.13.3** (see `CHANGELOG.md`)
+**Version 0.13.4** (see `CHANGELOG.md`)
 
 A chat app with no server in between. Messages, calls, voice and video messages and files go straight between the phones, encrypted. Built for people's privacy.
 

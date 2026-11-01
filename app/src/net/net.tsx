@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useApp, Attach } from '../store';
 import { Contact } from '../core/crypto';
+import { pickNewContacts } from '../core/autoconnect';
 import { FileKind, newId, Plain } from '../core/protocol';
 import { Receiver, sendFile } from '../core/transfer';
 import { fileSource, makeSink, openSource, storeOutgoing } from '../files';
@@ -30,6 +31,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
   const mgr = useRef<PeerManager | null>(null);
   const receivers = useRef(new Map<string, Receiver>());
   const sending = useRef(new Set<string>());
+  const tried = useRef(new Set<string>()); // contacts we have started connecting to since the signal server came online
   const [signal, setSignal] = useState<SignalState>('offline');
   const [link, setLink] = useState<Record<string, LinkState>>({});
   const [progress, setProgress] = useState<Record<string, number>>({});
@@ -125,7 +127,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
       },
       onSignal: st => {
         setSignal(st);
-        if (st === 'online') Object.values(appRef.current.contacts).forEach(c => !appRef.current.blocked[c.id] && m.connect(c));
+        if (st === 'online') { tried.current.clear(); pickNewContacts(appRef.current.contacts, appRef.current.blocked, tried.current).forEach(c => m.connect(c)); }
       },
       onTrack: (c, stream) => { if (stream) setRemote(o => ({ ...o, [c.id]: stream })); },
     });
@@ -138,8 +140,15 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
         if (waiting && !a.blocked[c.id] && m.isSignalOnline() && !m.isOpen(c.id)) m.connect(c);
       });
     }, 10000);
-    return () => { clearInterval(iv); cc.end(); m.stop(); mgr.current = null; setCalls(null); receivers.current.clear(); setLink({}); setSignal('offline'); };
+    return () => { clearInterval(iv); cc.end(); m.stop(); mgr.current = null; tried.current.clear(); setCalls(null); receivers.current.clear(); setLink({}); setSignal('offline'); };
   }, [identity, signalUrl, stunList, turnList, hideIp, tcpOnly, flush]);
+
+  // A contact added or unblocked while the app is already online is connected at once, not only after a restart.
+  useEffect(() => {
+    const m = mgr.current;
+    if (!m || signal !== 'online') return;
+    pickNewContacts(app.contacts, app.blocked, tried.current).forEach(c => m.connect(c));
+  }, [app.contacts, app.blocked, signal]);
 
   const connect = useCallback((c: Contact) => { mgr.current?.connect(c); }, []);
   const sendText = useCallback((c: Contact, text: string) => {

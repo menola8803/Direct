@@ -11,8 +11,8 @@ import { Avatar, Btn, H1, Sub, SmallBtn } from '../ui';
 import { holdLock } from '../lockhold';
 
 export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) => void; go: (r: Route) => void }) {
-  const { theme, t, contacts, blocked, block, identity, name } = useApp();
-  const { link } = useNet();
+  const { theme, t, contacts, blocked, block, identity, name, signalUrl } = useApp();
+  const { link, signal, available } = useNet();
   const [book, setBook] = useState<Person[]>([]);
   const [denied, setDenied] = useState(false);
   const [failed, setFailed] = useState('');
@@ -30,12 +30,15 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
 
   const s = q.trim().toLowerCase();
   const mine = useMemo(() => Object.values(contacts).filter(c => !blocked[c.id] && (!s || c.name.toLowerCase().includes(s))).sort((a, b) => a.name.localeCompare(b.name)), [contacts, blocked, s]);
+  // Why people may stay offline: without a signal server nothing connects by itself, and with one it must be reachable.
+  const note = !available || mine.length === 0 ? '' : !signalUrl ? t.contactsNoServer : signal !== 'online' ? t.contactsServerWait : '';
   const others = useMemo(() => book.filter(p => !s || p.name.toLowerCase().includes(s)), [book, s]);
-  const data: ({ kind: 'h'; title: string } | { kind: 'c'; id: string } | { kind: 'p'; p: Person })[] = [
+  const data: ({ kind: 'h'; title: string } | { kind: 'n'; text: string } | { kind: 'c'; id: string } | { kind: 'p'; p: Person })[] = [
     { kind: 'h', title: t.inApp },
     ...mine.map(c => ({ kind: 'c' as const, id: c.id })),
     ...(mine.length === 0 ? [] : []),
     { kind: 'h', title: t.fromPhonebook },
+    ...(others.length ? [{ kind: 'n' as const, text: t.phonebookHint }] : []),
     ...others.map(p => ({ kind: 'p' as const, p })),
   ];
 
@@ -59,13 +62,19 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
       </View>
       <TextInput value={q} onChangeText={setQ} placeholder={t.search} placeholderTextColor={theme.muted}
         style={{ height: 48, borderRadius: 14, borderWidth: 1, borderColor: theme.line, backgroundColor: theme.card, paddingHorizontal: 16, fontSize: 15, color: theme.ink }} />
+      {note ? (
+        <Pressable accessibilityRole="button" onPress={() => go({ name: 'connection' })} style={{ borderWidth: 1, borderColor: theme.accent, borderRadius: 14, padding: 12 }}>
+          <Text style={{ fontSize: 13, lineHeight: 19, color: theme.ink }}>{note} <Text style={{ color: theme.accent, fontWeight: '700' }}>{t.contactsNoteGo}&nbsp;›</Text></Text>
+        </Pressable>
+      ) : null}
       {failed ? <Text style={{ color: theme.danger, fontSize: 13 }}>{t.contactsLoadFail} {failed.slice(0, 160)}</Text> : null}
       {denied ? (
         <View style={{ gap: 10 }}><Text style={{ color: theme.muted }}>{t.contactsDenied}</Text><Btn title={t.allowContacts} kind="secondary" onPress={() => load().catch(e => setFailed(String(e?.message ?? e)))} /></View>
       ) : null}
-      <FlatList data={data} keyExtractor={(d, i) => (d.kind === 'h' ? 'h' + i : d.kind === 'c' ? d.id : 'p' + d.p.id)} contentContainerStyle={{ gap: 4, paddingBottom: 8 }}
+      <FlatList data={data} keyExtractor={(d, i) => (d.kind === 'h' ? 'h' + i : d.kind === 'n' ? 'n' + i : d.kind === 'c' ? d.id : 'p' + d.p.id)} contentContainerStyle={{ gap: 4, paddingBottom: 8 }}
         renderItem={({ item }) => {
           if (item.kind === 'h') return <Text style={{ fontSize: 12, fontWeight: '700', letterSpacing: 1, color: theme.muted, marginTop: 10, textTransform: 'uppercase' }}>{item.title}</Text>;
+          if (item.kind === 'n') return <Text style={{ fontSize: 13, lineHeight: 19, color: theme.muted }}>{item.text}</Text>;
           if (item.kind === 'c') {
             const c = contacts[item.id];
             return (

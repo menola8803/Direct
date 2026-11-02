@@ -37,6 +37,7 @@ import StunServers from './src/screens/StunServers';
 import TurnServers from './src/screens/TurnServers';
 import Privacy from './src/screens/Privacy';
 import ManualPair from './src/screens/ManualPair';
+import ConnReport from './src/screens/ConnReport';
 import Conference from './src/screens/Conference';
 import MediaTest from './src/screens/MediaTest';
 import Storage from './src/screens/Storage';
@@ -79,9 +80,10 @@ function Content() {
 
   const r = stack[stack.length - 1];
   switch (r.name) {
-    case 'chat': return <Screen><Chat id={r.id} onBack={pop} onVerify={() => push({ name: 'verify', id: r.id })} onPair={() => push({ name: 'pair', id: r.id })} /></Screen>;
+    case 'chat': return <Screen><Chat id={r.id} onBack={pop} onVerify={() => push({ name: 'verify', id: r.id })} onPair={() => push({ name: 'pair', id: r.id })} onReport={() => push({ name: 'report', id: r.id })} /></Screen>;
     case 'verify': return <Verify id={r.id} onBack={pop} onRemoved={() => setStack([{ name: 'tabs' }])} />;
     case 'pair': return <ManualPair id={r.id} onBack={pop} />;
+    case 'report': return <ConnReport id={r.id} onBack={pop} go={push} />;
     case 'mediatest': return <MediaTest onBack={pop} />;
     case 'storage': return <Storage onBack={pop} />;
     case 'invite': return <Invite card={r.card} onBack={pop} onOpenChat={id => setStack(st => [...st.slice(0, -1), { name: 'chat', id }])} />;

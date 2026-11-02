@@ -1,4 +1,4 @@
-# Getting started (0.13.4)
+# Getting started (0.13.5)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -30,6 +30,8 @@ Contacts → *Invite* (or My code → *Share invite*) sends a message with a dow
 - **Recipients are not signed in to GitHub**, so the repository must be **public** (or the releases and `docs/` must live in a public repo). With a private repo the link gives 404.
 - The invite page is `docs/i.html`. To make the link work, enable GitHub Pages: repo **Settings → Pages → Branch `main`, folder `/docs`** (needs a public repo). The code sits in the URL fragment (`#…`), which is never sent to GitHub. If Pages is off the link in the SMS gives an error page. The recipient can still copy the whole link from the SMS and paste it under Contacts → + Add (the app finds the `direct1:` code inside it).
 - **Connecting after you have added each other:** both phones must have added the other (the invite only carries the sender's code; the invited person sends theirs back, see the picture above) **and** must either use the same signal server address (Settings → Connection) or pair without a server (open the contact → *Connect without a server*). With a server the phones then connect by themselves, also to people you add while the app is running (before 0.13.4 such a contact stayed *offline* until the app was restarted or its chat was opened). If nobody can connect, the Contacts screen says why: no signal server is set, or it cannot be reached (a free Render server needs about a minute to wake up). People under *Invite from your address book* do not have the app yet: they move to *In the app* when they have installed Direct and you have added each other.
+- **Still *Connecting…* or *Not connected*?** Open the chat and tap **Why does it not connect?** under the messages. It says in words what is wrong (no signal server, the server cannot be reached, the server says the other phone is not connected to it, the other phone has not added you, or no direct path between the phones) and shows the facts behind it, which you can copy and send to whoever helps. The most common cause is that the two phones are on networks that cannot reach each other directly: **one phone shares its mobile data or Wi-Fi as a hotspot to the other**, mobile data against Wi-Fi, or a guest or office Wi-Fi that keeps devices apart. Test with both phones on the **same ordinary Wi-Fi router**. Across networks you need a TURN server (`docs/NETWORK.md`).
+- **Changing network or leaving the app:** you do not need to force-stop the app. It checks its connection to the signal server every 20 seconds, makes a new one when the old one has died (Wi-Fi turned off, another network, sleep), checks again as soon as you open the app, and tries once more to reconnect a link that dies. After a network change it can take up to about half a minute before the contact shows as online again.
 - Without a server there is no way to look up *who in your phone book has Direct*: a phone number cannot be matched to a key without a directory. Invite links are the serverless way.
 
 ## Files, retention and uninstall
@@ -67,7 +69,7 @@ Every push to `main` that touches `app/` builds an APK: open the repo → **Acti
 For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.13.4 -m "Direct 0.13.4" && git push origin v0.13.4
+git tag -a v0.13.5 -m "Direct 0.13.5" && git push origin v0.13.5
 ```
 By default the APK is signed with the Expo template's debug key, which is public. Fine for testing. For a real launch use your own key: `docs/SIGNING.md` (updates only install over an app signed with the same key, and switching key needs a reinstall, so make a backup first).
 

@@ -45,6 +45,25 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
   await wait(100);
   assert.equal(srv.online.get(b.pub), srv.online.get(b2.pub));
   await srv.close();
+
+  // A connection that stops answering is dropped, one that answers stays. (A phone that loses its network says nothing.)
+  {
+    const s2 = createServer({ port: 18081, host: '127.0.0.1', pingMs: 100 });
+    const u2 = 'ws://127.0.0.1:18081';
+    const live = await client(u2, A), gone = await client(u2, B);
+    gone.ws._socket.pause(); // it can no longer read, so it cannot answer the server's question
+    await wait(600);
+    assert.equal(s2.online.has(live.pub), true, 'a connection that answers stays');
+    assert.equal(s2.online.has(gone.pub), false, 'one that does not answer is dropped');
+    live.ws.send(JSON.stringify({ type: 'relay', to: gone.pub, payload: { n: 'x', c: 'y' } }));
+    await wait(100);
+    assert.equal(live.inbox.at(-1)?.type, 'offline', 'and the sender is told the other is offline');
+    live.ws.send(JSON.stringify({ type: 'relay', to: live.pub, payload: { hb: 1 } })); // a packet to yourself comes straight back (the heartbeat of the app relies on it)
+    await wait(100);
+    assert.deepEqual(live.inbox.at(-1), { type: 'relay', from: live.pub, payload: { hb: 1 } });
+    gone.ws.terminate();
+    await s2.close();
+  }
   console.log('server: all tests OK');
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

@@ -6,6 +6,16 @@ Two phones talk to each other directly (WebRTC). To do that they must find each 
 - **STUN** only tells a phone its own public address. It never sees messages and is cheap to run, so there are many free public servers.
 - **TURN** is a relay. When a direct path is impossible (many mobile networks, strict firewalls) all traffic goes through it. It cannot read the content (everything is encrypted end to end), but it sees IP addresses, timing and volume. Relaying costs bandwidth, which is why free TURN is rare.
 
+## When two phones will not connect
+The signal server only introduces the phones. The messages, calls and files then go **directly** between them, and that needs a path through both networks. With STUN only, a path exists when the phones are on the same local network or when both routers are friendly. It does **not** exist, and you need TURN, in these common cases:
+
+- **One phone is the other's hotspot (tethering).** This often fails in practice: the sharing phone's own traffic goes out over mobile data, behind the carrier's shared address, so as far as WebRTC can tell the two phones are on different networks. Test on a real Wi-Fi router instead.
+- **Mobile data against Wi-Fi, or two different mobile networks.** Most carriers put phones behind a shared address (CGNAT) that no STUN server can see through.
+- **Guest and office Wi-Fi** that blocks devices from talking to each other (client isolation).
+- **Privacy mode (relay only)** without a TURN server: nothing can connect, by design.
+
+In the app, open the chat and tap **Why does it not connect?**. It tells which of these (or a server problem) it is, from what the phones actually saw: whether the signal server is reachable, whether it says the other phone is online, whether the other phone answered, and how many addresses each side found. The report contains no IP addresses, only counts and states, so it can be copied and sent on.
+
 ## STUN defaults
 Cloudflare (`stun.cloudflare.com:3478`), Nextcloud on port 443 (`stun.nextcloud.com:443`) and Telnyx (`stun.telnyx.com:3478`). Telnyx replaced `stun.stunprotocol.org`, which did not answer. It is on the list the Tor Project validated for Snowflake in 2026 ([tor-browser-build issue 41775](https://gitlab.torproject.org/tpo/applications/tor-browser-build/-/issues/41775)). The build environment has no UDP, so none of these could be tested there: Settings → STUN servers → *Test* tells you what works on your phone and network. Free public servers have no guarantee, so keep two or three.
 

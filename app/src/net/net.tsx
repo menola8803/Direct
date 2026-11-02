@@ -1,7 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import { useApp, Attach } from '../store';
 import { Contact } from '../core/crypto';
 import { pickNewContacts } from '../core/autoconnect';
+import type { Facts } from '../core/diagnose';
+import { parseTurn } from './turn';
 import { FileKind, newId, Plain } from '../core/protocol';
 import { Receiver, sendFile } from '../core/transfer';
 import { fileSource, makeSink, openSource, storeOutgoing } from '../files';
@@ -19,10 +22,12 @@ type NetCtx = {
   call: CallView; remote: Record<string, any>; calls: CallController | null;
   sendText: (c: Contact, text: string) => void; connect: (c: Contact) => void;
   sendFile: (c: Contact, a: SendFileArgs) => void;
+  report: (id: string) => Facts; // the facts behind "Why does it not connect?"
   manualOffer: (c: Contact) => Promise<string>; manualAnswer: (c: Contact, code: string) => Promise<string>; manualFinish: (c: Contact, code: string) => Promise<void>;
 };
 const none = async () => { throw new Error('no rtc'); };
-const N = createContext<NetCtx>({ available: false, signal: 'offline', link: {}, progress: {}, call: idleCall, remote: {}, calls: null, sendText: () => {}, connect: () => {}, sendFile: () => {}, manualOffer: none, manualAnswer: none, manualFinish: none });
+const N = createContext<NetCtx>({ available: false, signal: 'offline', link: {}, progress: {}, call: idleCall, remote: {}, calls: null, sendText: () => {}, connect: () => {}, sendFile: () => {},
+  report: () => ({ signal: { url: '', state: 'offline', err: '', since: 0, tries: 0 }, relayOnly: false, hasTurn: false, now: Date.now() }), manualOffer: none, manualAnswer: none, manualFinish: none });
 export const useNet = () => useContext(N);
 
 export function NetProvider({ children }: { children: React.ReactNode }) {
@@ -31,9 +36,11 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
   const mgr = useRef<PeerManager | null>(null);
   const receivers = useRef(new Map<string, Receiver>());
   const sending = useRef(new Set<string>());
+  const linkRef = useRef<Record<string, LinkState>>({});
   const tried = useRef(new Set<string>()); // contacts we have started connecting to since the signal server came online
   const [signal, setSignal] = useState<SignalState>('offline');
   const [link, setLink] = useState<Record<string, LinkState>>({});
+  linkRef.current = link;
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [call, setCall] = useState<CallView>(idleCall);
   const [remote, setRemote] = useState<Record<string, any>>({});
@@ -150,7 +157,25 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
     pickNewContacts(app.contacts, app.blocked, tried.current).forEach(c => m.connect(c));
   }, [app.contacts, app.blocked, signal]);
 
+  // Back in front after a while away (another network, sleep): check the signal connection now instead of waiting for a timer,
+  // and ask every contact without a link to connect. A connection that died while the app was away is found within seconds.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', st => {
+      const m = mgr.current;
+      if (st !== 'active' || !m) return;
+      m.wake();
+      if (m.isSignalOnline()) { tried.current.clear(); pickNewContacts(appRef.current.contacts, appRef.current.blocked, tried.current).forEach(c => m.connect(c)); }
+    });
+    return () => sub.remove();
+  }, []);
+
   const connect = useCallback((c: Contact) => { mgr.current?.connect(c); }, []);
+  const report = useCallback((id: string): Facts => {
+    const a = appRef.current, m = mgr.current;
+    const plan = planIce({ stunList: a.stunList, turnList: a.turnList, hideIp: a.hideIp, tcpOnly: a.tcpOnly });
+    return { signal: m?.signalInfo() ?? { url: a.signalUrl, state: 'offline', err: '', since: 0, tries: 0 }, link: linkRef.current[id], diag: m?.getDiag(id),
+      relayOnly: plan.relayOnly, hasTurn: parseTurn(a.turnList).length > 0, now: Date.now() };
+  }, []);
   const sendText = useCallback((c: Contact, text: string) => {
     const msg = { id: newId(), mine: true, text, at: Date.now() };
     appRef.current.addMessage(c.id, { ...msg, status: 'queued' });
@@ -170,10 +195,10 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<NetCtx>(() => ({
     available: !!rtc, signal, link, progress, call, remote, calls,
-    sendText, connect, sendFile: sendFileMsg,
+    sendText, connect, sendFile: sendFileMsg, report,
     manualOffer: c => mgr.current ? mgr.current.manualOffer(c) : none(),
     manualAnswer: (c, code) => mgr.current ? mgr.current.manualAnswer(c, code) : none(),
     manualFinish: (c, code) => mgr.current ? mgr.current.manualFinish(c, code) : none(),
-  }), [signal, link, progress, call, remote, calls, sendText, connect, sendFileMsg]);
+  }), [signal, link, progress, call, remote, calls, sendText, connect, sendFileMsg, report]);
   return <N.Provider value={value}>{children}</N.Provider>;
 }

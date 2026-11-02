@@ -1,4 +1,4 @@
-# Bygga och driva Direct själv (version 0.13.4)
+# Bygga och driva Direct själv (version 0.13.5)
 
 Den här manualen visar hur du bygger appen på din egen dator, skaffar en egen nyckel för den, och vilka tjänster du
 själv kan driva för att inte vara beroende av andra. Alla kommandon är för Arch Linux och zsh.
@@ -176,6 +176,8 @@ WantedBy=multi-user.target
 Sedan `sudo systemctl enable --now direct-signal`. På varje telefon: Inställningar → Anslutning → `wss://direct.example.com` →
 Spara → håll inne knappen *Testa signalserver* (ett tryck visar bara hjälptexten). Alla måste ange exakt samma adress. Gratisalternativet på Render beskrivs i `docs/SETUP.md`.
 
+Servern sänder sedan 0.13.5 en ping var 30:e sekund och släpper anslutningar som inte svarar, så att listan över vilka som är online stämmer även när en telefon tappat nätet utan att säga hej då. Det är frivilligt att uppdatera: appens egen heartbeat fungerar mot alla serverversioner. Uppdatera med `git pull` och `sudo systemctl restart direct-signal` (på Render deployas den av sig själv om tjänsten följer repot).
+
 **STUN och TURN:** lista egna servrar i Inställningar → STUN-servrar och TURN-servrar. Så här sätter du upp en egen coturn,
 som ger både STUN och TURN: `docs/NETWORK.md`.
 
@@ -202,4 +204,4 @@ innan du avinstallerar, byter nyckel eller byter telefon, och använd inte samma
 | Bygget dör med minnesfel | `-Xmx4g` i `~/.gradle/gradle.properties`. |
 | `git pull` vägrar på `app/package.json` | `git restore app/package.json`, sedan `git pull`. |
 | "App not installed" | Annan signeringsnyckel än den installerade appen: avinstallera (säkerhetskopiera först). |
-| Telefoner hittar inte varandra | Testa STUN-servrarna (håll inne en server i listan), prova signalservern, och lägg till en TURN-server om ni sitter på mobilnät. |
+| Telefoner hittar inte varandra (*Connecting…*) | Öppna chatten och tryck **Varför ansluter det inte?**: rapporten säger om det är servern, den andra telefonen eller nätet. Vanligast: den ena telefonen delar sitt nät som hotspot till den andra, eller de sitter på olika nät. Testa med båda på **samma vanliga Wi-Fi-router**. Annars: testa STUN-servrarna (håll inne en server i listan), prova signalservern och lägg till en TURN-server (`docs/NETWORK.md`). |

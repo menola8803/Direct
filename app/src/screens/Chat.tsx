@@ -10,7 +10,7 @@ import { FileBubble } from '../media/Bubble';
 import { Recorded, VideoRecorder, VoiceRecorder } from '../media/Recorder';
 import { holdLock } from '../lockhold';
 
-export default function Chat({ id, onBack, onVerify, onPair }: { id: string; onBack: () => void; onVerify: () => void; onPair: () => void }) {
+export default function Chat({ id, onBack, onVerify, onPair, onReport }: { id: string; onBack: () => void; onVerify: () => void; onPair: () => void; onReport: () => void }) {
   const { theme, t, messages, contacts } = useApp();
   const net = useNet();
   const c = contacts[id];
@@ -59,6 +59,7 @@ export default function Chat({ id, onBack, onVerify, onPair }: { id: string; onB
             {item.mine ? <Text style={{ fontSize: 11, color: theme.muted, marginTop: 2 }}>{label(item.status)}</Text> : null}
           </View>
         )} />
+      {st !== 'open' && net.available ? <Pressable accessibilityRole="button" onPress={onReport}><Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>{t.dgTitle}&nbsp;›</Text></Pressable> : null}
       {st !== 'open' ? <Pressable onPress={onPair}><Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>{t.manualTitle} ›</Text></Pressable> : null}
       {note ? <Text style={{ color: theme.danger, fontSize: 13 }}>{note}</Text> : null}
       {mode === 'voice' ? <VoiceRecorder onDone={r => sendRec(r, 'voice')} onCancel={() => setMode('')} /> : null}

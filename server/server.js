@@ -10,6 +10,7 @@ const { decodeBase64, encodeBase64 } = require('tweetnacl-util');
 const MAX_PAYLOAD = 64 * 1024;       // byte per paket
 const MAX_PER_MIN = 120;             // paket per minut och anslutning
 const HELLO_TIMEOUT_MS = 10_000;
+const PING_MS = 30_000;               // how often every connection is asked if it is still there
 
 function createServer(opts = {}) {
   const wss = new WebSocketServer({ port: opts.port ?? 8080, host: opts.host, maxPayload: MAX_PAYLOAD });
@@ -20,6 +21,11 @@ function createServer(opts = {}) {
     let who = null, count = 0;
     const reset = setInterval(() => { count = 0; }, 60_000);
     const timer = setTimeout(() => { if (!who) ws.close(4001, 'hello timeout'); }, HELLO_TIMEOUT_MS);
+    // A phone that lost its network never says goodbye. Ask now and then; a connection that has not answered the previous
+    // question is dropped, so the list of who is online (and the "offline" answer to the sender) stays true.
+    let alive = true;
+    ws.on('pong', () => { alive = true; });
+    const ping = setInterval(() => { if (!alive) return ws.terminate(); alive = false; try { ws.ping(); } catch {} }, opts.pingMs ?? PING_MS);
     const send = o => ws.readyState === 1 && ws.send(JSON.stringify(o));
     send({ type: 'challenge', nonce });
 
@@ -45,7 +51,7 @@ function createServer(opts = {}) {
         else send({ type: 'offline', to: m.to });
       }
     });
-    ws.on('close', () => { clearInterval(reset); clearTimeout(timer); if (who && online.get(who) === ws) online.delete(who); });
+    ws.on('close', () => { clearInterval(reset); clearInterval(ping); clearTimeout(timer); if (who && online.get(who) === ws) online.delete(who); });
     ws.on('error', () => {});
   });
   return { wss, online, close: () => new Promise(r => { wss.clients.forEach(c => c.terminate()); wss.close(() => r()); }) };

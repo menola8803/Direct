@@ -5,6 +5,7 @@ export type Route =
   | { name: 'mycode' }
   | { name: 'invite'; card: string }
   | { name: 'pair'; id: string }
+  | { name: 'report'; id: string }
   | { name: 'mediatest' }
   | { name: 'storage' }
   | { name: 'add' }

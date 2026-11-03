@@ -1,4 +1,4 @@
-# Getting started (0.13.6)
+# Getting started (0.13.7)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -69,7 +69,7 @@ Every push to `main` that touches `app/` builds an APK: open the repo → **Acti
 For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.13.6 -m "Direct 0.13.6" && git push origin v0.13.6
+git tag -a v0.13.7 -m "Direct 0.13.7" && git push origin v0.13.7
 ```
 By default the APK is signed with the Expo template's debug key, which is public. Fine for testing. For a real launch use your own key: `docs/SIGNING.md` (updates only install over an app signed with the same key, and switching key needs a reinstall, so make a backup first).
 

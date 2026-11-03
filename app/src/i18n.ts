@@ -66,7 +66,7 @@ const sv = {
 
   attach: 'Bifoga fil', pickFile: 'Välj fil', recVoice: 'Spela in röstmeddelande', recVideo: 'Spela in videomeddelande', stopSend: 'Stoppa och skicka', cancelRec: 'Avbryt', recording: 'Spelar in…',
   tooBig: 'Filen är för stor (max 50 MB).', micDenied: 'Mikrofonen är inte tillåten.', play: 'Spela upp', pause: 'Pausa', openFile: 'Öppna / spara', sendingPct: 'Skickar',
-  voiceMsg: 'Röstmeddelande', videoMsg: 'Videomeddelande', fileMsg: 'Fil',
+  voiceFail: 'Kunde inte spela upp här. Öppna i en annan app.', voiceMsg: 'Röstmeddelande', videoMsg: 'Videomeddelande', fileMsg: 'Fil',
   call: 'Ring', videoCall: 'Videosamtal', groupCall: 'Konferens', incomingCall: 'Inkommande samtal', incomingVideo: 'Inkommande videosamtal', accept: 'Svara', decline: 'Avvisa', endCall: 'Lägg på',
   mute: 'Ljud av', unmute: 'Ljud på', camOff: 'Kamera av', camOn: 'Kamera på', calling: 'Ringer…', inCall: 'I samtal', callFail: 'Kunde inte starta samtalet. Kontrollera mikrofon/kamera och att kontakten är ansluten.',
   pickMembers: 'Välj upp till 3 personer med video eller 7 med bara ljud', needLink: 'Kontakten måste vara ansluten', noCalls: 'Samtal kräver den installerade appen (APK).',
@@ -270,7 +270,7 @@ const en: typeof sv = {
 
   attach: 'Attach file', pickFile: 'Choose file', recVoice: 'Record voice message', recVideo: 'Record video message', stopSend: 'Stop and send', cancelRec: 'Cancel', recording: 'Recording…',
   tooBig: 'The file is too large (max 50 MB).', micDenied: 'Microphone is not allowed.', play: 'Play', pause: 'Pause', openFile: 'Open / save', sendingPct: 'Sending',
-  voiceMsg: 'Voice message', videoMsg: 'Video message', fileMsg: 'File',
+  voiceFail: 'Could not play it here. Open it in another app.', voiceMsg: 'Voice message', videoMsg: 'Video message', fileMsg: 'File',
   call: 'Call', videoCall: 'Video call', groupCall: 'Conference', incomingCall: 'Incoming call', incomingVideo: 'Incoming video call', accept: 'Answer', decline: 'Decline', endCall: 'Hang up',
   mute: 'Mute', unmute: 'Unmute', camOff: 'Camera off', camOn: 'Camera on', calling: 'Calling…', inCall: 'In call', callFail: 'Could not start the call. Check microphone/camera and that the contact is connected.',
   pickMembers: 'Pick up to 3 people with video or 7 with audio only', needLink: 'The contact must be connected', noCalls: 'Calls need the installed app (APK).',

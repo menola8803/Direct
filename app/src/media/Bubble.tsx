@@ -8,6 +8,8 @@ import { Attach, useApp } from '../store';
 import { discardPlain, fmtSize, isEncrypted, plainCopy } from '../files';
 import { Btn } from '../ui';
 import { holdLock } from '../lockhold';
+import { atEnd, voiceView } from '../core/voice';
+import { playbackMode } from './audiomode';
 
 // A file that is stored encrypted is decrypted into a short-lived copy only when the person asks to play or open it.
 // An ordinary file is used as it is (start() does nothing).
@@ -32,20 +34,54 @@ function usePlain(f: Attach) {
 function Voice({ f, color }: { f: Attach; color: string }) {
   const { t } = useApp();
   const p = usePlain(f);
-  const player = useAudioPlayer(p.uri);
+  const player = useAudioPlayer(p.uri, { updateInterval: 250 });
   const st = useAudioPlayerStatus(player);
-  const want = useRef(false); // play as soon as the decrypted copy is ready
-  useEffect(() => { if (p.uri && want.current) { want.current = false; player.play(); } }, [p.uri, player]);
+  const stRef = useRef(st); stRef.current = st;
+  const [req, setReq] = useState<number | null>(null); // when play was pressed, until something plays
+  const [now, setNow] = useState(Date.now());
+  const [opening, setOpening] = useState(false);
+  const startedFor = useRef<number | null>(null);
+
+  // While a request is open: look at the clock, so a play that never starts is noticed.
+  useEffect(() => { if (req === null) return; const iv = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(iv); }, [req]);
+  useEffect(() => { if (req !== null && st.playing) setReq(null); }, [req, st.playing]);
+  // Start as soon as the audio is ready (for an encrypted file: after it has been decrypted and loaded).
+  useEffect(() => {
+    if (req === null || startedFor.current === req || !p.uri || !st.isLoaded) return;
+    startedFor.current = req;
+    playbackMode().then(() => {
+      if (atEnd(stRef.current)) player.seekTo(0);
+      player.play();
+    });
+  }, [req, p.uri, st.isLoaded, player]);
+
+  const view = voiceView({ requested: req !== null, loaded: st.isLoaded, playing: st.playing, error: st.error ?? null, waitedMs: req === null ? 0 : now - req });
   const press = () => {
-    if (!p.uri) { want.current = true; p.start(); return; }
-    if (st.playing) player.pause(); else { if (st.didJustFinish || st.currentTime >= (st.duration || 1)) player.seekTo(0); player.play(); }
+    if (st.playing) { player.pause(); return; }
+    setNow(Date.now()); setReq(Date.now());
+    if (!p.uri) p.start(); // encrypted: decrypt first, then the effect above plays it
+  };
+  const stuck = view === 'stuck';
+  // The way out when the phone will not play it here: hand the file to another app.
+  const openOther = async () => {
+    if (opening) return;
+    setOpening(true);
+    try { const u = await plainCopy(f.uri, f.name); holdLock(); await Sharing.shareAsync(u, { mimeType: f.mime }); } catch {} finally { setOpening(false); }
   };
   return (
-    <Pressable accessibilityRole="button" onPress={press}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minWidth: 160 }}>
-      <Text style={{ color, fontSize: 22 }}>{p.busy ? '…' : p.failed ? '!' : st.playing ? '❚❚' : '▶'}</Text>
-      <View><Text style={{ color, fontWeight: '600' }}>{t.voiceMsg}</Text><Text style={{ color, opacity: 0.7, fontSize: 12 }}>{f.dur ? `${f.dur}s` : fmtSize(f.size)}</Text></View>
-    </Pressable>
+    <View style={{ gap: 6 }}>
+      <Pressable accessibilityRole="button" onPress={press}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minWidth: 160 }}>
+        <Text style={{ color, fontSize: 22 }}>{p.busy || view === 'loading' ? '…' : p.failed || stuck ? '!' : view === 'playing' ? '❚❚' : '▶'}</Text>
+        <View><Text style={{ color, fontWeight: '600' }}>{t.voiceMsg}</Text><Text style={{ color, opacity: 0.7, fontSize: 12 }}>{f.dur ? `${f.dur}s` : fmtSize(f.size)}</Text></View>
+      </Pressable>
+      {stuck ? (
+        <View style={{ gap: 6 }}>
+          <Text style={{ color, fontSize: 12 }}>{t.voiceFail}{st.error ? ` (${String(st.error).slice(0, 80)})` : ''}</Text>
+          <Btn title={opening ? '…' : t.openFile} kind="secondary" onPress={openOther} />
+        </View>
+      ) : null}
+    </View>
   );
 }
 

@@ -5,6 +5,7 @@ import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, 
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { useApp } from '../store';
 import { Btn } from '../ui';
+import { playbackMode } from './audiomode';
 
 export type Recorded = { uri: string; name: string; mime: string; dur: number };
 
@@ -31,7 +32,7 @@ export function VoiceRecorder({ onDone, onCancel }: { onDone: (r: Recorded) => v
   const stop = async () => {
     const dur = Math.max(1, Math.round((Date.now() - started.current) / 1000));
     try { await rec.stop(); } catch {}
-    await setAudioModeAsync({ allowsRecording: false }).catch(() => {});
+    await playbackMode();
     if (rec.uri) onDone({ uri: rec.uri, name: `voice-${Date.now()}.m4a`, mime: 'audio/mp4', dur });
     else onCancel();
   };

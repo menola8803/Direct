@@ -1,7 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useApp, Attach } from '../store';
-import { Contact } from '../core/crypto';
+import { Contact, cardToContact, encodeCard } from '../core/crypto';
+import { PairFlow } from '../core/pairflow';
 import { pickNewContacts } from '../core/autoconnect';
 import type { Facts } from '../core/diagnose';
 import { parseTurn } from './turn';
@@ -23,17 +24,21 @@ type NetCtx = {
   sendText: (c: Contact, text: string) => void; connect: (c: Contact) => void;
   sendFile: (c: Contact, a: SendFileArgs) => void;
   report: (id: string) => Facts; // the facts behind "Why does it not connect?"
+  pair: PairApi; // pairing with a one-time code (the state is in useApp().pairs)
   manualOffer: (c: Contact) => Promise<string>; manualAnswer: (c: Contact, code: string) => Promise<string>; manualFinish: (c: Contact, code: string) => Promise<void>;
 };
+export type PairApi = Pick<PairFlow, 'create' | 'enter' | 'cancel' | 'dismiss' | 'sync'>;
+const noPair: PairApi = { create: () => null, enter: () => ({ ok: false, why: 'invalid' }), cancel: () => {}, dismiss: () => {}, sync: () => {} };
 const none = async () => { throw new Error('no rtc'); };
 const N = createContext<NetCtx>({ available: false, signal: 'offline', link: {}, progress: {}, call: idleCall, remote: {}, calls: null, sendText: () => {}, connect: () => {}, sendFile: () => {},
-  report: () => ({ signal: { url: '', state: 'offline', err: '', since: 0, tries: 0 }, relayOnly: false, hasTurn: false, now: Date.now() }), manualOffer: none, manualAnswer: none, manualFinish: none });
+  report: () => ({ signal: { url: '', state: 'offline', err: '', since: 0, tries: 0 }, relayOnly: false, hasTurn: false, now: Date.now() }), pair: noPair, manualOffer: none, manualAnswer: none, manualFinish: none });
 export const useNet = () => useContext(N);
 
 export function NetProvider({ children }: { children: React.ReactNode }) {
   const app = useApp();
   const appRef = useRef(app); appRef.current = app;
   const mgr = useRef<PeerManager | null>(null);
+  const flow = useRef<PairFlow | null>(null);
   const receivers = useRef(new Map<string, Receiver>());
   const sending = useRef(new Set<string>());
   const linkRef = useRef<Record<string, LinkState>>({});
@@ -114,6 +119,21 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
     });
     setCalls(cc);
 
+    // Pairing with a one-time code. Its state is kept in the saved state, so a code that is waiting survives the app being closed.
+    const pf = new PairFlow({
+      send: o => mgr.current?.signalSend(o) ?? false,
+      myCard: () => encodeCard(identity, appRef.current.name),
+      addContact: card => {
+        const c = cardToContact(card);
+        if (c.signPub === identity.signPublic) return null;
+        appRef.current.unblock(c.id); appRef.current.addContact(c);
+        return { id: c.id, name: c.name };
+      },
+      load: () => appRef.current.pairs ?? [],
+      save: list => appRef.current.setPairs(list),
+    });
+    flow.current = pf;
+
     const m = new PeerManager({
       identity, signalUrl, iceServers: plan.iceServers, relayOnly: plan.relayOnly, rtc,
       getContactBySign: s => Object.values(appRef.current.contacts).find(c => c.signPub === s && !appRef.current.blocked[c.id]),
@@ -134,9 +154,11 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
       },
       onSignal: st => {
         setSignal(st);
+        if (st === 'online') pf.sync();
         if (st === 'online') { tried.current.clear(); pickNewContacts(appRef.current.contacts, appRef.current.blocked, tried.current).forEach(c => m.connect(c)); }
       },
       onTrack: (c, stream) => { if (stream) setRemote(o => ({ ...o, [c.id]: stream })); },
+      onPair: msg => pf.onMessage(msg),
     });
     mgr.current = m; m.start();
     // Retry for contacts with pending messages.
@@ -147,7 +169,7 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
         if (waiting && !a.blocked[c.id] && m.isSignalOnline() && !m.isOpen(c.id)) m.connect(c);
       });
     }, 10000);
-    return () => { clearInterval(iv); cc.end(); m.stop(); mgr.current = null; tried.current.clear(); setCalls(null); receivers.current.clear(); setLink({}); setSignal('offline'); };
+    return () => { clearInterval(iv); cc.end(); m.stop(); mgr.current = null; flow.current = null; tried.current.clear(); setCalls(null); receivers.current.clear(); setLink({}); setSignal('offline'); };
   }, [identity, signalUrl, stunList, turnList, hideIp, tcpOnly, flush]);
 
   // A contact added or unblocked while the app is already online is connected at once, not only after a restart.
@@ -170,6 +192,14 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const connect = useCallback((c: Contact) => { mgr.current?.connect(c); }, []);
+  // The same calls whether or not the connection is up: they act on the flow of the moment (it is made again when the settings change).
+  const pair = useMemo<PairApi>(() => ({
+    create: () => flow.current?.create() ?? null,
+    enter: text => flow.current?.enter(text) ?? { ok: false, why: 'invalid' },
+    cancel: key => flow.current?.cancel(key),
+    dismiss: key => flow.current?.dismiss(key),
+    sync: () => flow.current?.sync(),
+  }), []);
   const report = useCallback((id: string): Facts => {
     const a = appRef.current, m = mgr.current;
     const plan = planIce({ stunList: a.stunList, turnList: a.turnList, hideIp: a.hideIp, tcpOnly: a.tcpOnly });
@@ -195,10 +225,10 @@ export function NetProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<NetCtx>(() => ({
     available: !!rtc, signal, link, progress, call, remote, calls,
-    sendText, connect, sendFile: sendFileMsg, report,
+    sendText, connect, sendFile: sendFileMsg, report, pair,
     manualOffer: c => mgr.current ? mgr.current.manualOffer(c) : none(),
     manualAnswer: (c, code) => mgr.current ? mgr.current.manualAnswer(c, code) : none(),
     manualFinish: (c, code) => mgr.current ? mgr.current.manualFinish(c, code) : none(),
-  }), [signal, link, progress, call, remote, calls, sendText, connect, sendFileMsg, report]);
+  }), [signal, link, progress, call, remote, calls, sendText, connect, sendFileMsg, report, pair]);
   return <N.Provider value={value}>{children}</N.Provider>;
 }

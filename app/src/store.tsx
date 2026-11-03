@@ -5,6 +5,8 @@ import * as SecureStore from 'expo-secure-store';
 import { getLocales } from 'expo-localization';
 import { Theme, ThemeName, themes } from './theme';
 import { migrateSaved } from './core/migrate';
+import { AddMode, DEFAULT_ADD_MODE } from './core/addmode';
+import type { PairRec } from './core/pairflow';
 import { dict, Lang, LangChoice, Strings } from './i18n';
 import { Contact, Identity, newIdentity } from './core/crypto';
 import { FileKind, MsgStatus } from './core/protocol';
@@ -31,6 +33,8 @@ type Saved = {
   fileMode: FileModeChoice; // where new files go: 'visible' (Download/Direct) or 'private' (encrypted, in the app)
   lockOn: boolean; // the app asks for fingerprint, face or screen lock before it is shown
   lockDelay: number; // seconds in the background before it asks again (0 = every time)
+  addMode: AddMode; // what the Add button leads to: a one-time code (default) or a QR code
+  pairs: PairRec[]; // pairing codes that are under way or just finished (see core/pairflow.ts). Not in backups.
 };
 const OLD_KEY = 'direct.state.v2'; // before 0.13.0: the state as plain text
 const KEY = 'direct.state.v3'; // from 0.13.0: the state sealed with the data key
@@ -40,6 +44,7 @@ const empty: Saved = {
   themeName: 'dark', langChoice: 'en', name: '', contacts: {}, blocked: {}, messages: {},
   signalUrl: '', stunList: '', turnList: '', hideIp: false, tcpOnly: false, introSeen: false,
   retentionDays: DEFAULT_RETENTION, storagePrompted: false, orphanAsked: false, fileMode: 'visible', lockOn: false, lockDelay: DEFAULT_LOCK_DELAY,
+  addMode: DEFAULT_ADD_MODE, pairs: [],
 };
 
 type Ctx = Saved & {
@@ -51,7 +56,8 @@ type Ctx = Saved & {
   addContact: (c: Contact) => void; removeContact: (id: string) => void; setVerified: (id: string, v: boolean) => void;
   addMessage: (cid: string, m: Msg) => boolean;
   setStatus: (cid: string, msgId: string, st: MsgStatus) => void;
-  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen' | 'retentionDays' | 'storagePrompted' | 'orphanAsked' | 'fileMode' | 'lockOn' | 'lockDelay'>>) => void;
+  setSettings: (p: Partial<Pick<Saved, 'signalUrl' | 'stunList' | 'turnList' | 'hideIp' | 'tcpOnly' | 'introSeen' | 'retentionDays' | 'storagePrompted' | 'orphanAsked' | 'fileMode' | 'lockOn' | 'lockDelay' | 'addMode'>>) => void;
+  setPairs: (list: PairRec[]) => void;
   clearChat: (id: string) => void; block: (id: string, name: string) => void; unblock: (id: string) => void; clearChats: () => void;
 };
 const C = createContext<Ctx>(null as unknown as Ctx);
@@ -189,6 +195,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return { ...o, messages: { ...o.messages, [cid]: list.map(m => (m.id === msgId && m.status !== 'delivered' ? { ...m, status: st } : m)) } };
     }),
     setSettings: p => setS(o => ({ ...o, ...p })),
+    setPairs: pairs => setS(o => ({ ...o, pairs })),
     block: (id, name) => setS(o => ({ ...o, blocked: { ...o.blocked, [id]: name } })),
     unblock: id => setS(o => { const b = { ...o.blocked }; delete b[id]; return { ...o, blocked: b }; }),
     clearChat: id => setS(o => { const m = { ...o.messages }; delete m[id]; return { ...o, messages: m }; }),

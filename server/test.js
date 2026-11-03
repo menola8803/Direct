@@ -41,6 +41,16 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
   await wait(100);
   assert.equal(a.inbox.length, 1, 'non-object payloads are ignored');
 
+  // Valid JSON that is not an object (null, a number, a list) used to throw inside the message handler and stop the whole server.
+  for (const j of ['null', '5', '[]', '"x"', 'true']) { a.ws.send(j); b.ws.send(j); }
+  const raw = new (require('ws'))(url); await new Promise(r => raw.on('open', r));
+  for (const j of ['null', '5', '[]']) raw.send(j); // before login too
+  await wait(100);
+  a.ws.send(JSON.stringify({ type: 'relay', to: b.pub, payload: { n: 'again', c: 'y' } }));
+  await wait(100);
+  assert.equal(b.inbox.at(-1).payload.n, 'again', 'the server is still up after non-object JSON');
+  raw.close();
+
   const b2 = await client(url, B); // samma nyckel ansluter igen
   await wait(100);
   assert.equal(srv.online.get(b.pub), srv.online.get(b2.pub));

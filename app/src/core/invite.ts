@@ -35,3 +35,16 @@ export function inviteMessage(card: string, s: InviteStrings, name?: string) {
     `${s.inviteHave}\n${inviteLink(card)}`,
   ].join('\n\n');
 }
+
+export type PairSmsStrings = InviteStrings & { pcSms: string; pcSmsHave: string; pcSmsValid: string };
+
+// The message that carries a pairing code (shown as 4829-17305-6): who wants to add you, the code and how long it lasts,
+// and for someone who does not have the app yet the link to it. Plain characters only, like the invite SMS.
+export function pairMessage(code: string, s: PairSmsStrings, name?: string) {
+  const who = (name ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 40) || s.inviteSomeone;
+  return [
+    s.pcSms.replace('{name}', () => who),
+    `${s.pcSmsHave}\n${code}\n${s.pcSmsValid}`,
+    `${s.inviteGet}\n${APK_URL}\n${s.inviteAllow}`,
+  ].join('\n\n');
+}

@@ -1,4 +1,4 @@
-# Getting started (0.13.7)
+# Getting started (0.14.0)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -16,6 +16,8 @@ Tested in October 2026: the *Test signal server* button gave 201 ms from a phone
 2. Name `direct-signal`, Region *Frankfurt*, Branch `main`, **Root Directory `server`**, Runtime *Node*, Build Command `npm install`, Start Command `npm start`, Instance Type **Free**. Leave *Health Check Path* empty: the server only answers WebSocket, so a path check would fail.
 3. When the log says `Direct signaling listening on port …` and the service is *Live*, take its address and change `https://` to `wss://`, for example `wss://direct-signal.onrender.com` (no port).
 4. On every phone: Settings → Connection → paste the address → Save → press and hold *Test signal server*. Everyone must use exactly the same address.
+
+**After an update** the server has to be updated too: Render → your service → *Manual Deploy → Deploy latest commit* (not needed if auto-deploy is on). From 0.14.0 the one-time codes for adding contacts need the new server; an older one makes a code stay on *Making the code…*. Updating the server is safe at any time: the phones reconnect by themselves.
 
 What to expect: the free instance sleeps after 15 minutes without inbound traffic and needs about a minute to wake, so the first test after a pause can fail; try again after a minute. The app reconnects by itself with growing delays (at most 30 seconds). Once two phones are connected, messages and calls go directly between them and the server is not involved. Render's free limits change, so check their pricing page (at the time of writing: 750 free instance hours per month and a monthly bandwidth cap). The server only sees public keys, IP addresses and timing, never content.
 
@@ -69,7 +71,7 @@ Every push to `main` that touches `app/` builds an APK: open the repo → **Acti
 For a release,
 Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
 ```
-git tag -a v0.13.7 -m "Direct 0.13.7" && git push origin v0.13.7
+git tag -a v0.14.0 -m "Direct 0.14.0" && git push origin v0.14.0
 ```
 By default the APK is signed with the Expo template's debug key, which is public. Fine for testing. For a real launch use your own key: `docs/SIGNING.md` (updates only install over an app signed with the same key, and switching key needs a reinstall, so make a backup first).
 

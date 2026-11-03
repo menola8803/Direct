@@ -11,7 +11,7 @@ import { Avatar, Btn, H1, Sub, SmallBtn } from '../ui';
 import { holdLock } from '../lockhold';
 
 export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) => void; go: (r: Route) => void }) {
-  const { theme, t, contacts, blocked, block, identity, name, signalUrl } = useApp();
+  const { theme, t, contacts, blocked, block, identity, name, signalUrl, addMode, pairs } = useApp();
   const { link, signal, available } = useNet();
   const [book, setBook] = useState<Person[]>([]);
   const [denied, setDenied] = useState(false);
@@ -56,12 +56,16 @@ export default function ContactsScreen({ onOpen, go }: { onOpen: (id: string) =>
     <View style={{ flex: 1, gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flex: 1 }}><H1>{t.contacts}</H1><Sub>{t.contactsSub}</Sub></View>
-        <SmallBtn title={t.myCode} onPress={() => go({ name: 'mycode' })} />
-        <View style={{ width: 8 }} />
-        <SmallBtn title={`+ ${t.add}`} tone="accent" onPress={() => go({ name: 'add' })} />
+        {addMode === 'qr' ? <><SmallBtn title={t.myCode} onPress={() => go({ name: 'mycode' })} /><View style={{ width: 8 }} /></> : null}
+        <SmallBtn title={`+ ${t.add}`} tone="accent" onPress={() => go({ name: addMode === 'qr' ? 'add' : 'paircode' })} />
       </View>
       <TextInput value={q} onChangeText={setQ} placeholder={t.search} placeholderTextColor={theme.muted}
         style={{ height: 48, borderRadius: 14, borderWidth: 1, borderColor: theme.line, backgroundColor: theme.card, paddingHorizontal: 16, fontSize: 15, color: theme.ink }} />
+      {pairs.length > 0 ? (
+        <Pressable accessibilityRole="button" onPress={() => go({ name: 'paircode' })} style={{ borderWidth: 1, borderColor: theme.accent, borderRadius: 14, padding: 12 }}>
+          <Text style={{ fontSize: 13, lineHeight: 19, color: theme.ink }}>{t.pcNote} <Text style={{ color: theme.accent, fontWeight: '700' }}>{t.pcNoteGo}&nbsp;›</Text></Text>
+        </Pressable>
+      ) : null}
       {note ? (
         <Pressable accessibilityRole="button" onPress={() => go({ name: 'connection' })} style={{ borderWidth: 1, borderColor: theme.accent, borderRadius: 14, padding: 12 }}>
           <Text style={{ fontSize: 13, lineHeight: 19, color: theme.ink }}>{note} <Text style={{ color: theme.accent, fontWeight: '700' }}>{t.contactsNoteGo}&nbsp;›</Text></Text>

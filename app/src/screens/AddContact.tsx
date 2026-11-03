@@ -7,7 +7,7 @@ import { useApp } from '../store';
 import { cardToContact, decodeCard } from '../core/crypto';
 import { Btn, Header, Screen } from '../ui';
 
-export default function AddContact({ onBack, onAdded }: { onBack: () => void; onAdded: (id: string) => void }) {
+export default function AddContact({ onBack, onAdded, onCode }: { onBack: () => void; onAdded: (id: string) => void; onCode?: () => void }) {
   const { theme, t, identity, addContact, unblock } = useApp();
   const [perm, ask] = useCameraPermissions();
   const [text, setText] = useState('');
@@ -40,6 +40,7 @@ export default function AddContact({ onBack, onAdded }: { onBack: () => void; on
       <View style={{ gap: 10 }}>
         <Btn title={t.add} onPress={() => take(text)} />
         <Btn title="↧" kind="secondary" onPress={async () => setText(await Clipboard.getStringAsync())} />
+        {onCode ? <Btn title={t.pcUseCode} kind="secondary" onPress={onCode} /> : null}
       </View>
     </Screen>
   );

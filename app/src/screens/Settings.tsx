@@ -9,7 +9,7 @@ import { lockLabel } from './AppLock';
 import { fileModeLabel } from './FilePlace';
 
 export default function Settings({ go }: { go: (r: Route) => void }) {
-  const { t, theme, langChoice, blocked, retentionDays, lockOn, fileMode } = useApp();
+  const { t, theme, langChoice, blocked, retentionDays, lockOn, fileMode, addMode } = useApp();
   const langLabel = langChoice === 'system' ? t.phoneLang : langChoice === 'sv' ? t.swedish : t.english;
   return (
     <ScrollView contentContainerStyle={{ gap: 14, paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
@@ -17,6 +17,7 @@ export default function Settings({ go }: { go: (r: Route) => void }) {
       <Card>
         <Row title={t.theme} sub={t.themeSub} right={theme.label} onPress={() => go({ name: 'theme' })} />
         <Row title={t.language} sub={t.languageSub} right={langLabel} onPress={() => go({ name: 'language' })} />
+        <Row title={t.addwayTitle} sub={t.addwaySub} right={addMode === 'qr' ? t.addwayRightQr : t.addwayRightCode} onPress={() => go({ name: 'addway' })} />
         <Row title={t.guideRowTitle} sub={t.guideRowSub} onPress={() => go({ name: 'guide' })} />
         <Row title={t.connection} sub={t.connectionSub} onPress={() => go({ name: 'connection' })} />
         <Row title={t.stunTitle} sub={t.stunSub} onPress={() => go({ name: 'stun' })} />

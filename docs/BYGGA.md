@@ -1,4 +1,4 @@
-# Bygga och driva Direct själv (version 0.13.7)
+# Bygga och driva Direct själv (version 0.14.0)
 
 Den här manualen visar hur du bygger appen på din egen dator, skaffar en egen nyckel för den, och vilka tjänster du
 själv kan driva för att inte vara beroende av andra. Alla kommandon är för Arch Linux och zsh.
@@ -175,6 +175,8 @@ WantedBy=multi-user.target
 ```
 Sedan `sudo systemctl enable --now direct-signal`. På varje telefon: Inställningar → Anslutning → `wss://direct.example.com` →
 Spara → håll inne knappen *Testa signalserver* (ett tryck visar bara hjälptexten). Alla måste ange exakt samma adress. Gratisalternativet på Render beskrivs i `docs/SETUP.md`.
+
+Från 0.14.0 har servern också **brevlådor för engångskoder** (`server/pair.js`, se `docs/PAIRING.md`). De ligger bara i minnet och försvinner när servern startas om, och appen som skapat koden lägger tillbaka den när den ansluter igen. **Kod-funktionen i appen kräver en server med 0.14.0**: en äldre server svarar inte på kodmeddelandena, så koden visas aldrig (den står kvar som *Skapar koden…*). Uppdatera servern först, sedan telefonerna. Står servern bakom en proxy (Render, Caddy, nginx) och du vill att spärrarna mot gissning ska räkna per användare i stället för per proxy, sätt `PROXY_HOPS` till antalet proxyer framför servern (`PROXY_HOPS=1 node server.js`); då används motsvarande post från höger i `X-Forwarded-For`. Utan den används anslutningens egen adress. Jag har inte kunnat kontrollera vilken post Render använder; ett fel val gör bara att spärrarna delas av alla.
 
 Servern sänder sedan 0.13.5 en ping var 30:e sekund och släpper anslutningar som inte svarar, så att listan över vilka som är online stämmer även när en telefon tappat nätet utan att säga hej då. Det är frivilligt att uppdatera: appens egen heartbeat fungerar mot alla serverversioner. Uppdatera med `git pull` och `sudo systemctl restart direct-signal` (på Render deployas den av sig själv om tjänsten följer repot).
 

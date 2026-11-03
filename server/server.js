@@ -2,10 +2,12 @@
 // - Klienter bevisar sin identitet med en signatur (challenge/response).
 // - The server forwards encrypted packets between two connected keys.
 // - The server stores no messages and cannot read the content (it is end-to-end encrypted).
+// - The one thing it keeps, in memory and for at most 24 hours, is the mailboxes of one-time pairing codes (pair.js).
 // - Messages, calls and files go directly between the phones (WebRTC), not through the server.
 const { WebSocketServer } = require('ws');
 const nacl = require('tweetnacl');
 const { decodeBase64, encodeBase64 } = require('tweetnacl-util');
+const { createPairs, clientIp } = require('./pair');
 
 const MAX_PAYLOAD = 64 * 1024;       // byte per paket
 const MAX_PER_MIN = 120;             // paket per minut och anslutning
@@ -15,8 +17,13 @@ const PING_MS = 30_000;               // how often every connection is asked if 
 function createServer(opts = {}) {
   const wss = new WebSocketServer({ port: opts.port ?? 8080, host: opts.host, maxPayload: MAX_PAYLOAD });
   const online = new Map(); // signPub (base64) -> ws
+  const pairs = createPairs(opts.pair);
+  const sweep = setInterval(pairs.sweep, 60_000);
+  sweep.unref();
+  const push = (to, o) => { const p = typeof to === 'string' && online.get(to); if (p && p.readyState === 1) { p.send(JSON.stringify(o)); return true; } return false; };
 
-  wss.on('connection', ws => {
+  wss.on('connection', (ws, req) => {
+    const ip = clientIp(req, opts.proxyHops ?? 0);
     const nonce = encodeBase64(nacl.randomBytes(24));
     let who = null, count = 0;
     const reset = setInterval(() => { count = 0; }, 60_000);
@@ -32,6 +39,7 @@ function createServer(opts = {}) {
     ws.on('message', raw => {
       if (++count > MAX_PER_MIN) return ws.close(4008, 'rate limit');
       let m; try { m = JSON.parse(raw.toString()); } catch { return; }
+      if (!m || typeof m !== 'object' || Array.isArray(m)) return;
       if (!who) {
         if (m.type !== 'hello' || typeof m.sign !== 'string' || typeof m.sig !== 'string') return;
         try {
@@ -45,6 +53,7 @@ function createServer(opts = {}) {
         clearTimeout(timer);
         return send({ type: 'ready' });
       }
+      if (typeof m.type === 'string' && m.type.startsWith('pair-')) return pairs.handle(who, ip, m, send, push);
       if (m.type === 'relay' && typeof m.to === 'string' && typeof m.payload === 'object' && m.payload) {
         const peer = online.get(m.to);
         if (peer && peer.readyState === 1) peer.send(JSON.stringify({ type: 'relay', from: who, payload: m.payload }));
@@ -54,13 +63,14 @@ function createServer(opts = {}) {
     ws.on('close', () => { clearInterval(reset); clearInterval(ping); clearTimeout(timer); if (who && online.get(who) === ws) online.delete(who); });
     ws.on('error', () => {});
   });
-  return { wss, online, close: () => new Promise(r => { wss.clients.forEach(c => c.terminate()); wss.close(() => r()); }) };
+  return { wss, online, pairs, close: () => new Promise(r => { clearInterval(sweep); wss.clients.forEach(c => c.terminate()); wss.close(() => r()); }) };
 }
 
 module.exports = { createServer };
 
 if (require.main === module) {
   const port = Number(process.env.PORT || 8080);
-  createServer({ port });
+  // PROXY_HOPS: how many proxies sit between the phones and this server (0 = none: use the address of the connection).
+  createServer({ port, proxyHops: Number(process.env.PROXY_HOPS || 0) });
   console.log(`Direct signaling listening on port ${port}`);
 }

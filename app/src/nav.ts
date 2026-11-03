@@ -9,6 +9,8 @@ export type Route =
   | { name: 'mediatest' }
   | { name: 'storage' }
   | { name: 'add' }
+  | { name: 'paircode' }
+  | { name: 'addway' }
   | { name: 'connection' }
   | { name: 'stun' }
   | { name: 'turn' }

@@ -24,6 +24,7 @@ export type PeerOpts = {
   onPlain: (c: Contact, p: Plain) => void;
   onLink: (contactId: string, s: LinkState) => void;
   onSignal?: (s: SignalState) => void;
+  onPair?: (m: any) => void; // an answer from the pairing mailboxes of the signal server (see core/pairflow.ts)
   onTrack?: (c: Contact, stream: any, track: any) => void;
   manualTimeoutMs?: number;
   connectTimeoutMs?: number;
@@ -187,6 +188,12 @@ export class PeerManager {
   }
 
   // ---- signalering ----
+  // A message to the signal server itself (not to another phone). False when there is no connection to send it on.
+  signalSend(o: object): boolean {
+    const ws = this.ws;
+    if (!ws || this.signal !== 'online' || ws.readyState !== 1) return false;
+    try { ws.send(JSON.stringify(o)); return true; } catch { return false; }
+  }
   private setSignal(s: SignalState) { if (this.signal !== s) { this.signal = s; this.o.onSignal?.(s); } }
 
   private openWs() {
@@ -212,6 +219,8 @@ export class PeerManager {
         for (const [id, p] of [...this.peers]) if (p.state === 'connecting' && !p.manual && !p.diag.heard) this.drop(id, 'closed', false, 'signal server reconnected');
         this.setSignal('online');
         this.startBeat(ws);
+      } else if (m.type === 'pair') {
+        this.o.onPair?.(m);
       } else if (m.type === 'relay') {
         if (m.from === this.o.identity.signPublic) return; // our own heartbeat coming back
         this.onRelay(m.from, m.payload).catch(e => { const c = this.o.getContactBySign(m.from); if (c) this.note(c.id, e); });

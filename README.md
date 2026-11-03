@@ -1,6 +1,6 @@
 # Direct
 
-**Version 0.13.7** (see `CHANGELOG.md`)
+**Version 0.14.0** (see `CHANGELOG.md`)
 
 A chat app with no server in between. Messages, calls, voice and video messages and files go straight between the phones, encrypted. Built for people's privacy.
 
@@ -8,7 +8,7 @@ This repository contains the **screen designs** (`design/`), a **runnable app** 
 
 ## The app (`app/`)
 Expo SDK 58, React Native 0.88, TypeScript.
-- Real identity (NaCl key pairs in secure storage); add contacts by QR or code; safety code to verify a contact.
+- Real identity (NaCl key pairs in secure storage); add contacts with a **one-time code** you send as a text message (default) or by QR; safety code to verify a contact. See `docs/PAIRING.md`.
 - Encrypted messages straight between phones over WebRTC, with **forward secrecy** (fresh one-time keys per connection plus a hash ratchet per message).
 - **Connect without a server:** exchange pairing codes (QR/text). A signaling server is optional and only helps phones find each other.
 - Delivery status (queued / sent / delivered), block contacts, phone-book import and SMS invites.

@@ -8,7 +8,7 @@ import { encodeCard } from '../core/crypto';
 import { inviteMessage } from '../core/invite';
 import { Btn, Card, Header, Screen } from '../ui';
 
-export default function MyCode({ onBack }: { onBack: () => void }) {
+export default function MyCode({ onBack, onCode }: { onBack: () => void; onCode?: () => void }) {
   const { identity, name, t } = useApp();
   const [done, setDone] = useState(false);
   if (!identity) return null;
@@ -22,6 +22,7 @@ export default function MyCode({ onBack }: { onBack: () => void }) {
       </Card>
       <Btn title={t.shareInvite} onPress={() => Share.share({ message: inviteMessage(card, t, name) }).catch(() => {})} />
       <Btn kind="secondary" title={done ? t.copied : t.copyCode} onPress={async () => { await Clipboard.setStringAsync(card); setDone(true); }} />
+      {onCode ? <Btn kind="secondary" title={t.pcUseCode} onPress={onCode} /> : null}
     </Screen>
   );
 }

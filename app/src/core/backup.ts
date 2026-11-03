@@ -24,7 +24,7 @@ export type BackupResult = { ok: true; data: BackupData } | { ok: false; error: 
 type Progress = (p: number) => void;
 
 // Settings of the phone itself are not carried to another phone: where files go, the app lock and the one-time questions.
-export const PHONE_ONLY = ['fileMode', 'lockOn', 'lockDelay', 'storagePrompted', 'orphanAsked', 'introSeen'] as const;
+export const PHONE_ONLY = ['fileMode', 'lockOn', 'lockDelay', 'storagePrompted', 'orphanAsked', 'introSeen', 'pairs'] as const;
 export function backupState(saved: Record<string, any>): Record<string, any> {
   const s = JSON.parse(JSON.stringify(saved)) as Record<string, any>;
   for (const k of PHONE_ONLY) delete s[k];

@@ -1,6 +1,6 @@
 {
   "name": "direct-signal",
-  "version": "0.7.0",
+  "version": "0.14.0",
   "private": true,
   "description": "Small relay server for Direct. Forwards encrypted signaling messages. Stores nothing.",
   "main": "server.js",

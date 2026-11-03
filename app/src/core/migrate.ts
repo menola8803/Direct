@@ -1,3 +1,4 @@
+import { normAddMode } from './addmode';
 import { normFileMode } from './filemode';
 import { normLockDelay } from './lock';
 import { normRetention } from './retention';
@@ -25,5 +26,8 @@ export function migrateSaved(raw: any): any {
   if (s.lockDelay !== undefined) s.lockDelay = normLockDelay(s.lockDelay);
   // 0.13.0: where new files go. Only 'private' changes the default ('visible').
   if (s.fileMode !== undefined) s.fileMode = normFileMode(s.fileMode);
+  // 0.14.0: how contacts are added (code or QR), and the pairing codes that are under way. Only 'qr' changes the default.
+  if (s.addMode !== undefined) s.addMode = normAddMode(s.addMode);
+  if (s.pairs !== undefined && !Array.isArray(s.pairs)) delete s.pairs;
   return s;
 }

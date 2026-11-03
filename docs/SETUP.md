@@ -1,4 +1,4 @@
-# Getting started (0.14.0)
+# Getting started (0.14.1)
 
 ## Without a server (nothing to host)
 1. Build the APK: `cd app && npm i && npx eas-cli build -p android --profile preview` (WebRTC does not work in Expo Go).
@@ -69,7 +69,7 @@ See `docs/NETWORK.md`: why there are no built-in TURN servers, how to run your o
 Every push to `main` that touches `app/` builds an APK: open the repo → **Actions** → the latest *Build APK* run → **Artifacts** → download `Direct-<version>-<commit>.apk` and install it.
 
 For a release,
-Push a tag and GitHub Actions builds the APK and attaches it to the release (`.github/workflows/release.yml`):
+git tag -a v0.14.1 -m "Direct 0.14.1" && git push origin v0.14.1
 ```
 git tag -a v0.14.0 -m "Direct 0.14.0" && git push origin v0.14.0
 ```

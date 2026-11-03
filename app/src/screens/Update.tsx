@@ -32,8 +32,8 @@ export default function Update({ onBack }: { onBack: () => void }) {
       const r = await latestRelease();
       if (!r) setMsg(t.noRelease);
       else if (isNewer(r.tag, cur)) { setRel(r); setMsg(`${t.newVersion}: ${r.tag}`); }
-      else setMsg(t.upToDate);
-    } catch { setMsg(t.updateFail); }
+      else setMsg(`${t.upToDate} (${cur}, GitHub: ${r.tag})`);
+    } catch (e) { setMsg(`${t.updateFail} (${String((e as any)?.message ?? e).slice(0, 120)})`); }
     setBusy(false);
   };
   return (
